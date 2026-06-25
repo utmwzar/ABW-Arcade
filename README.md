@@ -45,21 +45,6 @@ sudo rm -f /opt/arcade/arcade.db /opt/arcade/secret_key
 sudo ./install.sh        # oder nur: sudo systemctl start arcade
 ```
 
-## Wechsel von der alten `tetris`-Installation
-
-Frühere Versionen liefen unter `/opt/tetris` mit dem Service `tetris.service`
-und dem User `tetris`. Beim Umstieg (Accounts/Scores werden NICHT übernommen):
-
-```bash
-sudo systemctl disable --now tetris.service 2>/dev/null
-sudo rm -rf /opt/tetris /etc/systemd/system/tetris.service
-sudo userdel tetris 2>/dev/null
-sudo ./install.sh
-```
-
-`install.sh` warnt zusätzlich, falls die Alt-Installation noch liegt
-(Port-Konflikt auf 5000).
-
 ## Betrieb
 
 - Healthcheck ohne Login: `GET /healthz` → `{"ok": true}` (z. B. für
