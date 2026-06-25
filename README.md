@@ -10,7 +10,11 @@ Abhängigkeiten.
 Voraussetzung: Debian/Ubuntu (LXC, VM o. ä.) mit Root-Zugang und Internet
 für `apt`/`pip`.
 
+Das Release-Archiv (`abw-arcade.tar.gz`) gibt es unter
+[Releases](https://github.com/utmwzar/ABW-Arcade/releases/latest):
+
 ```bash
+wget https://github.com/utmwzar/ABW-Arcade/releases/latest/download/abw-arcade.tar.gz
 tar -xzf abw-arcade.tar.gz
 cd abw-arcade
 sudo ./install.sh
