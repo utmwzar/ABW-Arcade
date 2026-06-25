@@ -1,8 +1,7 @@
 # ABW Arcade
 
 Selbstgehostete Spiele-Website für den Homelab-Container: **Tetris, Snake,
-Breakout** (mit server-verifizierten Leaderboards), **Schach** (PvP mit Elo
-+ Bot-Modus, eigenes Design) und **DOOM** (WebAssembly im Browser).
+Breakout** (mit server-verifizierten Leaderboards), **Schach** (PvP mit Elo + Bot-Modus, eigenes Design) und **DOOM** (WebAssembly im Browser).
 Backend: Flask + SQLite + waitress, ein systemd-Service, keine weiteren
 Abhängigkeiten.
 
