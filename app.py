@@ -27,6 +27,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import engine
 import snake_engine
 import breakout_engine
+import g2048_engine
+import gd_engine
 import chess_engine
 import chess_bot
 
@@ -61,6 +63,17 @@ GAMES = [
         "slug": "breakout", "title": "Breakout", "endpoint": "breakout", "status": "live",
         "tagline": "Durchbrich die Mauer, halt den Ball im Spiel.",
         "accent": "magenta", "glyph": "▬",
+    },
+    {
+        "slug": "2048", "title": "2048", "endpoint": "game_2048", "status": "live",
+        "tagline": "Schiebe, kombiniere, knack die 2048.",
+        "accent": "orange", "glyph": "▢",
+    },
+    {
+        "slug": "geometry-dash", "title": "Geometry Dash", "endpoint": "geometry_dash",
+        "status": "live",
+        "tagline": "Spring im Rhythmus, weiche Stacheln aus, komm weiter.",
+        "accent": "blue", "glyph": "▲",
     },
     {
         "slug": "chess", "title": "Schach", "endpoint": "chess_lobby_page", "status": "live",
@@ -398,6 +411,22 @@ def breakout():
                            is_admin=bool(user["is_admin"]))
 
 
+@app.route("/games/2048")
+@login_required
+def game_2048():
+    user = current_user()
+    return render_template("g2048.html", username=user["username"],
+                           is_admin=bool(user["is_admin"]))
+
+
+@app.route("/games/geometry-dash")
+@login_required
+def geometry_dash():
+    user = current_user()
+    return render_template("gd.html", username=user["username"],
+                           is_admin=bool(user["is_admin"]))
+
+
 @app.route("/games/doom")
 @login_required
 def doom():
@@ -713,6 +742,189 @@ def api_breakout_finish():
         "ok": True,
         "score": score,
         "bricks": bricks,
+        "won": bool(result["won"]),
+        "game_over": bool(result["gameOver"]),
+    })
+
+
+# --------------------------------------------------------------------------
+# 2048 — same server-authoritative replay model. The client records every
+# board-changing swipe as { tick, dir }; the server replays them through the
+# identical engine and trusts only its own score. `lines` stores the highest
+# tile reached, `level` is unused (1).
+# --------------------------------------------------------------------------
+@app.route("/api/2048/start", methods=["POST"])
+def api_g2048_start():
+    uid = session.get("user_id")
+    if not uid:
+        return jsonify({"error": "not_authenticated"}), 401
+
+    db = get_db()
+    recent = db.execute(
+        "SELECT COUNT(*) AS c FROM games "
+        "WHERE user_id = ? AND created_at > datetime('now', '-1 hour')",
+        (uid,),
+    ).fetchone()["c"]
+    if recent >= MAX_STARTS_PER_HOUR:
+        return jsonify({"error": "rate_limited"}), 429
+
+    game_id = secrets.token_urlsafe(16)
+    seed = secrets.randbits(32)
+    db.execute(
+        "INSERT INTO games (id, user_id, game, seed, status) VALUES (?, ?, '2048', ?, 'open')",
+        (game_id, uid, seed),
+    )
+    db.commit()
+    return jsonify({"game_id": game_id, "seed": seed})
+
+
+@app.route("/api/2048/finish", methods=["POST"])
+def api_g2048_finish():
+    uid = session.get("user_id")
+    if not uid:
+        return jsonify({"error": "not_authenticated"}), 401
+
+    data = request.get_json(silent=True) or {}
+    game_id = data.get("game_id")
+    inputs = data.get("inputs")
+    if not isinstance(game_id, str) or not isinstance(inputs, list):
+        return jsonify({"error": "invalid_payload"}), 400
+    if len(inputs) > MAX_INPUTS:
+        return jsonify({"error": "too_many_inputs"}), 400
+
+    clean = []
+    for it in inputs:
+        if not isinstance(it, dict):
+            return jsonify({"error": "invalid_input"}), 400
+        d = it.get("dir")
+        tick = it.get("tick")
+        if d not in g2048_engine.ACTIONS:
+            return jsonify({"error": "invalid_input"}), 400
+        if isinstance(tick, bool) or not isinstance(tick, int) or tick < 0 or tick > MAX_TICK:
+            return jsonify({"error": "invalid_input"}), 400
+        clean.append({"tick": tick, "dir": d})
+
+    db = get_db()
+    game = db.execute(
+        "SELECT user_id, game, seed, status FROM games WHERE id = ?", (game_id,)
+    ).fetchone()
+    if game is None:
+        return jsonify({"error": "unknown_game"}), 404
+    if game["user_id"] != uid:
+        return jsonify({"error": "forbidden"}), 403
+    if game["game"] != "2048":
+        return jsonify({"error": "wrong_game"}), 409
+    if game["status"] != "open":
+        return jsonify({"error": "already_finished"}), 409
+
+    # The server replays the deterministic game and trusts only its own result.
+    result = g2048_engine.simulate(game["seed"], clean)
+    score = int(result["score"])
+    highest = int(result["highest"])
+
+    db.execute("UPDATE games SET status = 'finished' WHERE id = ?", (game_id,))
+    db.execute(
+        "INSERT INTO scores (user_id, game, score, lines, level, game_id) "
+        "VALUES (?, '2048', ?, ?, 1, ?)",
+        (uid, score, highest, game_id),
+    )
+    db.commit()
+    return jsonify({
+        "ok": True,
+        "score": score,
+        "highest": highest,
+        "won": bool(result["won"]),
+        "game_over": bool(result["gameOver"]),
+    })
+
+
+# --------------------------------------------------------------------------
+# Geometry Dash — same server-authoritative replay model. The level is a pure
+# function of the seed (no player-dependent randomness), and the single jump
+# button is recorded as { tick, dir } toggles (D = press, U = release). The
+# server replays them through the identical integer-physics engine and trusts
+# only its own result. `score` is the distance reached, in whole cells;
+# `lines`/`level` are unused (0 / 1).
+# --------------------------------------------------------------------------
+@app.route("/api/geometry-dash/start", methods=["POST"])
+def api_gd_start():
+    uid = session.get("user_id")
+    if not uid:
+        return jsonify({"error": "not_authenticated"}), 401
+
+    db = get_db()
+    recent = db.execute(
+        "SELECT COUNT(*) AS c FROM games "
+        "WHERE user_id = ? AND created_at > datetime('now', '-1 hour')",
+        (uid,),
+    ).fetchone()["c"]
+    if recent >= MAX_STARTS_PER_HOUR:
+        return jsonify({"error": "rate_limited"}), 429
+
+    game_id = secrets.token_urlsafe(16)
+    seed = secrets.randbits(32)
+    db.execute(
+        "INSERT INTO games (id, user_id, game, seed, status) "
+        "VALUES (?, ?, 'geometry-dash', ?, 'open')",
+        (game_id, uid, seed),
+    )
+    db.commit()
+    return jsonify({"game_id": game_id, "seed": seed})
+
+
+@app.route("/api/geometry-dash/finish", methods=["POST"])
+def api_gd_finish():
+    uid = session.get("user_id")
+    if not uid:
+        return jsonify({"error": "not_authenticated"}), 401
+
+    data = request.get_json(silent=True) or {}
+    game_id = data.get("game_id")
+    inputs = data.get("inputs")
+    if not isinstance(game_id, str) or not isinstance(inputs, list):
+        return jsonify({"error": "invalid_payload"}), 400
+    if len(inputs) > MAX_INPUTS:
+        return jsonify({"error": "too_many_inputs"}), 400
+
+    clean = []
+    for it in inputs:
+        if not isinstance(it, dict):
+            return jsonify({"error": "invalid_input"}), 400
+        d = it.get("dir")
+        tick = it.get("tick")
+        if d not in gd_engine.ACTIONS:
+            return jsonify({"error": "invalid_input"}), 400
+        if isinstance(tick, bool) or not isinstance(tick, int) or tick < 0 or tick > MAX_TICK:
+            return jsonify({"error": "invalid_input"}), 400
+        clean.append({"tick": tick, "dir": d})
+
+    db = get_db()
+    game = db.execute(
+        "SELECT user_id, game, seed, status FROM games WHERE id = ?", (game_id,)
+    ).fetchone()
+    if game is None:
+        return jsonify({"error": "unknown_game"}), 404
+    if game["user_id"] != uid:
+        return jsonify({"error": "forbidden"}), 403
+    if game["game"] != "geometry-dash":
+        return jsonify({"error": "wrong_game"}), 409
+    if game["status"] != "open":
+        return jsonify({"error": "already_finished"}), 409
+
+    # The server replays the deterministic run and trusts only its own result.
+    result = gd_engine.simulate(game["seed"], clean)
+    score = int(result["score"])
+
+    db.execute("UPDATE games SET status = 'finished' WHERE id = ?", (game_id,))
+    db.execute(
+        "INSERT INTO scores (user_id, game, score, lines, level, game_id) "
+        "VALUES (?, 'geometry-dash', ?, 0, 1, ?)",
+        (uid, score, game_id),
+    )
+    db.commit()
+    return jsonify({
+        "ok": True,
+        "score": score,
         "won": bool(result["won"]),
         "game_over": bool(result["gameOver"]),
     })

@@ -211,6 +211,11 @@ kbd {
 .lb-name { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lb-name.is-me { color: var(--cyan); }
 .lb-score { font-variant-numeric: tabular-nums; color: var(--text); }
+.lb-tile {
+  display: inline-block; margin-left: 8px; padding: 1px 6px;
+  font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums;
+  border: 1px solid var(--panel-border); border-radius: 5px; vertical-align: middle;
+}
 .lb-list li.lb-empty { display: block; color: var(--muted); font-size: 12px; }
 .lb-list li.lb-empty:nth-child(odd) { background: transparent; }
 
@@ -444,6 +449,8 @@ kbd {
 .accent-green   { --accent: #3cdc5a; }
 .accent-magenta { --accent: #ff3df0; }
 .accent-gold    { --accent: #ffd23f; }
+.accent-orange  { --accent: #f59563; }
+.accent-blue    { --accent: #5b8cff; }
 
 a.game-card:hover {
   transform: translateY(-4px);
@@ -609,4 +616,20 @@ a.game-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3p
 
 @media (max-width: 980px) {
   .doom-cols { grid-template-columns: 1fr; }
+}
+
+/* ---------- Geometry Dash: wide board on top, panels below ---------- */
+.gd-area { display: block; }
+.gd-area .board-wrap { width: 100%; margin-bottom: 18px; }
+.gd-area #board { width: 100%; height: auto; }
+.gd-bottom {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 720px) {
+  .gd-bottom { grid-template-columns: 1fr; }
+  .gd-bottom .sidebar { flex-direction: row; flex-wrap: wrap; }
+  .gd-bottom .sidebar > .panel { flex: 1; min-width: 140px; }
 }

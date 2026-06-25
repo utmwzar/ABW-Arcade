@@ -1,7 +1,9 @@
 # ABW Arcade
 
 Selbstgehostete Spiele-Website für den Homelab-Container: **Tetris, Snake,
-Breakout** (mit server-verifizierten Leaderboards), **Schach** (PvP mit Elo + Bot-Modus, eigenes Design) und **DOOM** (WebAssembly im Browser).
+Breakout, 2048, Geometry Dash** (mit server-verifizierten Leaderboards),
+**Schach** (PvP mit Elo + Bot-Modus, eigenes Design) und **DOOM**
+(WebAssembly im Browser).
 Backend: Flask + SQLite + waitress, ein systemd-Service, keine weiteren
 Abhängigkeiten.
 
@@ -10,11 +12,7 @@ Abhängigkeiten.
 Voraussetzung: Debian/Ubuntu (LXC, VM o. ä.) mit Root-Zugang und Internet
 für `apt`/`pip`.
 
-Das Release-Archiv (`abw-arcade.tar.gz`) gibt es unter
-[Releases](https://github.com/utmwzar/ABW-Arcade/releases/latest):
-
 ```bash
-wget https://github.com/utmwzar/ABW-Arcade/releases/latest/download/abw-arcade.tar.gz
 tar -xzf abw-arcade.tar.gz
 cd abw-arcade
 sudo ./install.sh
@@ -48,6 +46,21 @@ sudo rm -f /opt/arcade/arcade.db /opt/arcade/secret_key
 sudo ./install.sh        # oder nur: sudo systemctl start arcade
 ```
 
+## Wechsel von der alten `tetris`-Installation
+
+Frühere Versionen liefen unter `/opt/tetris` mit dem Service `tetris.service`
+und dem User `tetris`. Beim Umstieg (Accounts/Scores werden NICHT übernommen):
+
+```bash
+sudo systemctl disable --now tetris.service 2>/dev/null
+sudo rm -rf /opt/tetris /etc/systemd/system/tetris.service
+sudo userdel tetris 2>/dev/null
+sudo ./install.sh
+```
+
+`install.sh` warnt zusätzlich, falls die Alt-Installation noch liegt
+(Port-Konflikt auf 5000).
+
 ## Betrieb
 
 - Healthcheck ohne Login: `GET /healthz` → `{"ok": true}` (z. B. für
@@ -59,13 +72,16 @@ sudo ./install.sh        # oder nur: sudo systemctl start arcade
 
 ## Die Spiele & Architektur
 
-**Tetris / Snake / Breakout** — die Leaderboards sind manipulationsarm:
-Der Client schickt nie einen Score. Der Server vergibt pro Partie Seed +
-einmalige `game_id`, der Client zeichnet nur Eingaben auf
+**Tetris / Snake / Breakout / 2048 / Geometry Dash** — die Leaderboards sind
+manipulationsarm: Der Client schickt nie einen Score. Der Server vergibt pro
+Partie Seed + einmalige `game_id`, der Client zeichnet nur Eingaben auf
 (`{tick, action}`), und der Server **spielt die Partie mit der identischen
-Python-Engine nach** (engine.py / snake_engine.py / breakout_engine.py —
-bit-identisch zu den JS-Engines, Breakout dafür komplett in
-Integer-Physik). Scores pro Spiel, ein Account für alles.
+Python-Engine nach** (engine.py / snake_engine.py / breakout_engine.py /
+g2048_engine.py / gd_engine.py — bit-identisch zu den JS-Engines, Breakout und
+Geometry Dash in reiner Integer-Fixed-Point-Physik, 2048 deterministisch über
+den geseedeten Tile-Spawn). Bei Geometry Dash hängt das Level nur am Seed (nicht
+an der Eingabe), Score = erreichte Distanz in Zellen. Scores pro Spiel, ein
+Account für alles.
 
 **Schach** — Spieler gegen Spieler über die Lobby (`/games/chess`): Partie
 erstellen (Zufallsfarbe), zweiter Account tritt bei. Kein Replay, sondern
@@ -106,17 +122,20 @@ abw-arcade/
 ├── engine.py                   # Tetris-Engine (Server-Replay)
 ├── snake_engine.py             # Snake-Engine (Server-Replay)
 ├── breakout_engine.py          # Breakout-Engine (Integer-Physik, Replay)
+├── g2048_engine.py             # 2048-Engine (geseedeter Spawn, Replay)
+├── gd_engine.py                # Geometry-Dash-Engine (Integer-Physik, Replay)
 ├── chess_engine.py             # Schachregeln (Server validiert jeden Zug)
 ├── chess_bot.py                # Schach-Bot (Negamax, 3 Stärken)
 ├── requirements.txt            # Flask, waitress
 ├── install.sh                  # Setup/Update (idempotent)
-├── templates/                  # hub, game, snake, breakout, doom,
+├── templates/                  # hub, game, snake, breakout, 2048, gd, doom,
 │   ├── chess_lobby/chess_game  #   Schach (eigenes Theme), login/register,
 │   └── admin/                  #   Admin-Backend
 └── static/
     ├── style.css / chess.css
-    ├── engine.js, snake_engine.js, breakout_engine.js   # = .py-Engines
-    ├── tetris.js, snake.js, breakout.js, doom.js
+    ├── engine.js, snake_engine.js, breakout_engine.js, g2048_engine.js,
+    │   gd_engine.js                                                     # = .py
+    ├── tetris.js, snake.js, breakout.js, g2048.js, gd.js, doom.js
     ├── chess_lobby.js, chess_game.js
     └── doom/                   # websockets-doom.js/.wasm, freedoom1.wad,
                                 #   default.cfg, Lizenzen
