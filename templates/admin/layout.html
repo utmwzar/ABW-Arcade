@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Admin · ABW Arcade{% endblock %}
+{% block content %}
+<div class="admin-shell">
+  <header class="topbar">
+    <span class="logo logo-sm">ABW Arcade<span class="logo-tag">// ADMIN</span></span>
+    <div class="topbar-right">
+      <span class="who">{{ admin.username }}</span>
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('index') }}">Spiele</a>
+      <form method="post" action="{{ url_for('logout') }}" class="inline">
+        <button class="btn btn-ghost btn-sm">Logout</button>
+      </form>
+    </div>
+  </header>
+
+  <nav class="admin-nav" aria-label="Admin">
+    <a href="{{ url_for('admin_dashboard') }}" {% if active == 'dash' %}class="active" aria-current="page"{% endif %}>Übersicht</a>
+    <a href="{{ url_for('admin_users') }}" {% if active == 'users' %}class="active" aria-current="page"{% endif %}>Spieler</a>
+    <a href="{{ url_for('admin_scores') }}" {% if active == 'scores' %}class="active" aria-current="page"{% endif %}>Scores</a>
+  </nav>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flashes">
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block admin %}{% endblock %}
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "admin/layout.html" %}
+{% block admin %}
+<section class="panel">
+  <h2 class="panel-title">Spieler ({{ users|length }})</h2>
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th><th>Username</th><th>Registriert (UTC)</th>
+          <th class="num">Runs</th><th class="num">Best</th><th>Rolle</th><th class="actions-h">Aktionen</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td class="dim">{{ u.id }}</td>
+          <td>{{ u.username }}{% if u.id == admin.id %} <span class="you">(du)</span>{% endif %}</td>
+          <td class="dim">{{ u.created_at }}</td>
+          <td class="num">{{ u.runs }}</td>
+          <td class="num">{{ "{:,}".format(u.best).replace(",", ".") }}</td>
+          <td>{% if u.is_admin %}<span class="badge badge-admin">Admin</span>{% else %}<span class="badge">Spieler</span>{% endif %}</td>
+          <td class="actions-cell">
+            <a class="btn btn-ghost btn-xs" href="{{ url_for('admin_scores', user_id=u.id) }}">Scores</a>
+            {% if u.id != admin.id %}
+            <form method="post" action="{{ url_for('admin_toggle_admin', user_id=u.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-ghost btn-xs">{{ 'Admin entziehen' if u.is_admin else 'Zum Admin machen' }}</button>
+            </form>
+            {% endif %}
+            <form method="post" action="{{ url_for('admin_reset_password', user_id=u.id) }}"
+                  onsubmit="return confirm('Passwort von {{ u.username }} zurücksetzen? Das alte Passwort wird ungültig.')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-ghost btn-xs">PW-Reset</button>
+            </form>
+            {% if u.id != admin.id %}
+            <form method="post" action="{{ url_for('admin_delete_user', user_id=u.id) }}"
+                  onsubmit="return confirm('{{ u.username }} endgültig löschen? Alle Scores und Spiele werden mit entfernt.')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-danger btn-xs">Löschen</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel">
+  <h2 class="panel-title">Hinweis</h2>
+  <p class="maint-text">Den allerersten Admin legst du einmalig per CLI im Container an:
+    <code>cd /opt/tetris && sudo -u tetris .venv/bin/flask --app app make-admin USERNAME</code>
+    – danach lassen sich Rollen hier verwalten.</p>
+</section>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}DOOM · ABW Arcade{% endblock %}
+{% block content %}
+<div class="game-shell doom-shell">
+  <header class="topbar">
+    <span class="logo logo-sm">DOOM</span>
+    <div class="topbar-right">
+      <span class="who">Hi, {{ username }}</span>
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('index') }}">Spiele</a>
+      {% if is_admin %}
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_dashboard') }}">Admin</a>
+      {% endif %}
+      <form method="post" action="{{ url_for('logout') }}" class="inline">
+        <button class="btn btn-ghost btn-sm">Logout</button>
+      </form>
+    </div>
+  </header>
+
+  <div class="doom-cols">
+    <section class="doom-screen-wrap">
+      <canvas id="canvas" class="doom-canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+      <div id="doomOverlay" class="overlay">
+        <div class="overlay-inner">
+          <h2 id="doomTitle">DOOM</h2>
+          <p id="doomText">Läuft komplett in deinem Browser (WebAssembly).<br>Erster Start lädt ca. 35&nbsp;MB.</p>
+          <div id="wadButtons">
+            <button class="btn" data-wad="freedoom1.wad">Starten (FreeDoom)</button>
+          </div>
+          <div id="doomProgressWrap" class="doom-progress-wrap" style="display:none">
+            <div id="doomProgress" class="doom-progress"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="sidebar">
+      <div class="panel controls">
+        <span class="panel-title">Steuerung</span>
+        <ul>
+          <li><kbd>W</kbd><kbd>S</kbd> vor / zurück</li>
+          <li><kbd>A</kbd><kbd>D</kbd> seitwärts</li>
+          <li>Maus drehen + feuern <span class="dim-note">(ins Bild klicken)</span></li>
+          <li><kbd>Space</kbd> feuern · <kbd>E</kbd> benutzen</li>
+          <li><kbd>Shift</kbd> rennen · <kbd>Esc</kbd> Menü</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <span class="panel-title">Anzeige</span>
+        <button id="fsBtn" class="btn btn-sm" style="width:100%" disabled>Vollbild</button>
+        <p class="doom-note">Spielstände leben nur im Tab — nach einem Reload ist die Kampagne wieder am Anfang.</p>
+      </div>
+      <div class="panel">
+        <span class="panel-title">Info</span>
+        <p class="doom-note">Engine: Chocolate&nbsp;Doom als WASM (GPL). Spieldaten: FreeDoom&nbsp;Phase&nbsp;1 (BSD) — frei und mitgeliefert.
+        Eigene <code>doom1.wad</code>/<code>doom2.wad</code> in <code>static/doom/</code> ablegen, dann erscheint sie hier als Option.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='doom.js') }}"></script>
+{% endblock %}

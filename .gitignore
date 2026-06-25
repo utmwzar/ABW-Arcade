@@ -1,0 +1,16 @@
+# Runtime data — created on first start, never commit
+arcade.db
+arcade.db-journal
+arcade.db-wal
+arcade.db-shm
+secret_key
+
+# Python virtualenv (created by install.sh)
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# OS / editor cruft
+.DS_Store
+*.swp

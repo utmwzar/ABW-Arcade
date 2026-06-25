@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Spiele · ABW Arcade{% endblock %}
+{% block content %}
+<div class="hub-shell">
+  <header class="topbar">
+    <span class="logo logo-sm">ABW Arcade</span>
+    <div class="topbar-right">
+      <span class="who">Hi, {{ username }}</span>
+      {% if is_admin %}
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_dashboard') }}">Admin</a>
+      {% endif %}
+      <form method="post" action="{{ url_for('logout') }}" class="inline">
+        <button class="btn btn-ghost btn-sm">Logout</button>
+      </form>
+    </div>
+  </header>
+
+  <div class="hub-intro">
+    <h1 class="hub-title">Wähle dein Spiel</h1>
+    <p class="hub-sub">Ein Account, ein Leaderboard pro Spiel.</p>
+  </div>
+
+  <div class="game-grid">
+    {% for gm in games %}
+    {% set live = gm.status == 'live' %}
+    {% set tag = "a" if live else "div" %}
+    <{{ tag }} class="game-card accent-{{ gm.accent }}{{ ' is-soon' if not live }}"
+       {% if live %}href="{{ url_for(gm.endpoint) }}"{% else %}aria-disabled="true"{% endif %}>
+      <div class="card-screen">
+        {% if gm.slug == 'tetris' %}
+        <svg viewBox="0 0 120 120" class="mini" aria-hidden="true">
+          <g stroke="rgba(150,120,255,0.12)" stroke-width="1">
+            <path d="M20 0V120M40 0V120M60 0V120M80 0V120M100 0V120M0 20H120M0 40H120M0 60H120M0 80H120M0 100H120"/>
+          </g>
+          <rect x="41" y="1" width="18" height="18" rx="2" fill="#ff3df0"/>
+          <rect x="21" y="21" width="18" height="18" rx="2" fill="#ff3df0"/>
+          <rect x="41" y="21" width="18" height="18" rx="2" fill="#ff3df0"/>
+          <rect x="61" y="21" width="18" height="18" rx="2" fill="#ff3df0"/>
+          <rect x="1"  y="81" width="18" height="18" rx="2" fill="#00e5e5"/>
+          <rect x="21" y="81" width="18" height="18" rx="2" fill="#3d7bff"/>
+          <rect x="81" y="81" width="18" height="18" rx="2" fill="#ffd23f"/>
+          <rect x="1"  y="101" width="18" height="18" rx="2" fill="#00e5e5"/>
+          <rect x="21" y="101" width="18" height="18" rx="2" fill="#3cdc5a"/>
+          <rect x="41" y="101" width="18" height="18" rx="2" fill="#ff5277"/>
+          <rect x="61" y="101" width="18" height="18" rx="2" fill="#3d7bff"/>
+          <rect x="81" y="101" width="18" height="18" rx="2" fill="#ffd23f"/>
+          <rect x="101" y="101" width="18" height="18" rx="2" fill="#b249f8"/>
+        </svg>
+        {% elif gm.slug == 'snake' %}
+        <svg viewBox="0 0 120 120" class="mini" aria-hidden="true">
+          <g stroke="rgba(150,120,255,0.12)" stroke-width="1">
+            <path d="M20 0V120M40 0V120M60 0V120M80 0V120M100 0V120M0 20H120M0 40H120M0 60H120M0 80H120M0 100H120"/>
+          </g>
+          <rect x="21" y="61" width="18" height="18" rx="3" fill="#3cdc5a"/>
+          <rect x="41" y="61" width="18" height="18" rx="3" fill="#3cdc5a"/>
+          <rect x="61" y="61" width="18" height="18" rx="3" fill="#3cdc5a"/>
+          <rect x="61" y="41" width="18" height="18" rx="3" fill="#3cdc5a"/>
+          <rect x="61" y="21" width="18" height="18" rx="3" fill="#9bf6b0"/>
+          <circle cx="30" cy="92" r="8" fill="#ff3df0"/>
+        </svg>
+        {% elif gm.slug == 'breakout' %}
+        <svg viewBox="0 0 120 120" class="mini" aria-hidden="true">
+          <g stroke="rgba(150,120,255,0.10)" stroke-width="1">
+            <path d="M20 0V120M40 0V120M60 0V120M80 0V120M100 0V120M0 20H120M0 40H120M0 60H120M0 80H120M0 100H120"/>
+          </g>
+          <g>
+            <rect x="6"  y="10" width="24" height="9" rx="2" fill="#ff3df0"/>
+            <rect x="33" y="10" width="24" height="9" rx="2" fill="#ff3df0"/>
+            <rect x="60" y="10" width="24" height="9" rx="2" fill="#b249f8"/>
+            <rect x="87" y="10" width="24" height="9" rx="2" fill="#b249f8"/>
+            <rect x="6"  y="22" width="24" height="9" rx="2" fill="#3d7bff"/>
+            <rect x="33" y="22" width="24" height="9" rx="2" fill="#3d7bff"/>
+            <rect x="60" y="22" width="24" height="9" rx="2" fill="#00e5e5"/>
+          </g>
+          <rect x="44" y="104" width="32" height="7" rx="3" fill="#00e5e5"/>
+          <circle cx="62" cy="80" r="6" fill="#ece8ff"/>
+        </svg>
+        {% elif gm.slug == 'chess' %}
+        <svg viewBox="0 0 120 120" class="mini" aria-hidden="true">
+          <g>
+            {% for r in range(6) %}{% for c in range(8) %}
+            <rect x="{{ 4 + c * 14 }}" y="{{ 18 + r * 14 }}" width="14" height="14"
+                  fill="{{ '#efd9b4' if (r + c) % 2 == 0 else '#a97a52' }}"/>
+            {% endfor %}{% endfor %}
+          </g>
+          <text x="32" y="72" font-size="34" text-anchor="middle" fill="#2e2018">♞</text>
+          <text x="88" y="58" font-size="34" text-anchor="middle" fill="#f6efdd"
+                stroke="#6b4f33" stroke-width="1">♛</text>
+        </svg>
+        {% elif gm.slug == 'doom' %}
+        <svg viewBox="0 0 120 120" class="mini" aria-hidden="true">
+          <rect x="0" y="0" width="120" height="120" fill="#050208"/>
+          <polygon points="0,0 120,0 78,30 42,30" fill="#1c0f24"/>
+          <polygon points="0,120 120,120 78,90 42,90" fill="#241026"/>
+          <polygon points="0,0 42,30 42,90 0,120" fill="#170a1e"/>
+          <polygon points="120,0 78,30 78,90 120,120" fill="#170a1e"/>
+          <rect x="42" y="30" width="36" height="60" fill="#2a0608"/>
+          <rect x="50" y="42" width="20" height="48" fill="#5e0d0d"/>
+          <rect x="54" y="50" width="12" height="40" fill="#a31515"/>
+          <rect x="57" y="58" width="6" height="32" fill="#ff4242"/>
+          <g stroke="#3b1846" stroke-width="2">
+            <line x1="0" y1="34" x2="42" y2="44"/><line x1="0" y1="74" x2="42" y2="70"/>
+            <line x1="120" y1="34" x2="78" y2="44"/><line x1="120" y1="74" x2="78" y2="70"/>
+          </g>
+          <text x="60" y="113" font-size="11" text-anchor="middle" fill="#ff4242"
+                font-family="monospace" letter-spacing="2">E1M1</text>
+        </svg>
+        {% else %}
+        <svg viewBox="0 0 120 120" class="mini" aria-hidden="true">
+          <g stroke="rgba(150,120,255,0.10)" stroke-width="1">
+            <path d="M20 0V120M40 0V120M60 0V120M80 0V120M100 0V120M0 20H120M0 40H120M0 60H120M0 80H120M0 100H120"/>
+          </g>
+        </svg>
+        {% endif %}
+        {% if not live %}<span class="card-badge">Bald</span>{% endif %}
+      </div>
+      <div class="card-body">
+        <h2 class="card-title">{{ gm.title }}</h2>
+        <p class="card-tag">{{ gm.tagline }}</p>
+      </div>
+      <span class="card-cta">{{ 'Spielen &raquo;'|safe if live else 'In Arbeit' }}</span>
+    </{{ tag }}>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
