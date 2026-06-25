@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Geometry Dash · ABW Arcade{% endblock %}
+{% block content %}
+<div class="game-shell">
+  <header class="topbar">
+    <span class="logo logo-sm">GEOMETRY&nbsp;DASH</span>
+    <div class="topbar-right">
+      <span class="who">Hi, {{ username }}</span>
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('index') }}">Spiele</a>
+      {% if is_admin %}
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_dashboard') }}">Admin</a>
+      {% endif %}
+      <form method="post" action="{{ url_for('logout') }}" class="inline">
+        <button class="btn btn-ghost btn-sm">Logout</button>
+      </form>
+    </div>
+  </header>
+
+  <div class="play-area gd-area">
+    <section class="board-wrap">
+      <canvas id="board" width="900" height="280"></canvas>
+      <div id="overlay" class="overlay">
+        <div class="overlay-inner">
+          <h2 id="overlay-title">BEREIT?</h2>
+          <p id="overlay-text">Drücke <kbd>Leertaste</kbd> zum Springen und Starten</p>
+          <button id="startBtn" class="btn">Lauf starten</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="gd-bottom">
+      <aside class="sidebar">
+        <div class="panel stats">
+          <div class="stat"><span class="stat-label">Distanz</span><span id="score" class="stat-val">0</span></div>
+          <div class="stat"><span class="stat-label">Bestwert</span><span id="best" class="stat-val">0</span></div>
+        </div>
+        <div class="panel controls">
+          <span class="panel-title">Steuerung</span>
+          <ul>
+            <li><kbd>Leertaste</kbd> <kbd>&uarr;</kbd> <kbd>W</kbd> springen</li>
+            <li>gedrückt halten = automatisch weiter</li>
+            <li>Mausklick springt auch</li>
+            <li><kbd>R</kbd> neuer Lauf</li>
+          </ul>
+        </div>
+      </aside>
+
+      <aside class="panel leaderboard">
+        <span class="panel-title">High Scores</span>
+        <ol id="leaderboard" class="lb-list"><li class="lb-empty">lädt …</li></ol>
+        <div id="personal" class="personal"></div>
+      </aside>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='gd_engine.js') }}"></script>
+<script src="{{ url_for('static', filename='gd.js') }}"></script>
+{% endblock %}

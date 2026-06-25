@@ -41,6 +41,8 @@ rsync -a \
   "$SRC_DIR/engine.py" \
   "$SRC_DIR/snake_engine.py" \
   "$SRC_DIR/breakout_engine.py" \
+  "$SRC_DIR/g2048_engine.py" \
+  "$SRC_DIR/gd_engine.py" \
   "$SRC_DIR/chess_engine.py" \
   "$SRC_DIR/chess_bot.py" \
   "$SRC_DIR/requirements.txt" \
