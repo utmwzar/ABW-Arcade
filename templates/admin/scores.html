@@ -1,0 +1,79 @@
+{% extends "admin/layout.html" %}
+{% block admin %}
+<section class="panel">
+  <div class="panel-head">
+    <h2 class="panel-title">
+      Scores{% if filter_user %} · {{ filter_user.username }}{% endif %}{% if filter_game %} · {{ filter_game }}{% endif %}
+    </h2>
+    <div class="panel-head-actions">
+      {% if filter_user or filter_game %}
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_scores') }}">Filter aufheben</a>
+      {% endif %}
+      <form method="post" action="{{ url_for('admin_clear_scores') }}"
+            onsubmit="return confirm('Wirklich ALLE Scores aller Spiele löschen? Die Leaderboards sind danach leer.')">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-danger btn-sm">Leaderboard leeren</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="filter-row">
+    <span class="filter-label">Spiel:</span>
+    <a class="chip {{ 'chip-on' if not filter_game }}"
+       href="{{ url_for('admin_scores', user_id=filter_user.id if filter_user else None) }}">Alle</a>
+    {% for gm in games %}
+    <a class="chip {{ 'chip-on' if filter_game == gm.slug }}"
+       href="{{ url_for('admin_scores', game=gm.slug, user_id=filter_user.id if filter_user else None) }}">{{ gm.title }}</a>
+    {% endfor %}
+  </div>
+
+  {% if scores %}
+  <div class="table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th><th>Spieler</th><th>Spiel</th><th class="num">Score</th>
+          <th class="num">Lines</th><th class="num">Lvl</th>
+          <th>Session</th><th>Zeit (UTC)</th><th class="actions-h">Aktion</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in scores %}
+        <tr>
+          <td class="dim">{{ s.id }}</td>
+          <td>{{ s.username }}</td>
+          <td><span class="badge badge-game">{{ s.game }}</span></td>
+          <td class="num">{{ "{:,}".format(s.score).replace(",", ".") }}</td>
+          <td class="num">{{ s.lines }}</td>
+          <td class="num">{{ s.level }}</td>
+          <td class="dim mono-xs">{{ (s.game_id or '–')[:10] }}</td>
+          <td class="dim">{{ s.created_at }}</td>
+          <td class="actions-cell">
+            <form method="post" action="{{ url_for('admin_delete_score', score_id=s.id) }}"
+                  onsubmit="return confirm('Score #{{ s.id }} ({{ s.score }} von {{ s.username }}) löschen?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-danger btn-xs">Löschen</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pager">
+    {% if page > 1 %}
+    <a class="btn btn-ghost btn-sm"
+       href="{{ url_for('admin_scores', page=page-1, user_id=filter_user.id if filter_user else None, game=filter_game) }}">&larr; Neuere</a>
+    {% endif %}
+    <span class="pager-info">Seite {{ page }}</span>
+    {% if has_next %}
+    <a class="btn btn-ghost btn-sm"
+       href="{{ url_for('admin_scores', page=page+1, user_id=filter_user.id if filter_user else None, game=filter_game) }}">Ältere &rarr;</a>
+    {% endif %}
+  </div>
+  {% else %}
+  <p class="empty">Keine Scores für diese Auswahl vorhanden.</p>
+  {% endif %}
+</section>
+{% endblock %}

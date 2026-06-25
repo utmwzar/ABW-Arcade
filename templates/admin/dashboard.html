@@ -1,0 +1,101 @@
+{% extends "admin/layout.html" %}
+{% block admin %}
+<div class="tiles">
+  <div class="panel tile">
+    <span class="tile-num">{{ stats.users }}</span>
+    <span class="tile-label">Spieler</span>
+  </div>
+  <div class="panel tile">
+    <span class="tile-num">{{ stats.scores }}</span>
+    <span class="tile-label">Runs gesamt</span>
+  </div>
+  <div class="panel tile">
+    <span class="tile-num">{{ "{:,}".format(stats.best).replace(",", ".") }}</span>
+    <span class="tile-label">Bester Score</span>
+  </div>
+  <div class="panel tile">
+    <span class="tile-num">{{ stats.games_open }}<span class="tile-sub">/{{ stats.games_open + stats.games_finished }}</span></span>
+    <span class="tile-label">Offene Spiele</span>
+  </div>
+</div>
+
+<div class="admin-cols">
+  <section class="panel">
+    <h2 class="panel-title">Top 5</h2>
+    {% if top %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>#</th><th>Spieler</th><th class="num">Score</th><th class="num">Lines</th><th class="num">Lvl</th></tr></thead>
+        <tbody>
+          {% for r in top %}
+          <tr>
+            <td class="rank">{{ loop.index }}</td>
+            <td>{{ r.username }}</td>
+            <td class="num">{{ "{:,}".format(r.score).replace(",", ".") }}</td>
+            <td class="num">{{ r.lines }}</td>
+            <td class="num">{{ r.level }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<p class="empty">Noch keine Scores.</p>{% endif %}
+  </section>
+
+  <section class="panel">
+    <h2 class="panel-title">Letzte Runs</h2>
+    {% if latest %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Spieler</th><th class="num">Score</th><th>Zeit (UTC)</th></tr></thead>
+        <tbody>
+          {% for r in latest %}
+          <tr>
+            <td>{{ r.username }}</td>
+            <td class="num">{{ "{:,}".format(r.score).replace(",", ".") }}</td>
+            <td class="dim">{{ r.created_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<p class="empty">Noch keine Runs.</p>{% endif %}
+  </section>
+</div>
+
+<section class="panel">
+  <h2 class="panel-title">Pro Spiel</h2>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Spiel</th><th>Status</th><th class="num">Runs</th><th class="num">Bester Score</th></tr></thead>
+      <tbody>
+        {% for gm in by_game %}
+        <tr>
+          <td><a class="cell-link" href="{{ url_for('admin_scores', game=gm.slug) }}">{{ gm.title }}</a></td>
+          <td>
+            {% if gm.status == 'live' %}<span class="badge badge-live">Live</span>
+            {% elif gm.status == 'soon' %}<span class="badge">Bald</span>
+            {% else %}<span class="badge">—</span>{% endif %}
+          </td>
+          <td class="num">{{ gm.runs }}</td>
+          <td class="num">{{ "{:,}".format(gm.best).replace(",", ".") }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel">
+  <h2 class="panel-title">Wartung</h2>
+  <div class="maint-row">
+    <p class="maint-text">Spiele, die gestartet aber nie beendet wurden (Tab geschlossen
+      o. ä.), bleiben als <em>offen</em> in der Datenbank. Einträge älter als 24 h
+      können gefahrlos entfernt werden.</p>
+    <form method="post" action="{{ url_for('admin_cleanup_games') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-ghost btn-sm">Verwaiste Spiele aufräumen</button>
+    </form>
+  </div>
+</section>
+{% endblock %}
