@@ -1,0 +1,20 @@
+# Zeilenenden festnageln — bewusst minimal gehalten.
+#
+# Das Problem, das hier geloest wird: Auf Windows steht core.autocrlf
+# haeufig auf true. Ein Shell-Skript, das dadurch mit CRLF ins Repo
+# geraet, startet auf Debian nicht. Es scheitert mit
+#
+#     bad interpreter: /usr/bin/env bash^M
+#
+# und das sieht nicht nach einem Zeilenendenproblem aus, sondern nach
+# einem kaputten Skript. Genau die Sorte Fehler, die eine Stunde kostet.
+#
+# Die erste Zeile schaltet jede automatische Umwandlung fuer ALLE Dateien
+# ab — sie bleiben Byte fuer Byte so, wie sie im Repo liegen. Das schuetzt
+# vor allem die DOOM-Daten: eine CRLF-"Korrektur" in einer .wad, .wasm
+# oder .cfg zerstoert sie unbemerkt.
+#
+# Danach die eine Ausnahme, auf die es ankommt.
+
+*       -text
+*.sh    text eol=lf

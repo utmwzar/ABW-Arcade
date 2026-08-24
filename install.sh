@@ -36,20 +36,34 @@ echo ">> App-User & Zielverzeichnis ..."
 id -u "$APP_USER" &>/dev/null || \
   useradd --system --home "$APP_DIR" --shell /usr/sbin/nologin "$APP_USER"
 mkdir -p "$APP_DIR"
-rsync -a \
-  "$SRC_DIR/app.py" \
-  "$SRC_DIR/engine.py" \
-  "$SRC_DIR/snake_engine.py" \
-  "$SRC_DIR/breakout_engine.py" \
-  "$SRC_DIR/g2048_engine.py" \
-  "$SRC_DIR/gd_engine.py" \
-  "$SRC_DIR/chess_engine.py" \
-  "$SRC_DIR/chess_bot.py" \
-  "$SRC_DIR/requirements.txt" \
-  "$SRC_DIR/README.md" \
-  "$SRC_DIR/templates" \
-  "$SRC_DIR/static" \
-  "$APP_DIR/"
+
+# Den ganzen Ordner kopieren, nicht einzelne Dateien. Frueher stand hier eine
+# Liste, die bei jedem neuen Spiel von Hand ergaenzt werden musste. Wird sie
+# vergessen, laeuft die Installation ohne Fehler durch und das Spiel fehlt
+# einfach — ein Fehler, der sich nicht meldet.
+#
+# --delete raeumt weg, was es im neuen Stand nicht mehr gibt (etwa das JS
+# eines entfernten Spiels). Was unten ausgeschlossen ist, wird dabei WEDER
+# uebertragen NOCH geloescht — so bleiben Laufzeitdaten und selbst abgelegte
+# Dateien unangetastet. Besonders die beiden WADs: Das README fordert
+# ausdruecklich dazu auf, eigene doom1.wad/doom2.wad hierher zu legen; ohne
+# den Ausschluss wuerde ein Update sie wegraeumen.
+rsync -a --delete \
+  --exclude='.git/' \
+  --exclude='.gitignore' \
+  --exclude='.venv/' \
+  --exclude='__pycache__/' \
+  --exclude='*.pyc' \
+  --exclude='install.sh' \
+  --exclude='paket-bauen.sh' \
+  --exclude='arcade.db' \
+  --exclude='arcade.db-journal' \
+  --exclude='arcade.db-wal' \
+  --exclude='arcade.db-shm' \
+  --exclude='secret_key' \
+  --exclude='static/doom/doom1.wad' \
+  --exclude='static/doom/doom2.wad' \
+  "$SRC_DIR/" "$APP_DIR/"
 
 echo ">> Virtualenv & Dependencies ..."
 python3 -m venv "$APP_DIR/.venv"
@@ -93,6 +107,13 @@ fi
 
 IP="$(hostname -I 2>/dev/null | awk '{print $1}')"
 echo ""
+# Welcher Stand liegt jetzt eigentlich da? Genau die Frage war beim
+# Auseinanderlaufen von Paket und Code nicht zu beantworten.
+if [ -f "$APP_DIR/PAKET-INFO" ]; then
+  echo ">> Installierter Stand:"
+  sed 's/^/     /' "$APP_DIR/PAKET-INFO"
+  echo ""
+fi
 echo ">> Fertig! ABW Arcade:  http://${IP:-<server-ip>}:${PORT}"
 echo ">> Ersten Admin ernennen (nach der Registrierung im Browser):"
 echo "     cd ${APP_DIR} && sudo -u ${APP_USER} .venv/bin/flask --app app make-admin DEIN_NAME"

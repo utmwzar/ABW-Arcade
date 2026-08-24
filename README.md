@@ -25,6 +25,11 @@ startet den systemd-Service `arcade.service` auf Port **5000**
 entsteht beim ersten Start automatisch leer — **es werden nie alte Accounts
 oder Scores mitgeliefert oder überschrieben**.
 
+Zum Schluss zeigt das Skript an, welcher Stand installiert wurde (aus der
+Datei `PAKET-INFO`, die im Paket mitkommt). Dieselbe Datei liegt danach
+unter `/opt/arcade/PAKET-INFO` — damit lässt sich auf einem laufenden Server
+jederzeit feststellen, welcher Commit dort tatsächlich läuft.
+
 Danach im Browser registrieren und den ersten Admin ernennen:
 
 ```bash
@@ -60,6 +65,33 @@ sudo ./install.sh
 
 `install.sh` warnt zusätzlich, falls die Alt-Installation noch liegt
 (Port-Konflikt auf 5000).
+
+## Ein neues Paket bauen
+
+Nur nötig, wenn du ein Release veröffentlichen willst — zum Installieren
+reicht das fertige `abw-arcade.tar.gz`.
+
+```bash
+./paket-bauen.sh              # baut aus HEAD
+./paket-bauen.sh v1.1         # baut aus einem Tag oder Commit
+```
+
+Das Skript liest ausschließlich aus `git archive`, nie aus dem
+Arbeitsverzeichnis. Dadurch enthält das Paket per Konstruktion genau die
+eingecheckten Dateien eines Commits — eine `.venv`, eine `arcade.db` oder
+halbfertige Änderungen können gar nicht erst hineingeraten.
+
+**Bau das Paket nicht von Hand.** Genau daran ist v1.0 gescheitert: Das
+veröffentlichte Archiv war älter als der Code und enthielt 2048 und
+Geometry Dash nicht, obwohl dieses README beide bereits beschrieb. Ein
+handgepacktes Archiv hat keine Zusicherung, dass es zum Code passt.
+
+Veröffentlichen:
+
+```bash
+gh release create v1.1 abw-arcade.tar.gz --repo utmwzar/ABW-Arcade \
+  --title "ABW Arcade v1.1" --notes "..."
+```
 
 ## Betrieb
 
@@ -128,6 +160,8 @@ abw-arcade/
 ├── chess_bot.py                # Schach-Bot (Negamax, 3 Stärken)
 ├── requirements.txt            # Flask, waitress
 ├── install.sh                  # Setup/Update (idempotent)
+├── paket-bauen.sh              # baut abw-arcade.tar.gz aus git
+├── PAKET-INFO                  # nur im Paket: Commit + Stand der Auslieferung
 ├── templates/                  # hub, game, snake, breakout, 2048, gd, doom,
 │   ├── chess_lobby/chess_game  #   Schach (eigenes Theme), login/register,
 │   └── admin/                  #   Admin-Backend
