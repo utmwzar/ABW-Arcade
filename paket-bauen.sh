@@ -39,7 +39,12 @@ DATUM="$(git log -1 --format=%cI "${REF}")"
 
 # Nicht eingecheckte Aenderungen landen NICHT im Paket. Das ist Absicht, aber
 # es soll niemanden ueberraschen — deshalb ein deutlicher Hinweis.
-if [ "$REF" = "HEAD" ] && ! git diff-index --quiet HEAD -- 2>/dev/null; then
+#
+# Geprueft wird auf echte INHALTSaenderungen, nicht auf Modusaenderungen:
+# Unter WSL meldet /mnt/... jede Datei als 777, wodurch git lauter
+# Rechteaenderungen sieht und die Warnung sonst immer feuert.
+GEAENDERT="$(git diff --numstat HEAD -- 2>/dev/null | awk '$1!="0"||$2!="0"' | wc -l)"
+if [ "$REF" = "HEAD" ] && [ "$GEAENDERT" -gt 0 ]; then
   echo "!! Das Arbeitsverzeichnis hat nicht eingecheckte Aenderungen."
   echo "!! Sie kommen NICHT ins Paket — gebaut wird der Commit ${COMMIT}."
   echo "!! Erst committen, wenn sie mitsollen."
