@@ -18,3 +18,8 @@
 
 *       -text
 *.sh    text eol=lf
+
+# Nicht ins Verteilpaket (git archive) — sie gehoeren zur Entwicklung,
+# nicht zur Installation.
+.gitattributes  export-ignore
+.gitignore      export-ignore
