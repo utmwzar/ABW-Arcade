@@ -56,6 +56,8 @@ rsync -a --delete \
   --exclude='*.pyc' \
   --exclude='install.sh' \
   --exclude='paket-bauen.sh' \
+  --exclude='pruefe-engines.js' \
+  --exclude='pruefe_engines.py' \
   --exclude='arcade.db' \
   --exclude='arcade.db-journal' \
   --exclude='arcade.db-wal' \
