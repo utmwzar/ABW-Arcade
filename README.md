@@ -1,36 +1,74 @@
 # ABW Arcade
 
-Selbstgehostete Spiele-Website für den Homelab-Container: **Tetris, Snake,
-Breakout, 2048, Geometry Dash** (mit server-verifizierten Leaderboards),
-**Schach** (PvP mit Elo + Bot-Modus, eigenes Design) und **DOOM**
-(WebAssembly im Browser).
-Backend: Flask + SQLite + waitress, ein systemd-Service, keine weiteren
-Abhängigkeiten.
+Selbstgehostete Spiele-Website für den Homelab-Container. Ein Account, sieben
+Spiele, server-geprüfte Bestenlisten.
 
-## Neu aufsetzen (frische Umgebung)
+**Tetris · Snake · Breakout · 2048 · Geometry Dash · Schach · DOOM**
 
-Voraussetzung: Debian/Ubuntu (LXC, VM o. ä.) mit Root-Zugang und Internet
-für `apt`/`pip`.
+Backend: Flask + SQLite + waitress, ein systemd-Dienst, sonst nichts. Keine
+Datenbank aufzusetzen, kein Reverse Proxy nötig, kein Docker.
+
+---
+
+## Installation
+
+Voraussetzung: Debian oder Ubuntu (LXC, VM, Container) mit Root-Zugang und
+Internet für `apt` und `pip`.
+
+Das hier ist alles — von der leeren Maschine bis zur laufenden Seite:
 
 ```bash
+curl -fsSL -o abw-arcade.tar.gz \
+  https://github.com/utmwzar/ABW-Arcade/releases/latest/download/abw-arcade.tar.gz
 tar -xzf abw-arcade.tar.gz
 cd abw-arcade
 sudo ./install.sh
 ```
 
-Das Skript installiert Pakete (python3, venv, rsync), legt den System-User
-`arcade` an, kopiert die App nach `/opt/arcade`, baut das Virtualenv und
-startet den systemd-Service `arcade.service` auf Port **5000**
-(anpassbar: `PORT=8080 sudo ./install.sh`). Die Datenbank `arcade.db`
-entsteht beim ersten Start automatisch leer — **es werden nie alte Accounts
-oder Scores mitgeliefert oder überschrieben**.
+Der Link zeigt immer auf das **neueste** Release. Du musst keine
+Versionsnummer nachschlagen und keine URL anpassen.
 
-Zum Schluss zeigt das Skript an, welcher Stand installiert wurde (aus der
-Datei `PAKET-INFO`, die im Paket mitkommt). Dieselbe Datei liegt danach
-unter `/opt/arcade/PAKET-INFO` — damit lässt sich auf einem laufenden Server
-jederzeit feststellen, welcher Commit dort tatsächlich läuft.
+Kein `curl` auf der Kiste? `wget` tut es genauso:
 
-Danach im Browser registrieren und den ersten Admin ernennen:
+```bash
+wget -O abw-arcade.tar.gz \
+  https://github.com/utmwzar/ABW-Arcade/releases/latest/download/abw-arcade.tar.gz
+```
+
+### Alternative: direkt aus git
+
+Wenn git ohnehin da ist, geht es auch ohne Archiv. `install.sh` läuft in
+jedem Ordner, in dem das Projekt liegt:
+
+```bash
+git clone --depth 1 https://github.com/utmwzar/ABW-Arcade.git
+cd ABW-Arcade
+sudo ./install.sh
+```
+
+Der Unterschied: Das Release ist ein fester, getesteter Stand. `git clone`
+holt den aktuellen Entwicklungsstand, der auch mal kaputt sein kann. **Für
+den Server nimm das Release**, für Mitbasteln den Klon.
+
+### Was das Skript macht
+
+Es installiert `python3`, `python3-venv`, `python3-pip` und `rsync`, legt den
+System-User `arcade` an, kopiert die App nach `/opt/arcade`, baut dort ein
+Virtualenv und startet den systemd-Dienst `arcade.service` auf Port **5000**.
+
+Anderer Port:
+
+```bash
+PORT=8080 sudo ./install.sh
+```
+
+Zum Schluss zeigt es an, welcher Stand installiert wurde. Dieselbe Angabe
+liegt danach in `/opt/arcade/PAKET-INFO` — damit kannst du auf einem
+laufenden Server jederzeit nachsehen, welcher Commit dort wirklich läuft.
+
+### Ersten Admin ernennen
+
+Erst im Browser registrieren, dann auf dem Server:
 
 ```bash
 cd /opt/arcade && sudo -u arcade .venv/bin/flask --app app make-admin DEIN_NAME
@@ -38,23 +76,40 @@ cd /opt/arcade && sudo -u arcade .venv/bin/flask --app app make-admin DEIN_NAME
 
 Falls eine Firewall läuft: `ufw allow 5000/tcp` (bzw. euer Regelwerk).
 
-## Update vs. frischer Reset
+---
 
-**Update** (Accounts/Scores behalten): neues Paket entpacken, `sudo
-./install.sh`, fertig — Migrationen laufen beim Start automatisch.
+## Update
 
-**Frischer Reset** (alte Accounts/Scores verwerfen):
+Dasselbe wie die Installation — neues Paket holen, entpacken, `install.sh`.
+Das Skript ist idempotent.
+
+**Accounts und Highscores bleiben erhalten.** Ausdrücklich unangetastet:
+
+| Datei | Inhalt |
+|---|---|
+| `arcade.db` | Accounts, Scores, Elo, laufende Partien |
+| `secret_key` | Sitzungsschlüssel — ohne ihn müssen sich alle neu anmelden |
+| `static/doom/doom1.wad`, `doom2.wad` | selbst hinterlegte DOOM-Daten |
+| `.venv/` | das Virtualenv |
+
+Alles andere wird ersetzt, veraltete Dateien werden entfernt.
+
+### Frischer Reset
+
+Wenn Accounts und Scores weg sollen:
 
 ```bash
 sudo systemctl stop arcade
 sudo rm -f /opt/arcade/arcade.db /opt/arcade/secret_key
-sudo ./install.sh        # oder nur: sudo systemctl start arcade
+sudo systemctl start arcade
 ```
 
-## Wechsel von der alten `tetris`-Installation
+Beides entsteht beim nächsten Start neu und leer.
 
-Frühere Versionen liefen unter `/opt/tetris` mit dem Service `tetris.service`
-und dem User `tetris`. Beim Umstieg (Accounts/Scores werden NICHT übernommen):
+### Umstieg von der alten `tetris`-Installation
+
+Frühere Versionen liefen unter `/opt/tetris` mit dem Dienst `tetris.service`.
+Accounts und Scores werden dabei **nicht** übernommen:
 
 ```bash
 sudo systemctl disable --now tetris.service 2>/dev/null
@@ -63,114 +118,153 @@ sudo userdel tetris 2>/dev/null
 sudo ./install.sh
 ```
 
-`install.sh` warnt zusätzlich, falls die Alt-Installation noch liegt
-(Port-Konflikt auf 5000).
+`install.sh` warnt von selbst, falls die Alt-Installation noch liegt — sie
+belegt denselben Port 5000.
 
-## Ein neues Paket bauen
+---
 
-Nur nötig, wenn du ein Release veröffentlichen willst — zum Installieren
-reicht das fertige `abw-arcade.tar.gz`.
+## Betrieb
 
 ```bash
-./paket-bauen.sh              # baut aus HEAD
-./paket-bauen.sh v1.1         # baut aus einem Tag oder Commit
+systemctl status arcade        # läuft es?
+systemctl restart arcade       # neu starten
+journalctl -u arcade -f        # Logs mitlesen
+curl localhost:5000/healthz    # {"ok": true}
 ```
 
-Das Skript liest ausschließlich aus `git archive`, nie aus dem
-Arbeitsverzeichnis. Dadurch enthält das Paket per Konstruktion genau die
-eingecheckten Dateien eines Commits — eine `.venv`, eine `arcade.db` oder
-halbfertige Änderungen können gar nicht erst hineingeraten.
+`/healthz` braucht keinen Login und prüft auch die Datenbank — taugt also
+direkt als Uptime-Kuma-Ziel.
+
+In Umgebungen ohne systemd (etwa Docker) schreibt `install.sh` die
+Dienstdatei trotzdem und gibt den passenden manuellen Startbefehl aus.
+
+---
+
+## Die Spiele & wie sie funktionieren
+
+**Tetris / Snake / Breakout / 2048 / Geometry Dash** — die Bestenlisten sind
+manipulationsarm gebaut: **Der Client schickt nie einen Score.** Der Server
+vergibt pro Partie einen Seed und eine einmalige `game_id`, der Client
+zeichnet nur Eingaben auf (`{tick, action}`), und der Server **spielt die
+Partie mit der identischen Python-Engine nach** und rechnet den Punktestand
+selbst aus.
+
+Einen Score zu fälschen heißt damit: ein Eingabeprotokoll einreichen, das ihn
+tatsächlich erreicht. Möglich ist das nur, indem man wirklich gut spielt —
+oder einen Bot schreibt, der es tut.
+
+Damit das aufgeht, müssen die Engines paarweise bit-identisch rechnen
+(`engine.py` ↔ `engine.js` usw.). Breakout und Geometry Dash benutzen deshalb
+reine Integer-Fixed-Point-Physik statt Fließkomma, 2048 einen geseedeten
+Tile-Spawn. Bei Geometry Dash hängt das Level nur am Seed, der Score ist die
+erreichte Distanz.
+
+**Schach** — Spieler gegen Spieler über die Lobby (`/games/chess`): Partie
+erstellen, zweiter Account tritt bei. Kein Replay, sondern direkte Autorität:
+Der Server validiert **jeden einzelnen Zug** mit `chess_engine.py` —
+Vollregeln inklusive Rochade, en passant, Umwandlung, Matt, Patt,
+50-Züge-Regel, Stellungswiederholung und totem Material, gegen
+Perft-Referenzzahlen geprüft. Dazu Elo (K=32, Start 1000), Remis und
+Aufgeben.
+
+Ein **Bot-Modus** (`chess_bot.py`, Negamax mit Alpha-Beta, drei Stärken) ist
+bewusst **unbewertet** und auf drei gleichzeitige Partien begrenzt.
+
+**DOOM** — Chocolate Doom als WebAssembly, mit **FreeDoom Phase 1** als
+freien Spieldaten. Läuft vollständig im Browser, der Server liefert nur
+Statik. Darum bewusst **ohne Bestenliste**: Was im Browser gerechnet wird,
+lässt sich nicht überprüfen.
+
+Eigene `doom1.wad`/`doom2.wad` nach `/opt/arcade/static/doom/` legen — sie
+erscheinen dann als zusätzliche Startoption und überleben Updates. Steuerung:
+WASD + Maus (ins Bild klicken), Space feuert, E benutzt, Shift rennt.
+Spielstände leben nur im Tab.
+
+**Admin** (`/admin`) — Dashboard mit Statistik je Spiel, Spielerverwaltung
+(Adminrechte, Passwort zurücksetzen, Löschen mit CASCADE), Score-Verwaltung
+mit Filter, Aufräumen verwaister Replay-Sitzungen.
+
+---
+
+## Mitentwickeln
+
+### Ein neues Spiel ergänzen
+
+1. Eintrag in der `GAMES`-Registry in `app.py` (slug, title, endpoint,
+   status `"live"`)
+2. Route + Template
+3. Falls es eine Bestenliste hat: Score-Zeilen mit demselben `slug` in die
+   Tabelle `scores` schreiben
+
+Hub, Leaderboard-API und Admin greifen den Eintrag automatisch auf. Auch
+`install.sh` braucht keine Anpassung — es kopiert den ganzen Ordner.
+
+### Ein Release-Paket bauen
+
+Nur nötig, wenn du ein Release veröffentlichen willst:
+
+```bash
+./paket-bauen.sh              # aus HEAD
+./paket-bauen.sh v1.1         # aus einem Tag oder Commit
+```
+
+Das Skript liest ausschließlich über `git archive` aus einem Commit, nie aus
+dem Arbeitsverzeichnis. Dadurch enthält das Paket per Konstruktion genau den
+eingecheckten Stand — eine `.venv`, eine `arcade.db` oder halbfertige
+Änderungen können gar nicht hineingeraten.
 
 **Bau das Paket nicht von Hand.** Genau daran ist v1.0 gescheitert: Das
-veröffentlichte Archiv war älter als der Code und enthielt 2048 und
-Geometry Dash nicht, obwohl dieses README beide bereits beschrieb. Ein
-handgepacktes Archiv hat keine Zusicherung, dass es zum Code passt.
+veröffentlichte Archiv war älter als der Code und enthielt 2048 und Geometry
+Dash nicht, obwohl dieses README beide schon beschrieb.
 
 Veröffentlichen:
 
 ```bash
-gh release create v1.1 abw-arcade.tar.gz --repo utmwzar/ABW-Arcade \
-  --title "ABW Arcade v1.1" --notes "..."
+gh release create v1.2 abw-arcade.tar.gz --repo utmwzar/ABW-Arcade \
+  --title "ABW Arcade v1.2" --notes "Was sich geändert hat ..."
 ```
 
-## Betrieb
+### Lokal ausprobieren, ohne zu installieren
 
-- Healthcheck ohne Login: `GET /healthz` → `{"ok": true}` (z. B. für
-  Uptime Kuma).
-- Logs: `journalctl -u arcade -f`
-- Service: `systemctl status|restart arcade`
-- In Umgebungen ohne systemd (z. B. Docker) gibt `install.sh` den passenden
-  manuellen Startbefehl aus.
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/flask --app app run --port 5000
+```
 
-## Die Spiele & Architektur
-
-**Tetris / Snake / Breakout / 2048 / Geometry Dash** — die Leaderboards sind
-manipulationsarm: Der Client schickt nie einen Score. Der Server vergibt pro
-Partie Seed + einmalige `game_id`, der Client zeichnet nur Eingaben auf
-(`{tick, action}`), und der Server **spielt die Partie mit der identischen
-Python-Engine nach** (engine.py / snake_engine.py / breakout_engine.py /
-g2048_engine.py / gd_engine.py — bit-identisch zu den JS-Engines, Breakout und
-Geometry Dash in reiner Integer-Fixed-Point-Physik, 2048 deterministisch über
-den geseedeten Tile-Spawn). Bei Geometry Dash hängt das Level nur am Seed (nicht
-an der Eingabe), Score = erreichte Distanz in Zellen. Scores pro Spiel, ein
-Account für alles.
-
-**Schach** — Spieler gegen Spieler über die Lobby (`/games/chess`): Partie
-erstellen (Zufallsfarbe), zweiter Account tritt bei. Kein Replay, sondern
-direkte Autorität: Der Server validiert **jeden Zug** mit
-`chess_engine.py` (Vollregeln inkl. Rochade, en passant, Umwandlung,
-Matt/Patt, 50-Züge, Wiederholung, totes Material; per
-Perft-Referenzzahlen verifiziert). Updates per Polling (2–3 s), Remis &
-Aufgeben, **Elo-Rangliste** (K=32, Start 1000). Zusätzlich ein
-**Bot-Modus** (`chess_bot.py`, Negamax + Alpha-Beta, drei Stärken) —
-Bot-Partien sind bewusst **unbewertet** und auf 3 gleichzeitig begrenzt.
-Eigenes "Studierzimmer"-Design nur im Schach (`chess.css`, gescoped unter
-`body.chess-theme`).
-
-**DOOM** — Chocolate Doom als WebAssembly (GPL, selbst kompiliert) mit
-**FreeDoom Phase 1** als freien Spieldaten (BSD); Lizenztexte liegen in
-`static/doom/`. Läuft komplett im Browser, der Server liefert nur Statik —
-darum bewusst **kein Leaderboard** (client-seitig = nicht verifizierbar).
-Eigene `doom1.wad`/`doom2.wad` nach `static/doom/` legen → erscheint als
-Start-Option. Steuerung: WASD + Maus (ins Bild klicken), Space feuern,
-E benutzen, Shift rennen. Savegames leben nur im Tab.
-
-**Admin** (`/admin`, nur für Admins): Dashboard mit Pro-Spiel-Statistik,
-Spielerverwaltung (Admin-Flag, Passwort-Reset, Löschen mit CASCADE),
-Score-Verwaltung mit Spiel-Filter, Aufräumen verwaister Replay-Sessions.
-
-## Ein neues Spiel ergänzen
-
-Eintrag in der `GAMES`-Registry in `app.py` (slug, title, endpoint,
-status "live"), Route + Template, und — falls Leaderboard — Score-Zeilen
-mit dem `slug` in die `scores`-Tabelle schreiben. Hub, Leaderboard-API und
-Admin greifen es automatisch auf.
+---
 
 ## Struktur
 
 ```
 abw-arcade/
-├── app.py                      # Flask: Hub, Auth, Spiel-APIs, Schach, Admin
-├── engine.py                   # Tetris-Engine (Server-Replay)
-├── snake_engine.py             # Snake-Engine (Server-Replay)
-├── breakout_engine.py          # Breakout-Engine (Integer-Physik, Replay)
-├── g2048_engine.py             # 2048-Engine (geseedeter Spawn, Replay)
-├── gd_engine.py                # Geometry-Dash-Engine (Integer-Physik, Replay)
-├── chess_engine.py             # Schachregeln (Server validiert jeden Zug)
-├── chess_bot.py                # Schach-Bot (Negamax, 3 Stärken)
-├── requirements.txt            # Flask, waitress
-├── install.sh                  # Setup/Update (idempotent)
-├── paket-bauen.sh              # baut abw-arcade.tar.gz aus git
-├── PAKET-INFO                  # nur im Paket: Commit + Stand der Auslieferung
-├── templates/                  # hub, game, snake, breakout, 2048, gd, doom,
-│   ├── chess_lobby/chess_game  #   Schach (eigenes Theme), login/register,
-│   └── admin/                  #   Admin-Backend
+├── app.py                  Flask: Hub, Auth, Spiel-APIs, Schach, Admin
+├── engine.py               Tetris-Engine (Server-Replay)
+├── snake_engine.py         Snake
+├── breakout_engine.py      Breakout (Integer-Physik)
+├── g2048_engine.py         2048 (geseedeter Spawn)
+├── gd_engine.py            Geometry Dash (Integer-Physik)
+├── chess_engine.py         Schachregeln, validiert jeden Zug
+├── chess_bot.py            Schach-Bot (Negamax, 3 Stärken)
+├── requirements.txt        Flask, waitress
+├── install.sh              Setup und Update, idempotent
+├── paket-bauen.sh          baut abw-arcade.tar.gz aus git
+├── templates/              hub, Spiele, login/register, admin/
 └── static/
-    ├── style.css / chess.css
-    ├── engine.js, snake_engine.js, breakout_engine.js, g2048_engine.js,
-    │   gd_engine.js                                                     # = .py
+    ├── style.css, chess.css
+    ├── *_engine.js         die JS-Gegenstücke zu den .py-Engines
     ├── tetris.js, snake.js, breakout.js, g2048.js, gd.js, doom.js
-    ├── chess_lobby.js, chess_game.js
-    └── doom/                   # websockets-doom.js/.wasm, freedoom1.wad,
-                                #   default.cfg, Lizenzen
+    └── doom/               websockets-doom.js/.wasm, freedoom1.wad, Lizenzen
 ```
+
+Zur Laufzeit kommen `arcade.db`, `secret_key` und `.venv/` dazu — die gehören
+nicht ins Repo und überleben jedes Update.
+
+---
+
+## Lizenz
+
+MIT, siehe [LICENSE](LICENSE).
+
+DOOM: Chocolate Doom steht unter GPL, FreeDoom unter BSD. Die Lizenztexte
+liegen in `static/doom/`.
