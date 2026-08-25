@@ -25,10 +25,10 @@ cd abw-arcade
 sudo ./install.sh
 ```
 
-Der Link zeigt immer auf das **neueste** Release. Du musst keine
-Versionsnummer nachschlagen und keine URL anpassen.
+Der Link zeigt immer auf das **neueste** Release — es ist keine
+Versionsnummer nachzuschlagen und keine URL anzupassen.
 
-Kein `curl` auf der Kiste? `wget` tut es genauso:
+Ohne `curl` tut es `wget` genauso:
 
 ```bash
 wget -O abw-arcade.tar.gz \
@@ -48,7 +48,7 @@ sudo ./install.sh
 
 Der Unterschied: Das Release ist ein fester, getesteter Stand. `git clone`
 holt den aktuellen Entwicklungsstand, der auch mal kaputt sein kann. **Für
-den Server nimm das Release**, für Mitbasteln den Klon.
+den Betrieb ist das Release die richtige Wahl**, zum Mitentwickeln der Klon.
 
 ### Was das Skript macht
 
@@ -63,7 +63,7 @@ PORT=8080 sudo ./install.sh
 ```
 
 Zum Schluss zeigt es an, welcher Stand installiert wurde. Dieselbe Angabe
-liegt danach in `/opt/arcade/PAKET-INFO` — damit kannst du auf einem
+liegt danach in `/opt/arcade/PAKET-INFO` — damit lässt sich auf einem
 laufenden Server jederzeit nachsehen, welcher Commit dort wirklich läuft.
 
 ### Ersten Admin ernennen
@@ -74,7 +74,7 @@ Erst im Browser registrieren, dann auf dem Server:
 cd /opt/arcade && sudo -u arcade .venv/bin/flask --app app make-admin DEIN_NAME
 ```
 
-Falls eine Firewall läuft: `ufw allow 5000/tcp` (bzw. euer Regelwerk).
+Falls eine Firewall läuft, muss der Port frei sein: `ufw allow 5000/tcp`.
 
 ---
 
@@ -201,7 +201,7 @@ Hub, Leaderboard-API und Admin greifen den Eintrag automatisch auf. Auch
 
 ### Ein Release-Paket bauen
 
-Nur nötig, wenn du ein Release veröffentlichen willst:
+Nur nötig, um ein Release zu veröffentlichen:
 
 ```bash
 ./paket-bauen.sh              # aus HEAD
@@ -213,14 +213,13 @@ dem Arbeitsverzeichnis. Dadurch enthält das Paket per Konstruktion genau den
 eingecheckten Stand — eine `.venv`, eine `arcade.db` oder halbfertige
 Änderungen können gar nicht hineingeraten.
 
-**Bau das Paket nicht von Hand.** Genau daran ist v1.0 gescheitert: Das
-veröffentlichte Archiv war älter als der Code und enthielt 2048 und Geometry
-Dash nicht, obwohl dieses README beide schon beschrieb.
+Das Archiv sollte nicht von Hand gepackt werden: Dabei gibt es keine
+Zusicherung, dass sein Inhalt zum Code passt.
 
 Veröffentlichen:
 
 ```bash
-gh release create v1.2 abw-arcade.tar.gz --repo utmwzar/ABW-Arcade \
+gh release create v1.2 abw-arcade.tar.gz \
   --title "ABW Arcade v1.2" --notes "Was sich geändert hat ..."
 ```
 
