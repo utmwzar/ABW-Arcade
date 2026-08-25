@@ -3,15 +3,14 @@
 # ABW Arcade — Verteilpaket bauen
 #
 #     ./paket-bauen.sh              # baut aus HEAD
-#     ./paket-bauen.sh v1.1         # baut aus einem Tag oder Commit
+#     ./paket-bauen.sh v1.2         # baut aus einem Tag oder Commit
 #
 # Ergebnis: abw-arcade.tar.gz im Projektordner, entpackt nach abw-arcade/.
 #
-# Warum ueberhaupt ein Skript: Das Paket wurde frueher von Hand gepackt.
-# Dabei ist es auseinandergelaufen — das veroeffentlichte v1.0-Archiv war
-# aelter als der Code und enthielt zwei Spiele nicht, die das README bereits
-# beschrieb. Ein von Hand gebautes Paket hat keine Zusicherung, dass es zum
-# Code passt; dieses hier hat sie, weil es ausschliesslich aus git liest.
+# Warum ueberhaupt ein Skript: Ein von Hand gepacktes Archiv hat keine
+# Zusicherung, dass sein Inhalt zum Code passt — es enthaelt, was zufaellig
+# gerade im Ordner lag. Dieses hier hat sie, weil es ausschliesslich aus git
+# liest.
 #
 # Konkret: `git archive` nimmt genau die eingecheckten Dateien eines Commits.
 # Nicht das Arbeitsverzeichnis. Damit koennen weder eine .venv noch eine
