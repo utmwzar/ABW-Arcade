@@ -261,7 +261,7 @@ Eintrag in `pruefe-engines.js`, damit der Gleichlauf mitgeprüft wird.
 
 ```bash
 ./paket-bauen.sh              # aus HEAD
-./paket-bauen.sh v1.2         # aus einem Tag oder Commit
+./paket-bauen.sh v1.0         # aus einem Tag oder Commit
 ```
 
 Das Skript liest ausschließlich über `git archive` aus einem Commit, nie aus
@@ -272,8 +272,8 @@ nicht hineingeraten.
 Veröffentlichen:
 
 ```bash
-gh release create v1.3 abw-arcade.tar.gz \
-  --title "ABW Arcade v1.3" --notes "Was sich geändert hat ..."
+gh release create v1.1 abw-arcade.tar.gz \
+  --title "ABW Arcade v1.1" --notes "Was sich geändert hat ..."
 ```
 
 ---

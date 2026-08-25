@@ -3,7 +3,7 @@
 # ABW Arcade — Verteilpaket bauen
 #
 #     ./paket-bauen.sh              # baut aus HEAD
-#     ./paket-bauen.sh v1.2         # baut aus einem Tag oder Commit
+#     ./paket-bauen.sh v1.0         # baut aus einem Tag oder Commit
 #
 # Ergebnis: abw-arcade.tar.gz im Projektordner, entpackt nach abw-arcade/.
 #
