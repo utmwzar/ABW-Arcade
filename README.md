@@ -159,6 +159,9 @@ Geometry Dash benutzen deshalb reine Integer-Fixed-Point-Physik statt
 Fließkomma, 2048 einen geseedeten Tile-Spawn. Bei Geometry Dash hängt das
 Level nur am Seed, der Score ist die erreichte Distanz.
 
+Dass die Paare wirklich übereinstimmen, ist nicht bloß behauptet, sondern
+geprüft: `node pruefe-engines.js` (siehe [Mitentwickeln](#mitentwickeln)).
+
 **Schach** — Spieler gegen Spieler über die Lobby (`/games/chess`): Partie
 erstellen, zweiter Account tritt bei. Kein Replay, sondern direkte Autorität:
 Der Server validiert **jeden einzelnen Zug** mit `chess_engine.py` —
@@ -198,6 +201,43 @@ mit Filter, Aufräumen verwaister Replay-Sitzungen.
 
 Hub, Leaderboard-API und Admin greifen den Eintrag automatisch auf. Auch
 `install.sh` braucht keine Anpassung — es kopiert den ganzen Ordner.
+
+### Die Engines auf Gleichlauf prüfen
+
+```bash
+node pruefe-engines.js            # alle Spiele
+node pruefe-engines.js snake gd   # nur diese
+```
+
+Braucht `node` und `python3`, sonst nichts. Läuft in unter einer Sekunde und
+endet mit Exit-Code 1, wenn etwas abweicht — taugt also für einen
+Pre-Commit-Hook oder CI.
+
+Der Test würfelt Eingabeprotokolle, schickt **jedes davon durch beide
+Fassungen** einer Engine und vergleicht die Ergebnisse Feld für Feld. Er
+sichert damit die Annahme ab, auf der der ganze Betrugsschutz steht: dass
+`<spiel>_engine.py` und `static/<spiel>_engine.js` bei gleicher Eingabe
+exakt dasselbe ausrechnen.
+
+Laufen die beiden auseinander, passiert nämlich nichts Lautes — es werden
+nur stillschweigend ehrliche Partien abgelehnt oder falsche Punktestände
+eingetragen.
+
+**Nach jeder Änderung an einer Engine ausführen**, und zwar an beiden
+Seiten des Paares.
+
+Snake und Tetris bekommen dabei gesteuerte Partien statt Zufallseingaben.
+Der Grund steht ausführlich im Skript: Zufällig gespielt frisst die Schlange
+nie und räumt Tetris nie eine Reihe — der Test verglich dann lauter Partien
+mit Punktestand 0 und ließ ausgerechnet die Punktetabellen ungeprüft.
+
+Die Ausgabe zeigt deshalb je Spiel mit an, wie viele Fälle überhaupt Punkte
+erreicht haben und wie lang die längste Partie war. Stehen dort Nullen,
+prüft der Test nichts mehr — unabhängig davon, ob er grün meldet.
+
+Ob er noch Zähne hat, lässt sich jederzeit nachstellen: eine Konstante in
+einer der `*_engine.py` verbiegen (etwa `LINE_SCORES` oder `START_LIVES`),
+laufen lassen, Abweichung erwarten, Änderung zurücknehmen.
 
 ### Ein Release-Paket bauen
 
@@ -248,6 +288,8 @@ abw-arcade/
 ├── requirements.txt        Flask, waitress
 ├── install.sh              Setup und Update, idempotent
 ├── paket-bauen.sh          baut abw-arcade.tar.gz aus git
+├── pruefe-engines.js       vergleicht die .py- gegen die .js-Engines
+├── pruefe_engines.py       Python-Seite dieser Pruefung
 ├── templates/              hub, Spiele, login/register, admin/
 └── static/
     ├── style.css, chess.css
