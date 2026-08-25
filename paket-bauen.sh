@@ -33,8 +33,11 @@ if ! git rev-parse --verify --quiet "${REF}^{commit}" >/dev/null; then
   exit 1
 fi
 
-COMMIT="$(git rev-parse --short "${REF}")"
-DATUM="$(git log -1 --format=%cI "${REF}")"
+# ^{commit} ist wichtig: Bei einem annotierten Tag liefert rev-parse sonst die
+# SHA des Tag-Objekts, nicht die des Commits. Die stuende dann in PAKET-INFO
+# und waere im Repo nicht auffindbar.
+COMMIT="$(git rev-parse --short "${REF}^{commit}")"
+DATUM="$(git log -1 --format=%cI "${REF}^{commit}")"
 
 # Nicht eingecheckte Aenderungen landen NICHT im Paket. Das ist Absicht, aber
 # es soll niemanden ueberraschen — deshalb ein deutlicher Hinweis.
