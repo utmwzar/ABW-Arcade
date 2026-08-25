@@ -153,11 +153,11 @@ Einen Score zu fälschen heißt damit: ein Eingabeprotokoll einreichen, das ihn
 tatsächlich erreicht. Möglich ist das nur, indem man wirklich gut spielt —
 oder einen Bot schreibt, der es tut.
 
-Damit das aufgeht, müssen die Engines paarweise bit-identisch rechnen
-(`engine.py` ↔ `engine.js` usw.). Breakout und Geometry Dash benutzen deshalb
-reine Integer-Fixed-Point-Physik statt Fließkomma, 2048 einen geseedeten
-Tile-Spawn. Bei Geometry Dash hängt das Level nur am Seed, der Score ist die
-erreichte Distanz.
+Damit das aufgeht, müssen die Engines paarweise bit-identisch rechnen —
+`tetris_engine.py` gegen `tetris_engine.js` und so weiter. Breakout und
+Geometry Dash benutzen deshalb reine Integer-Fixed-Point-Physik statt
+Fließkomma, 2048 einen geseedeten Tile-Spawn. Bei Geometry Dash hängt das
+Level nur am Seed, der Score ist die erreichte Distanz.
 
 **Schach** — Spieler gegen Spieler über die Lobby (`/games/chess`): Partie
 erstellen, zweiter Account tritt bei. Kein Replay, sondern direkte Autorität:
@@ -238,7 +238,7 @@ python3 -m venv .venv
 ```
 abw-arcade/
 ├── app.py                  Flask: Hub, Auth, Spiel-APIs, Schach, Admin
-├── engine.py               Tetris-Engine (Server-Replay)
+├── tetris_engine.py        Tetris (Server-Replay)
 ├── snake_engine.py         Snake
 ├── breakout_engine.py      Breakout (Integer-Physik)
 ├── g2048_engine.py         2048 (geseedeter Spawn)

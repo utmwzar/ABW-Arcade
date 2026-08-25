@@ -1,5 +1,5 @@
 """
-Python port of static/engine.js — must produce bit-identical results so the
+Python port of static/tetris_engine.js — must produce bit-identical results so the
 server can replay a recorded game and compute the authoritative score.
 
 The 32-bit integer arithmetic mirrors JavaScript's |0, >>>, ^, | and

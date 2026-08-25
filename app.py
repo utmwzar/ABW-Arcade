@@ -7,7 +7,7 @@ Scores are server-authoritative: the client never submits a score. Instead it
 asks the server to /api/game/start (which issues a random seed + a single-use
 game id), plays a fully deterministic game while recording every input, and on
 game over posts seed-id + the input log to /api/game/finish. The server then
-REPLAYS the identical game in engine.py and computes the score itself. Faking a
+REPLAYS the identical game in tetris_engine.py and computes the score itself. Faking a
 score therefore requires submitting an input log that genuinely reaches it.
 """
 
@@ -24,7 +24,7 @@ from flask import (
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 
-import engine
+import tetris_engine
 import snake_engine
 import breakout_engine
 import g2048_engine
@@ -534,7 +534,7 @@ def api_game_finish():
             return jsonify({"error": "invalid_input"}), 400
         action = it.get("action")
         tick = it.get("tick")
-        if action not in engine.ACTIONS:
+        if action not in tetris_engine.ACTIONS:
             return jsonify({"error": "invalid_input"}), 400
         if isinstance(tick, bool) or not isinstance(tick, int) or tick < 0 or tick > MAX_TICK:
             return jsonify({"error": "invalid_input"}), 400
@@ -552,7 +552,7 @@ def api_game_finish():
         return jsonify({"error": "already_finished"}), 409
 
     # The server replays the deterministic game and trusts only its own result.
-    result = engine.simulate(game["seed"], clean)
+    result = tetris_engine.simulate(game["seed"], clean)
     score, lines, level = int(result["score"]), int(result["lines"]), int(result["level"])
 
     db.execute("UPDATE games SET status = 'finished' WHERE id = ?", (game_id,))

@@ -1,12 +1,12 @@
 /*
  * Tetris frontend.
- * All game RULES live in engine.js (shared with the server). This file only
+ * All game RULES live in tetris_engine.js (shared with the server). This file only
  * does rendering, input and the fixed-timestep loop, and it RECORDS every
  * input as { tick, action }. On game over it posts the recorded log to the
  * server, which replays it and computes the authoritative score. The client
  * never sends a score.
  *
- * The loop must match engine.simulate() exactly: for each tick we first apply
+ * The loop must match tetris_engine.simulate() exactly: for each tick we first apply
  * the inputs recorded at that tick, then one gravityStep, then advance.
  */
 (() => {
@@ -128,7 +128,7 @@
     overlay.classList.remove("hidden");
   }
 
-  // ---------- loop (mirrors engine.simulate tick order) ----------
+  // ---------- loop (mirrors tetris_engine.simulate tick order) ----------
   function stepTick() {
     if (pending.length) {
       for (let i = 0; i < pending.length; i++) {
