@@ -19,6 +19,21 @@
 *       -text
 *.sh    text eol=lf
 
+# Dasselbe Problem andersherum: cmd.exe liest Batch-Dateien mit LF-Enden
+# unzuverlaessig (Sprungmarken und Klammerbloecke brechen still), und
+# PowerShell-Skripte sollen sich im Windows-Editor ordentlich oeffnen.
+# Gilt auch beim Packen: git archive schreibt sie mit CRLF ins tar.gz und
+# ins zip, egal auf welchem System das Paket gebaut wird.
+*.cmd      text eol=crlf
+*.bat      text eol=crlf
+*.ps1      text eol=crlf
+# Doppelklick-Skripte fuer den macOS-Finder sind Shell-Skripte: LF.
+*.command  text eol=lf
+
+# Ausdruecklich binaer: keine Umwandlung, kein Text-Diff, kein Merge.
+*.wad      binary
+*.wasm     binary
+
 # Nicht ins Verteilpaket (git archive) — sie gehoeren zur Entwicklung,
 # nicht zur Installation.
 .gitattributes  export-ignore
