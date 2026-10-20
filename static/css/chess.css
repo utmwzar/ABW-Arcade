@@ -51,8 +51,10 @@
   .coord.file { right: calc((7 - var(--i)) * 12.5% + 2px); bottom: 1px; }
   .pc { padding: 1.1%; }
 }
-.coord.on-light { color: #5d4f9a; }
-.coord.on-dark { color: #f1edff; }
+/* Tinte aus dem Nachtviolett: auf hellen Feldern 5,9 : 1, auf dunklen 5,0 : 1
+   (helle Schrift erreicht auf dem mittleren Lavendel höchstens 3,6 : 1) */
+.coord.on-light { color: var(--line-strong); }
+.coord.on-dark { color: var(--bg-raised); }
 .board.no-coords .coord { display: none; }
 
 .sq.last { box-shadow: inset 0 0 0 100vmax rgb(44 207 227 / 0.3); }
