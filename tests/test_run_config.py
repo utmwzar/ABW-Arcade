@@ -223,6 +223,17 @@ class ServeTest(unittest.TestCase):
                                     encoding="utf-8", errors="replace", timeout=60)
             self.assertEqual(second.returncode, 78, second.stdout)
             self.assertIn("belegt oder reserviert", second.stdout)
+            # Auch ein fremdes Programm mit SO_REUSEADDR - so bindet waitress
+            # selbst - kommt nicht dazwischen. Unter Windows haelt das nur,
+            # solange der Socket des Servers exklusiv bleibt, auch nachdem
+            # waitress auf ihm noch SO_REUSEADDR zu setzen versucht hat.
+            intruder = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                intruder.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                with self.assertRaises(OSError):
+                    intruder.bind(("127.0.0.1", port))
+            finally:
+                intruder.close()
             # Der erste laeuft unbeirrt weiter.
             self.assertEqual(self.get_json(port), {"ok": True})
         finally:
