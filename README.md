@@ -1,7 +1,7 @@
 # ABW Arcade
 
 Selbstgehostete Spiele-Website für den Homelab-Container. Ein Account, sieben
-Spiele, server-geprüfte Bestenlisten.
+Spiele, server-geprüfte Leaderboards.
 
 **Tetris · Snake · Breakout · 2048 · Geometry Dash · Schach · DOOM**
 
@@ -126,7 +126,7 @@ prüfen sie, ob die Seite antwortet und JavaScript richtig ausliefert.
 | | Linux | macOS | Windows |
 |---|---|---|---|
 | Programm | `/opt/arcade` | `/opt/arcade` | `C:\ProgramData\ABW-Arcade` |
-| Accounts, Punktestände | `/opt/arcade` | `/opt/arcade/data` | `C:\ProgramData\ABW-Arcade\data` |
+| Accounts, Scores | `/opt/arcade` | `/opt/arcade/data` | `C:\ProgramData\ABW-Arcade\data` |
 | Dienst | `arcade.service` (systemd) | LaunchDaemon `io.github.utmwzar.abw-arcade` | Windows-Dienst „ABW Arcade“ (`abw-arcade`, über [WinSW](https://github.com/winsw/winsw)) |
 | Konto | `arcade` | `_arcade` (versteckt) | `NT SERVICE\abw-arcade` |
 | Logs | `journalctl -u arcade` | `/opt/arcade/logs/arcade.log` | `C:\ProgramData\ABW-Arcade\logs` |
@@ -136,7 +136,7 @@ Unter Linux installiert `install.sh` dazu `python3`, `python3-venv` und
 Programmordner nur lesen; schreiben kann es nur in `data` und `logs`.
 
 Die Datenbank `arcade.db` entsteht beim ersten Start leer. Es werden nie
-Accounts oder Punktestände mitgeliefert.
+Accounts oder Scores mitgeliefert.
 
 Zum Schluss meldet das Skript, welcher Stand installiert wurde. Dieselbe
 Angabe liegt danach in `PAKET-INFO` im Programmordner — damit lässt sich auf
@@ -185,7 +185,7 @@ Neues Paket holen, entpacken und das Skript erneut starten — derselbe Ablauf
 wie bei der Installation. Die Skripte sind idempotent und lassen sich
 beliebig oft ausführen.
 
-**Port, Accounts und Bestenlisten bleiben erhalten.** Ohne `--port` bzw.
+**Port, Accounts und Leaderboards bleiben erhalten.** Ohne `--port` bzw.
 `-Port` gilt der Port aus `arcade.conf`. Bei Linux-Installationen von vor
 `arcade.conf` übernimmt `install.sh` ihn aus der bisherigen Dienstdatei.
 
@@ -193,7 +193,7 @@ Unangetastet bleiben:
 
 | | |
 |---|---|
-| `arcade.db` | Accounts, Punktestände, Elo, laufende Partien |
+| `arcade.db` | Accounts, Scores, Elo, laufende Partien |
 | `secret_key` | Sitzungsschlüssel; ohne ihn müssen sich alle neu anmelden |
 | `arcade.conf` | Port, Threads, Datenordner |
 | `static/doom/doom1.wad`, `doom2.wad` | selbst hinterlegte DOOM-Daten, in jeder Schreibweise (`DOOM1.WAD`) |
@@ -206,7 +206,7 @@ kopieren damit.
 
 ### Zurücksetzen
 
-Sollen Accounts und Punktestände verschwinden, den Dienst anhalten, beide
+Sollen Accounts und Scores verschwinden, den Dienst anhalten, beide
 Dateien löschen und den Dienst wieder starten. Beides entsteht beim nächsten
 Start neu und leer.
 
@@ -237,7 +237,7 @@ spätere Neuinstallation liegen. `install.cmd -Uninstall -RemoveData` entfernt
 alles.
 
 Unter Linux und macOS geht es von Hand; dabei verschwinden auch alle
-Accounts und Punktestände:
+Accounts und Scores:
 
 ```bash
 # Linux
@@ -258,7 +258,7 @@ sudo dscl . -delete /Groups/_arcade
 ### Umstieg von einer älteren `tetris`-Installation
 
 Ältere Stände liefen unter `/opt/tetris` mit dem Dienst `tetris.service`.
-Accounts und Punktestände werden dabei **nicht** übernommen:
+Accounts und Scores werden dabei **nicht** übernommen:
 
 ```bash
 sudo systemctl disable --now tetris.service 2>/dev/null
@@ -336,10 +336,10 @@ Werkstatt.
 
 ## Die Spiele & wie sie funktionieren
 
-### Bestenlisten ohne Vertrauen in den Browser
+### Leaderboards ohne Vertrauen in den Browser
 
 Bei **Tetris, Snake, Breakout, 2048 und Geometry Dash** schickt der Client
-nie einen Punktestand. Stattdessen:
+nie einen Score. Stattdessen:
 
 1. Der Server vergibt pro Partie einen Zufalls-Seed und eine einmalige
    `game_id`.
@@ -347,9 +347,9 @@ nie einen Punktestand. Stattdessen:
    zeichnet nur die Eingaben auf (`{tick, action}`).
 3. Nach Spielende schickt er Seed, `game_id` und das Eingabeprotokoll.
 4. Der Server **spielt die Partie mit derselben Engine nach** und rechnet den
-   Punktestand selbst aus.
+   Score selbst aus.
 
-Einen Punktestand zu fälschen hieße damit, ein Eingabeprotokoll einzureichen,
+Einen Score zu fälschen hieße damit, ein Eingabeprotokoll einzureichen,
 das ihn tatsächlich erreicht — man müsste also wirklich so gut spielen oder
 einen Bot schreiben, der es tut.
 
@@ -357,10 +357,16 @@ Damit das aufgeht, müssen die Engines paarweise exakt gleich rechnen:
 `tetris_engine.py` gegen `static/tetris_engine.js` und so weiter. Breakout
 und Geometry Dash benutzen deshalb reine Integer-Fixed-Point-Physik statt
 Fließkomma, 2048 einen geseedeten Tile-Spawn. Bei Geometry Dash hängt das
-Level allein am Seed; der Punktestand ist die erreichte Distanz.
+Level allein am Seed; der Score ist die erreichte Distance.
 
 Dass die Paare übereinstimmen, ist nicht bloß behauptet, sondern geprüft —
 siehe [Gleichlauf der Engines](#gleichlauf-der-engines-prüfen).
+
+Touch-Gesten und die Effekte im Spielfeld ändern daran nichts. Eine Geste
+erzeugt dieselben Aktionen wie die Tasten und wird genauso aufgezeichnet
+(`static/js/touch.js`). Die Effekte lesen die Engine nur und haben eine
+eigene Uhr (`static/js/observe/`, `static/js/fx-canvas.js`); ein Test spielt
+jedes Spiel mit und ohne sie und verlangt dasselbe Ergebnis.
 
 ### Schach
 
@@ -394,7 +400,7 @@ anfangs aus und lässt sich in den Einstellungen einschalten.
 
 Unter `/admin`, nur für Accounts mit Adminrecht: Dashboard mit Statistik je
 Spiel, Spielerverwaltung (Adminrecht vergeben, Passwort zurücksetzen, Löschen
-mit CASCADE), Verwaltung der Punktestände mit Filter je Spiel und Aufräumen
+mit CASCADE), Verwaltung der Scores mit Filter je Spiel und Aufräumen
 verwaister Replay-Sitzungen.
 
 ---
@@ -416,12 +422,15 @@ oder `ARCADE_PORT` usw.): `.venv/bin/python run.py`.
 
 ```bash
 python -m unittest discover -s tests -t .
+node --test "tests/js/**/*.test.mjs"
 ```
 
-Prüft jede Seite, die Spiel-APIs, die Schachregeln (Perft), die
-Content-Types der statischen Dateien und die Installer-Bausteine
-(`installer/sync.py`, `run.py`). Die CI installiert das Paket außerdem
-als echten Dienst unter Linux, macOS und Windows.
+Der erste Befehl prüft jede Seite, die Spiel-APIs, die Schachregeln (Perft),
+die Content-Types der statischen Dateien und die Installer-Bausteine
+(`installer/sync.py`, `run.py`). Der zweite prüft die Browser-Module ohne
+Browser: Einstellungen, Bewegung, Gesten, Effekte, die Beobachter gegen die
+Engines und das Nachspielen von Schachpartien. Die CI installiert das Paket
+außerdem als echten Dienst unter Linux, macOS und Windows.
 
 ### Gleichlauf der Engines prüfen
 
@@ -436,16 +445,16 @@ Pre-Commit-Hook oder CI.
 
 Der Test erzeugt Eingabeprotokolle, schickt **jedes davon durch beide
 Fassungen** einer Engine und vergleicht die Ergebnisse Feld für Feld. Damit
-ist die Annahme abgesichert, auf der die Bestenlisten beruhen. Laufen die
+ist die Annahme abgesichert, auf der die Leaderboards beruhen. Laufen die
 Fassungen auseinander, meldet sich sonst nichts: Es würden nur stillschweigend
-ehrliche Partien abgelehnt oder falsche Punktestände eingetragen.
+ehrliche Partien abgelehnt oder falsche Scores eingetragen.
 
 **Nach jeder Änderung an einer Engine ausführen**, und zwar an beiden Seiten
 des Paares.
 
 Snake und Tetris bekommen dabei gesteuerte Partien statt Zufallseingaben.
 Zufällig gespielt frisst die Schlange nie und Tetris räumt nie eine Reihe —
-verglichen würden dann lauter Partien mit Punktestand 0, und ausgerechnet die
+verglichen würden dann lauter Partien mit Score 0, und ausgerechnet die
 Punktetabellen blieben ungeprüft. Die Begründung steht ausführlich im Skript.
 
 Deshalb zeigt die Ausgabe je Spiel mit an, wie viele Fälle überhaupt Punkte
@@ -458,17 +467,22 @@ laufen lassen, Abweichung erwarten, Änderung zurücknehmen.
 
 ### Ein neues Spiel ergänzen
 
-1. Eintrag in der `GAMES`-Registry in `app.py` (slug, title, endpoint,
-   status `"live"`)
-2. Route und Template anlegen
-3. Falls es eine Bestenliste geben soll: Punktestände mit demselben `slug` in
-   die Tabelle `scores` schreiben
+1. Eintrag in der `GAMES`-Registry in `app.py`: slug, title, endpoint,
+   status `"live"`, board, dazu die Texte `goal`, `controls` und, wenn es
+   Gesten gibt, `touch`. Hub, Start-Overlay und Steuerung lesen sie nur dort.
+2. Vorschaubild als `templates/thumbs/<slug>.html`.
+3. Route und Template; das Template erbt von `game_base.html` und setzt das
+   Spielfeld mit `game_canvas(breite, höhe)`.
+4. Das Spiel-Skript meldet sich mit `createArcade()` aus `static/js/arcade.js`
+   an; Start, Pause, Spielende und Leaderboard kommen dann von dort.
+5. Falls es ein Leaderboard geben soll: Scores mit demselben `slug` in die
+   Tabelle `scores` schreiben.
 
-Hub, Leaderboard-API und Admin greifen den Eintrag von selbst auf. Auch die
+Leaderboard-API und Admin greifen den Eintrag von selbst auf. Auch die
 Installationsskripte brauchen keine Anpassung, sie kopieren den ganzen
 Ordner.
 
-Soll das Spiel eine server-geprüfte Bestenliste haben, braucht es die Engine
+Soll das Spiel ein server-geprüftes Leaderboard haben, braucht es die Engine
 zweimal — als `<spiel>_engine.py` und `static/<spiel>_engine.js` — und einen
 Eintrag in `pruefe-engines.js`, damit der Gleichlauf mitgeprüft wird.
 

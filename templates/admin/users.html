@@ -2,7 +2,7 @@
 {% block admin %}
 <section class="panel" aria-labelledby="users-title">
   <h2 class="panel-title" id="users-title">Spieler <span class="muted">({{ users|length }})</span></h2>
-  <div class="table-wrap">
+  <div class="table-wrap" tabindex="0" role="group" aria-labelledby="users-title">
     <table class="table">
       <thead>
         <tr>

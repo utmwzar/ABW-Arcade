@@ -38,10 +38,15 @@ export class Board {
     this.grid.className = "board-grid";
     this.grid.setAttribute("role", "grid");
     this.grid.setAttribute("aria-label", "Schachbrett");
+    // Koordinaten als eigene Ebene, nicht in den Feldern: Der Name eines Feldes
+    // ("a8, schwarzer Turm") soll genau das sein, was dort zu lesen ist.
+    this.coords = document.createElement("div");
+    this.coords.className = "board-coords";
+    this.coords.setAttribute("aria-hidden", "true");
     this.layer = document.createElement("div");
     this.layer.className = "board-pieces";
     this.layer.setAttribute("aria-hidden", "true");
-    root.append(this.grid, this.layer);
+    root.append(this.grid, this.coords, this.layer);
 
     this.squares = new Map();
     for (let y = 0; y < 8; y++) {
@@ -83,18 +88,26 @@ export class Board {
 
   layout() {
     this.squares.clear();
+    const shade = (sq) => ((FILES.indexOf(sq[0]) + Number(sq[1])) % 2 === 0 ? "light" : "dark");   // a1 dunkel, h1 hell
     const cells = this.grid.querySelectorAll("[role=gridcell]");
     cells.forEach((el, i) => {
-      const x = i % 8, y = Math.floor(i / 8);
-      const sq = this.at(x, y);
-      const f = FILES.indexOf(sq[0]), r = Number(sq[1]);
-      el.className = `sq ${(f + r) % 2 === 0 ? "light" : "dark"}`;   // a1 dunkel, h1 hell
+      const sq = this.at(i % 8, Math.floor(i / 8));
+      el.className = `sq ${shade(sq)}`;
       el.dataset.sq = sq;
-      el.replaceChildren();
-      if (x === 0) el.append(Object.assign(document.createElement("span"), { className: "coord rank", textContent: sq[1] }));
-      if (y === 7) el.append(Object.assign(document.createElement("span"), { className: "coord file", textContent: sq[0] }));
       this.squares.set(sq, el);
     });
+    // Ziffern am linken Rand, Buchstaben unten; die Farbe passt zum Feld darunter.
+    const coord = (cls, text, sq, i) => {
+      const span = Object.assign(document.createElement("span"), { className: `coord ${cls} on-${shade(sq)}`, textContent: text });
+      span.style.setProperty("--i", i);
+      return span;
+    };
+    const labels = [];
+    for (let i = 0; i < 8; i++) {
+      const left = this.at(0, i), bottom = this.at(i, 7);
+      labels.push(coord("rank", left[1], left, i), coord("file", bottom[0], bottom, i));
+    }
+    this.coords.replaceChildren(...labels);
     for (const [sq, piece] of this.pieces) this.place(piece.el, sq);
     this.syncCursor();
     this.paintMarks();

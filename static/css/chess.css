@@ -38,11 +38,13 @@
 .sq.light { background: var(--board-light); }
 .sq.dark { background: var(--board-dark); }
 .sq:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; z-index: 1; }
-.sq .coord { position: absolute; font: 700 11px/1 var(--font-ui); pointer-events: none; }
-.sq .coord.rank { left: 4px; top: 3px; }
-.sq .coord.file { right: 4px; bottom: 3px; }
-.sq.light .coord { color: #5d4f9a; }
-.sq.dark .coord { color: #f1edff; }
+/* Koordinaten: eigene Ebene über den Feldern (chess-board.js), unter den Figuren */
+.board-coords { position: absolute; inset: 0; pointer-events: none; }
+.board-coords .coord { position: absolute; font: 700 11px/1 var(--font-ui); }
+.coord.rank { left: 4px; top: calc(var(--i) * 12.5% + 3px); }
+.coord.file { right: calc((7 - var(--i)) * 12.5% + 4px); bottom: 3px; }
+.coord.on-light { color: #5d4f9a; }
+.coord.on-dark { color: #f1edff; }
 .board.no-coords .coord { display: none; }
 
 .sq.last { box-shadow: inset 0 0 0 100vmax rgb(44 207 227 / 0.3); }

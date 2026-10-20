@@ -10,7 +10,7 @@
 <div class="admin-cols">
   <section class="panel" aria-labelledby="by-game-title">
     <h2 class="panel-title" id="by-game-title">Leaderboards</h2>
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="group" aria-labelledby="by-game-title">
       <table class="table">
         <thead><tr><th>Spiel</th><th class="num">Scores</th><th class="num">Highscore</th><th>von</th></tr></thead>
         <tbody>
@@ -30,7 +30,7 @@
   <section class="panel" aria-labelledby="latest-title">
     <h2 class="panel-title" id="latest-title">Letzte Scores</h2>
     {% if latest %}
-    <div class="table-wrap">
+    <div class="table-wrap" tabindex="0" role="group" aria-labelledby="latest-title">
       <table class="table">
         <thead><tr><th>Spieler</th><th>Spiel</th><th class="num">Score</th><th>Wann</th></tr></thead>
         <tbody>

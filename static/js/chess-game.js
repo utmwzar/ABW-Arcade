@@ -142,7 +142,8 @@ function renderMoves() {
       b.className = "mv";
       b.dataset.ply = j + 1;
       b.textContent = notation(m, { mate });
-      b.setAttribute("aria-label", `${j % 2 ? "Schwarz" : "Weiß"}: ${spoken(m, { mate })}`);
+      // Der Name beginnt mit dem sichtbaren Text, damit Sprachsteuerung ihn findet.
+      b.setAttribute("aria-label", `${b.textContent}, ${j % 2 ? "Schwarz" : "Weiß"}: ${spoken(m, { mate })}`);
       if (j + 1 === shown) b.setAttribute("aria-current", "step");
       li.append(b);
     }

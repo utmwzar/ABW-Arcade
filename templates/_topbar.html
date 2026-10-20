@@ -11,13 +11,13 @@
         {% if is_admin %}<a href="{{ url_for('admin_dashboard') }}" {% if nav_section == 'admin' %}aria-current="page"{% endif %}>Admin</a>{% endif %}
       </nav>
       <div class="usernav">
-        <span class="who"><span class="avatar" aria-hidden="true">{{ username[:1]|upper }}</span><span><span class="visually-hidden">Angemeldet als </span>{{ username }}</span></span>
-        <button class="btn btn-ghost btn-sm" type="button" data-settings-open aria-haspopup="dialog">
-          <svg class="icon" aria-hidden="true"><use href="#i-gear"/></svg>Einstellungen
+        <span class="who"><span class="avatar" aria-hidden="true">{{ username[:1]|upper }}</span><span class="who-name"><span class="visually-hidden">Angemeldet als </span>{{ username }}</span></span>
+        <button class="btn btn-ghost btn-sm" type="button" data-settings-open aria-haspopup="dialog" title="Einstellungen">
+          <svg class="icon" aria-hidden="true"><use href="#i-gear"/></svg><span class="btn-label">Einstellungen</span>
         </button>
         <form method="post" action="{{ url_for('logout') }}">
-          <button class="btn btn-ghost btn-sm" type="submit">
-            <svg class="icon" aria-hidden="true"><use href="#i-logout"/></svg>Abmelden
+          <button class="btn btn-ghost btn-sm" type="submit" title="Abmelden">
+            <svg class="icon" aria-hidden="true"><use href="#i-logout"/></svg><span class="btn-label">Abmelden</span>
           </button>
         </form>
       </div>

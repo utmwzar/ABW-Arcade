@@ -90,10 +90,22 @@ a:hover { color: var(--accent-hover); }
   background: var(--surface-2); color: var(--accent); font-weight: 800; font-size: var(--fs-sm);
   border: 1px solid var(--line-strong);
 }
+.who-name { max-width: 16ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .usernav form { margin: 0; }
 .btn.menu-btn { display: none; }
 
-@media (max-width: 760px) {
+/* Mittlere Breiten (Tablet quer, kleines Fenster): Einstellungen und Abmelden
+   nur als Symbol; die Beschriftung bleibt für Screenreader und als Tooltip. */
+@media (min-width: 861px) and (max-width: 1080px) {
+  .usernav .btn-label {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip-path: inset(50%); white-space: nowrap;
+  }
+  .usernav .btn { padding-inline: var(--s-2); }
+}
+
+/* Schmal (Handy, Tablet hochkant): alles hinter „Menü“. */
+@media (max-width: 860px) {
   .topbar-inner { height: 56px; gap: var(--s-4); }
   .btn.menu-btn { display: inline-flex; margin-left: auto; }
   .topbar-panel {
@@ -249,7 +261,9 @@ html[data-touch="on"] .controls.controls-touch { display: grid; }
 .flash-ok { background: var(--ok-soft); border-color: rgb(74 208 138 / 0.45); color: #d3f7e2; }
 
 /* ---------- Tabellen ---------- */
-.table-wrap { overflow-x: auto; }
+/* Breite Tabellen scrollen seitlich; per Tab erreichbar, damit das auch mit Pfeiltasten geht. */
+.table-wrap { overflow-x: auto; border-radius: var(--r-sm); }
+.table-wrap:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
 .table th {
   text-align: left; font-weight: 600; color: var(--text-muted);
