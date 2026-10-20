@@ -1,7 +1,14 @@
 # Prüfungen bei jedem Push und Pull Request.
 #
-# checks: Gleichlauf der Engines (Python gegen JavaScript), Python-Tests
-# (Perft, jede Seite rendert, API, statische Dateien) und Shell-Skripte.
+# checks:          Gleichlauf der Engines (Python gegen JavaScript), Python-Tests
+#                  (Perft, jede Seite rendert, API, statische Dateien, Installer),
+#                  Shell-Skripte, install.ps1 parst, Windows-Skripte nur ASCII.
+# unit-matrix:     installer/sync.py und run.py unter Linux, macOS und Windows.
+# package:         baut abw-arcade.tar.gz und abw-arcade.zip und prüft ihren Inhalt.
+# install-linux:   installiert das Release v1.0 mit eigenem Port und aktualisiert
+#                  es auf das neue Paket: Port und Accounts müssen bleiben.
+# install-macos:   echter LaunchDaemon mit dem bash 3.2 von macOS, dazu ein Update.
+# install-windows: echter Windows-Dienst (WinSW), Port-Konflikt, Update, Deinstallation.
 name: CI
 
 on:
@@ -41,3 +48,323 @@ jobs:
 
       - name: Shell-Skripte
         run: shellcheck install.sh paket-bauen.sh
+
+      - name: install.ps1 parst ohne Fehler
+        run: |
+          pwsh -NoProfile -Command '
+            $errors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path install.ps1).Path, [ref]$null, [ref]$errors)
+            foreach ($e in $errors) { "{0}:{1}: {2}" -f $e.Extent.StartLineNumber, $e.Extent.StartColumnNumber, $e.Message }
+            if ($errors.Count -gt 0) { exit 1 }
+            "install.ps1: keine Syntaxfehler"
+          '
+
+      - name: Windows-Skripte nur ASCII
+        # PowerShell 5.1 liest Skripte ohne BOM in der ANSI-Codepage.
+        run: |
+          python - $(git ls-files '*.ps1' '*.cmd' '*.bat') <<'EOF'
+          import sys
+          bad = [p for p in sys.argv[1:] if any(b > 127 for b in open(p, "rb").read())]
+          for p in bad:
+              print("Nicht-ASCII-Zeichen in", p)
+          print("geprueft:", ", ".join(sys.argv[1:]))
+          sys.exit(1 if bad else 0)
+          EOF
+
+  unit-matrix:
+    name: Installer-Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Abhängigkeiten
+        run: python -m pip install -r requirements.txt
+
+      - name: Tests
+        run: python -m unittest tests.test_sync tests.test_run_config tests.test_static -v
+
+  package:
+    name: Paket bauen und prüfen
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # Tags für "git describe" in PAKET-INFO
+
+      - name: Pakete bauen
+        run: ./paket-bauen.sh
+
+      - name: Inhalt prüfen
+        run: |
+          set -euo pipefail
+          tar -tzf abw-arcade.tar.gz | grep -v '/$' | sort > tar.txt
+          unzip -Z1 abw-arcade.zip | grep -v '/$' | sort > zip.txt
+          diff tar.txt zip.txt
+          if grep -E '^abw-arcade/(\.github|\.claude|tests)/|^abw-arcade/(PRODUCT|DESIGN)\.md$' tar.txt; then
+            echo "Entwicklungsdateien im Paket"; exit 1
+          fi
+          for datei in PAKET-INFO run.py install.sh install.cmd install.ps1 installer/sync.py requirements.txt; do
+            grep -qx "abw-arcade/$datei" tar.txt || { echo "$datei fehlt im Paket"; exit 1; }
+          done
+          mkdir aus-tar aus-zip
+          tar -xzf abw-arcade.tar.gz -C aus-tar
+          unzip -q abw-arcade.zip -d aus-zip
+          for d in aus-tar/abw-arcade aus-zip/abw-arcade; do
+            for f in install.cmd install.ps1; do
+              zeilen=$(wc -l < "$d/$f")
+              crlf=$(grep -c $'\r$' "$d/$f" || true)
+              if [ "$zeilen" -eq 0 ] || [ "$zeilen" -ne "$crlf" ]; then
+                echo "$d/$f: nur $crlf von $zeilen Zeilen mit CRLF"; exit 1
+              fi
+            done
+            if grep -q $'\r' "$d/install.sh"; then echo "$d/install.sh enthält CR"; exit 1; fi
+            echo "== $d/PAKET-INFO"; cat "$d/PAKET-INFO"
+          done
+          [ -x aus-tar/abw-arcade/install.sh ] || { echo "install.sh im tar.gz nicht ausführbar"; exit 1; }
+          unzip -Z abw-arcade.zip abw-arcade/install.sh
+          unzip -Z abw-arcade.zip abw-arcade/install.sh | grep -q '^-rwx' || { echo "install.sh im zip ohne -rwx"; exit 1; }
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: abw-arcade-pakete
+          path: |
+            abw-arcade.tar.gz
+            abw-arcade.zip
+          if-no-files-found: error
+
+  install-linux:
+    name: Installation Linux (Update ab v1.0)
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v6
+        with:
+          name: abw-arcade-pakete
+
+      - name: Release v1.0 mit eigenem Port installieren
+        run: |
+          set -euxo pipefail
+          curl -fsSL -o v1.tar.gz https://github.com/utmwzar/ABW-Arcade/releases/download/v1.0/abw-arcade.tar.gz
+          mkdir alt
+          tar -xzf v1.tar.gz -C alt
+          cd alt/abw-arcade
+          sudo env PORT=5077 bash install.sh
+
+      - name: Account auf v1.0 registrieren
+        run: |
+          set -euxo pipefail
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:5077/healthz && break; sleep 1; done
+          code=$(curl -s -o /dev/null -w '%{http_code}' -d 'username=ciuser&password=geheim123&password2=geheim123' http://127.0.0.1:5077/register)
+          test "$code" = 302
+
+      - name: Update auf das neue Paket, ohne Port
+        run: |
+          set -euxo pipefail
+          mkdir neu
+          tar -xzf abw-arcade.tar.gz -C neu
+          cd neu/abw-arcade
+          sudo ./install.sh
+
+      - name: Port, Account und make-admin nach dem Update
+        run: |
+          set -euxo pipefail
+          curl -fsS http://127.0.0.1:5077/healthz
+          sudo grep -qx 'PORT=5077' /opt/arcade/arcade.conf
+          grep -q 'run.py' /etc/systemd/system/arcade.service
+          read -r code url < <(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' -d 'username=ciuser&password=geheim123' http://127.0.0.1:5077/login)
+          test "$code" = 302
+          test "$url" = "http://127.0.0.1:5077/"
+          sudo -u arcade /opt/arcade/.venv/bin/python /opt/arcade/run.py make-admin ciuser
+
+      - name: Eigene WAD übersteht ein weiteres Update
+        run: |
+          set -euxo pipefail
+          echo "eigene WAD" | sudo tee /opt/arcade/static/doom/DOOM1.WAD > /dev/null
+          cd neu/abw-arcade
+          sudo ./install.sh --yes
+          test "$(cat /opt/arcade/static/doom/DOOM1.WAD)" = "eigene WAD"
+          sudo grep -qx 'PORT=5077' /opt/arcade/arcade.conf
+          curl -fsS http://127.0.0.1:5077/healthz
+
+      - name: Logs bei Fehler
+        if: failure()
+        run: |
+          sudo journalctl -u arcade --no-pager -n 200 || true
+          sudo cat /etc/systemd/system/arcade.service /opt/arcade/arcade.conf || true
+
+  install-macos:
+    name: Installation macOS
+    needs: package
+    runs-on: macos-latest
+    steps:
+      - uses: actions/download-artifact@v6
+        with:
+          name: abw-arcade-pakete
+
+      - name: Python von python.org installieren
+        # Der Dienst laeuft als _arcade und darf nicht in /Users lesen; das
+        # Python von setup-python liegt unter /Users/runner.
+        run: |
+          set -euxo pipefail
+          curl -fsSL -o python.pkg https://www.python.org/ftp/python/3.12.10/python-3.12.10-macos11.pkg
+          sudo installer -pkg python.pkg -target /
+          /Library/Frameworks/Python.framework/Versions/3.12/bin/python3 --version
+
+      - name: Installieren (mit /bin/bash 3.2)
+        run: |
+          set -euxo pipefail
+          mkdir neu
+          tar -xzf abw-arcade.tar.gz -C neu
+          cd neu/abw-arcade
+          sudo /bin/bash ./install.sh --port 5051
+
+      - name: Dienst, Account und make-admin
+        run: |
+          set -euxo pipefail
+          curl -fsS http://127.0.0.1:5051/healthz
+          code=$(curl -s -o /dev/null -w '%{http_code}' -d 'username=ciuser&password=geheim123&password2=geheim123' http://127.0.0.1:5051/register)
+          test "$code" = 302
+          sudo -u _arcade /opt/arcade/.venv/bin/python /opt/arcade/run.py make-admin ciuser
+          sudo grep -qx 'PORT=5051' /opt/arcade/arcade.conf
+          dscl . -read /Users/_arcade IsHidden
+          ls -ld /opt/arcade /opt/arcade/data /opt/arcade/logs
+
+      - name: Update ohne Port, eigene WAD in Grossbuchstaben
+        run: |
+          set -euxo pipefail
+          echo "eigene WAD" | sudo tee /opt/arcade/static/doom/DOOM1.WAD > /dev/null
+          cd neu/abw-arcade
+          sudo /bin/bash ./install.sh
+          test "$(sudo cat /opt/arcade/static/doom/DOOM1.WAD)" = "eigene WAD"
+          sudo grep -qx 'PORT=5051' /opt/arcade/arcade.conf
+          curl -fsS http://127.0.0.1:5051/healthz
+          read -r code url < <(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' -d 'username=ciuser&password=geheim123' http://127.0.0.1:5051/login)
+          test "$code" = 302
+
+      - name: Logs sichern
+        if: failure()
+        run: |
+          mkdir -p logs-macos
+          sudo cp -R /opt/arcade/logs/. logs-macos/ || true
+          sudo launchctl print system/io.github.utmwzar.abw-arcade > logs-macos/launchctl.txt 2>&1 || true
+          sudo chown -R "$(id -u)" logs-macos
+          cat logs-macos/* || true
+
+      - uses: actions/upload-artifact@v6
+        if: failure()
+        with:
+          name: logs-macos
+          path: logs-macos
+
+  install-windows:
+    name: Installation Windows
+    needs: package
+    runs-on: windows-latest
+    steps:
+      - uses: actions/download-artifact@v6
+        with:
+          name: abw-arcade-pakete
+
+      - uses: actions/setup-python@v6
+        id: py
+        with:
+          python-version: "3.12"
+
+      - name: Entpacken
+        shell: pwsh
+        run: Expand-Archive -Path abw-arcade.zip -DestinationPath neu
+
+      - name: install.ps1 mit Windows PowerShell 5.1 parsen
+        shell: powershell
+        run: |
+          $errors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path 'neu\abw-arcade\install.ps1').Path, [ref]$null, [ref]$errors)
+          foreach ($e in $errors) { '{0}: {1}' -f $e.Extent.StartLineNumber, $e.Message }
+          if ($errors.Count -gt 0) { exit 1 }
+
+      - name: Installieren
+        shell: cmd
+        run: neu\abw-arcade\install.cmd -NonInteractive -Port 5052 -Python "${{ steps.py.outputs.python-path }}"
+
+      - name: Dienst, Stop/Start und Port-Konflikt
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          function Wait-Ok {
+            for ($i = 0; $i -lt 60; $i++) {
+              try { if ((Invoke-RestMethod -Uri http://127.0.0.1:5052/healthz -TimeoutSec 3).ok) { return } } catch { }
+              Start-Sleep -Seconds 1
+            }
+            throw 'healthz antwortet nicht'
+          }
+          Wait-Ok
+          $svc = Get-CimInstance -ClassName Win32_Service -Filter "Name='abw-arcade'"
+          "Dienstkonto: $($svc.StartName), Start: $($svc.StartMode)"
+          if ($svc.StartName -ne 'NT SERVICE\abw-arcade') { "::warning::Dienst laeuft als $($svc.StartName) statt NT SERVICE\abw-arcade" }
+          if ($svc.StartMode -ne 'Auto') { throw "Startmodus $($svc.StartMode)" }
+          Stop-Service -Name abw-arcade
+          Start-Sleep -Seconds 2
+          if (Get-NetTCPConnection -State Listen -LocalPort 5052 -ErrorAction SilentlyContinue) { throw 'Port 5052 nach Stop-Service noch belegt' }
+          Start-Service -Name abw-arcade
+          Wait-Ok
+          $env:ARCADE_PORT = '5052'
+          & 'C:\ProgramData\ABW-Arcade\.venv\Scripts\python.exe' 'C:\ProgramData\ABW-Arcade\run.py'
+          $code = $LASTEXITCODE
+          Remove-Item Env:ARCADE_PORT
+          if ($code -ne 78) { throw "Zweite Instanz endete mit $code statt 78" }
+          Wait-Ok
+          $reg = curl.exe -s -o NUL -w '%{http_code}' -d 'username=ciuser&password=geheim123&password2=geheim123' http://127.0.0.1:5052/register
+          if ($reg -ne '302') { throw "Registrierung: $reg" }
+          Set-Content -Path 'C:\ProgramData\ABW-Arcade\static\doom\DOOM1.WAD' -Value 'eigene WAD'
+
+      - name: Update ohne Port
+        shell: cmd
+        run: neu\abw-arcade\install.cmd -NonInteractive -Python "${{ steps.py.outputs.python-path }}"
+
+      - name: Port, Account, WAD und make-admin nach dem Update
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if (-not (Invoke-RestMethod -Uri http://127.0.0.1:5052/healthz).ok) { throw 'healthz' }
+          if (-not (Select-String -Path 'C:\ProgramData\ABW-Arcade\arcade.conf' -Pattern '^PORT=5052$' -Quiet)) { throw 'PORT=5052 fehlt in arcade.conf' }
+          if ((Get-Content 'C:\ProgramData\ABW-Arcade\static\doom\DOOM1.WAD') -ne 'eigene WAD') { throw 'DOOM1.WAD verloren' }
+          $login = curl.exe -s -o NUL -w '%{http_code}' -d 'username=ciuser&password=geheim123' http://127.0.0.1:5052/login
+          if ($login -ne '302') { throw "Login: $login" }
+          & 'C:\ProgramData\ABW-Arcade\.venv\Scripts\python.exe' 'C:\ProgramData\ABW-Arcade\run.py' make-admin ciuser
+          if ($LASTEXITCODE -ne 0) { throw "make-admin: $LASTEXITCODE" }
+
+      - name: Deinstallieren, Daten bleiben
+        shell: cmd
+        run: neu\abw-arcade\install.cmd -NonInteractive -Uninstall
+
+      - name: Nach der Deinstallation
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if (Get-Service -Name abw-arcade -ErrorAction SilentlyContinue) { throw 'Dienst noch da' }
+          if (Get-NetFirewallRule -Name 'ABW-Arcade-HTTP' -ErrorAction SilentlyContinue) { throw 'Firewall-Regel noch da' }
+          if (-not (Test-Path 'C:\ProgramData\ABW-Arcade\data\arcade.db')) { throw 'arcade.db fehlt' }
+          if (Test-Path 'C:\ProgramData\ABW-Arcade\run.py') { throw 'Programm noch da' }
+
+      - name: Logs bei Fehler
+        if: failure()
+        shell: pwsh
+        run: |
+          Get-ChildItem 'C:\ProgramData\ABW-Arcade\logs' -ErrorAction SilentlyContinue | ForEach-Object {
+            "===== $($_.FullName)"
+            Get-Content -Path $_.FullName -Tail 100
+          }
+
+      - uses: actions/upload-artifact@v6
+        if: failure()
+        with:
+          name: logs-windows
+          path: C:\ProgramData\ABW-Arcade\logs
