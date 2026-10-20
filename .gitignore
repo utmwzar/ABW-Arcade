@@ -18,5 +18,14 @@ __pycache__/
 # Lokale Claude-Code-Einstellungen (nur fuer diesen Rechner)
 .claude/settings.local.json
 
+# Arbeitsdateien von impeccable (Entwuerfe, Screenshots, Auslosungen).
+# Versioniert werden nur Konfiguration und Oberflaechen-Briefs.
+.impeccable/mocks/
+.impeccable/review/
+.impeccable/questions/
+.impeccable/build/
+.impeccable/live/
+.impeccable/config.local.json
+
 # Gebautes Verteilpaket (entsteht durch paket-bauen.sh)
 abw-arcade.tar.gz

@@ -31,32 +31,21 @@ blockierte Website-Daten, Safari mit vollem Kontingent.
 ## Schlüssel und Schema
 
 - Schlüssel folgen dem Muster `abw.v1.<bereich>.<name>`, zum Beispiel `abw.v1.chess.coords`.
-- Jeder Schlüssel ist in `SCHEMA` in `prefs.js` eingetragen, mit Default und erlaubten Werten.
-  `SCHEMA` ist die **einzige** Liste der gespeicherten Einstellungen; eine weitere Liste gibt es
-  nicht.
-
-```js
-export const SCHEMA = {
-  'ui.motion':      { default: 'system', values: ['system', 'full', 'reduced'] },
-  'ui.touch':       { default: 'auto',   values: ['auto', 'on', 'off'] },
-  'chess.coords':   { default: true,     type: 'boolean' },
-  'chess.hints':    { default: true,     type: 'boolean' },
-  'chess.botLevel': { default: 'medium', values: ['easy', 'medium', 'hard'] },
-  'chess.botColor': { default: 'random', values: ['random', 'w', 'b'] },
-  'doom.sound':     { default: true,     type: 'boolean' },
-  'help.seen':      { default: [],       type: 'slugs' },   // Spiel-Slugs aus der GAMES-Registry
-};
-```
-
-Wer ein neues Feld braucht, ergänzt `SCHEMA` und braucht sonst nichts anzulegen.
+- Jeder Schlüssel ist in `SCHEMA` in `static/js/prefs.js` eingetragen, mit Default und erlaubten
+  Werten. `SCHEMA` ist die **einzige** Liste der gespeicherten Einstellungen: Diesen Skill nicht
+  um eine Kopie der Liste ergänzen, sondern dort nachsehen.
+- Erlaubte Arten: feste Werte (`values: [...]`), `type: 'boolean'` und `type: 'slugs'` (Liste
+  kurzer Kennungen mit Obergrenze `max`).
+- Wer ein neues Feld braucht, ergänzt `SCHEMA` und braucht sonst nichts anzulegen.
 
 ## API von `static/js/prefs.js` (Vertrag)
 
 ```js
-get(key)                 // gespeicherter Wert, wenn gültig; sonst der Default
-set(key, value)          // prüft gegen SCHEMA; Ungültiges wird ignoriert (console.warn)
+get(key)                 // gespeicherter Wert, wenn gültig; sonst der Default (Listen als Kopie)
+set(key, value)          // prüft gegen SCHEMA; Ungültiges wird abgelehnt (false, console.warn)
 reset(key)               // zurück auf den Default
 subscribe(key | '*', (value, key) => {})  // gibt eine Abmeldefunktion zurück
+createPrefs(storage)     // eigene Instanz über einem Storage, für Tests
 ```
 
 ## Pflichten der Implementierung
@@ -78,7 +67,8 @@ subscribe(key | '*', (value, key) => {})  // gibt eine Abmeldefunktion zurück
 
 ## Prüfen
 
-- `node --test`: `prefs.js` gegen eine Fake-Storage-Implementierung. Abgedeckt sind ungültige Werte,
-  ein werfender Storage, das `storage`-Event und Defaults.
+- `node --test "tests/js/**/*.test.mjs"`: `tests/js/prefs.test.mjs` prüft `prefs.js` gegen
+  Fake-Speicher. Abgedeckt sind ungültige Werte, ein werfender und ein voller Storage, das
+  `storage`-Event und Defaults. Ein neues Feld bekommt dort mindestens einen Fall.
 - Playwright mit gesperrtem Storage (`addInitScript`, der den Getter von `localStorage` werfen lässt):
   Alle Seiten müssen ohne Konsolenfehler laufen.

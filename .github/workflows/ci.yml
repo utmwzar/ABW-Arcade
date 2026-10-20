@@ -39,5 +39,8 @@ jobs:
       - name: Python-Tests
         run: python -W error::ResourceWarning -m unittest discover -s tests -t . -v
 
+      - name: JavaScript-Tests
+        run: node --test "tests/js/**/*.test.mjs"
+
       - name: Shell-Skripte
         run: shellcheck install.sh paket-bauen.sh

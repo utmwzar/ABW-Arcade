@@ -53,6 +53,7 @@ rsync -a --delete \
   --exclude='.gitignore' \
   --exclude='.gitattributes' \
   --exclude='.claude/' \
+  --exclude='.impeccable/' \
   --exclude='.github/' \
   --exclude='tests/' \
   --exclude='PRODUCT.md' \

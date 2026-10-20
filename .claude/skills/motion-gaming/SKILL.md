@@ -31,8 +31,8 @@ Einblenden, eigene Ausblend-Animationen und Bewegungen, die man jederzeit unterb
 4. **Bewegung blockiert nie die Eingabe.** Ein neuer Zug oder eine neue Taste bricht die laufende
    Animation ab (`animation.finish()` oder `cancel()`), statt auf sie zu warten.
 5. **Reduzierte Bewegung gilt immer.** `fx.motion()` liefert `'full'`, `'reduced'` oder `'off'`.
-   Grundlage sind die Einstellung in der App (`prefs.get('ui.motion')`) und
-   `prefers-reduced-motion`.
+   Grundlage sind die Einstellung in der App (`prefs.get('ui.motion')`: System, Voll, Reduziert
+   oder Aus) und bei „System“ `prefers-reduced-motion`.
    - Bei `reduced` gibt es kein Wackeln und keine Wege; Ein- und Ausblenden nur über `opacity`.
      Partikel schrumpfen auf etwa 30 %.
    - Bei `off` gibt es keine Animation; der Endzustand wird sofort gesetzt.
@@ -45,11 +45,11 @@ Einblenden, eigene Ausblend-Animationen und Bewegungen, die man jederzeit unterb
 
 Die Werte stehen als CSS-Variablen in `static/css/tokens.css` und als Konstanten in `fx.js`.
 
-| Token | Wert | Wofür |
+| Token (CSS / `fx.DUR`) | Wert | Wofür |
 |---|---|---|
-| `--dur-1` | 120 ms | Hover, Druckfeedback, Ausblenden kleiner Elemente |
-| `--dur-2` | 200 ms | Overlay aus, Panel-Wechsel, Schachzug |
-| `--dur-3` | 320 ms | Overlay ein, Ergebnis-Karte |
+| `--dur-short` / `DUR.short` | 120 ms | Hover, Druckfeedback, Ausblenden kleiner Elemente |
+| `--dur-base` / `DUR.base` | 200 ms | Overlay aus, Panel-Wechsel, Schachzug |
+| `--dur-long` / `DUR.long` | 320 ms | Overlay ein, Ergebnis-Karte |
 | `--ease-out` | `cubic-bezier(.2,.8,.2,1)` | Standard für Einblenden |
 | `--ease-in` | `cubic-bezier(.4,0,1,1)` | Ausblenden |
 | `--ease-spring` | `linear(…)` aus `fx.spring()` | Ergebnis-Karte, Highscore-Badge |
@@ -62,15 +62,18 @@ Die Werte stehen als CSS-Variablen in `static/css/tokens.css` und als Konstanten
 
 ```js
 motion()                                   // 'full' | 'reduced' | 'off'
-animate(el, keyframes, opts)               // Animation | null; respektiert motion()
-enter(el, { from = 'up' | 'scale' | 'fade' } = {})   // Promise; setzt am Ende den Endzustand
-exit(el, { to = 'down' | 'scale' | 'fade' } = {})    // Promise
-stagger(els, (el, i) => Animation|null, { step = 30, max = 6 })
+animate(el, keyframes, opts)               // Animation | null; respektiert motion(), fill: 'backwards'
+enter(el, { from = 'up' | 'scale' | 'fade', delay }) // setzt hidden = false, blendet ein; Promise
+exit(el, { to = 'down' | 'scale' | 'fade' })         // blendet aus, setzt danach hidden = true; Promise
+stagger(els, (el, delay) => Animation|null, { step = 30, max = 6 })
 flip(el, firstRect, { duration, easing })  // FLIP: el ist bereits am Ziel, firstRect = alte Position
 countTo(el, from, to, { ms = 600, format })  // Zahl hochzählen, format = de-DE
-bump(el)  flash(el)  shake(el)             // kurzes Feedback
-spring({ stiffness = 170, damping = 26, mass = 1 })  // { easing: 'linear(…)', duration }
+bump(el)  flash(el)  shake(el)             // kurzes Feedback; flash höchstens 3× pro Sekunde
+spring({ stiffness = 210, damping = 22, mass = 1 })  // { easing: 'linear(…)', duration }
+reduceKeyframes(keyframes)                 // nur opacity, oder null
 ```
+
+Maßgeblich ist der Code in `static/js/fx.js`; die reinen Teile prüft `tests/js/fx.test.mjs`.
 
 ## API von `static/js/fx-canvas.js` (Vertrag)
 

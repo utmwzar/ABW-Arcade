@@ -29,6 +29,7 @@
 # ohne Schraegstrich am Ende, weil "verzeichnis/" in .gitattributes nicht
 # zuverlaessig greift.
 /.claude        export-ignore
+/.impeccable    export-ignore
 /.github        export-ignore
 /tests          export-ignore
 /PRODUCT.md     export-ignore
