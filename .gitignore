@@ -4,6 +4,8 @@ arcade.db-journal
 arcade.db-wal
 arcade.db-shm
 secret_key
+# Einstellungen der Installation (legen die Installer an)
+arcade.conf
 
 # Python virtualenv (created by install.sh)
 .venv/
@@ -27,8 +29,9 @@ __pycache__/
 .impeccable/live/
 .impeccable/config.local.json
 
-# Gebautes Verteilpaket (entsteht durch paket-bauen.sh)
+# Gebaute Verteilpakete (entstehen durch paket-bauen.sh)
 abw-arcade.tar.gz
+abw-arcade.zip
 
 # Arbeitsverzeichnisse von Hintergrund-Agenten (git worktree)
 .claude/worktrees/

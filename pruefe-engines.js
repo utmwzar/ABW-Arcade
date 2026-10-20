@@ -25,7 +25,7 @@
  * Der Zufall ist geseedet. Ein Fehlschlag ist damit wiederholbar, und ein
  * gruener Lauf heisst bei jedem dasselbe.
  *
- * Braucht node und python3, sonst nichts.
+ * Braucht node und python3 (unter Windows den Starter py), sonst nichts.
  */
 "use strict";
 
@@ -303,7 +303,9 @@ function bytecodeVerwerfen() {
 
 /** Alle Faelle in einem Rutsch durch die Python-Fassung schicken. */
 function pythonLauf(faelle) {
-  const python = process.env.PYTHON || "python3";
+  // Unter Windows heisst der Python-Starter "py"; python3 gibt es dort nicht.
+  const windows = process.platform === "win32";
+  const python = process.env.PYTHON || (windows ? "py" : "python3");
   bytecodeVerwerfen();
   const ergebnis = spawnSync(python, ["-B", path.join(HIER, "pruefe_engines.py")], {
     input: JSON.stringify(faelle),
@@ -314,7 +316,9 @@ function pythonLauf(faelle) {
   if (ergebnis.error) {
     throw new Error(
       `${python} liess sich nicht starten: ${ergebnis.error.message}\n` +
-      `Anderer Interpreter: PYTHON=/pfad/zu/python node pruefe-engines.js`
+      "Anderer Interpreter: " + (windows
+        ? '$env:PYTHON = "C:\\Pfad\\zu\\python.exe"; node pruefe-engines.js'
+        : "PYTHON=/pfad/zu/python node pruefe-engines.js")
     );
   }
   if (ergebnis.status !== 0) {
