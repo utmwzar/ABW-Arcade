@@ -184,7 +184,7 @@ jobs:
           curl -fsS http://127.0.0.1:5077/healthz
           sudo grep -qx 'PORT=5077' /opt/arcade/arcade.conf
           grep -q 'run.py' /etc/systemd/system/arcade.service
-          read -r code url < <(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' -d 'username=ciuser&password=geheim123' http://127.0.0.1:5077/login)
+          read -r code url < <(curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' -d 'username=ciuser&password=geheim123' http://127.0.0.1:5077/login)
           test "$code" = 302
           test "$url" = "http://127.0.0.1:5077/"
           sudo -u arcade /opt/arcade/.venv/bin/python /opt/arcade/run.py make-admin ciuser
@@ -251,7 +251,7 @@ jobs:
           test "$(sudo cat /opt/arcade/static/doom/DOOM1.WAD)" = "eigene WAD"
           sudo grep -qx 'PORT=5051' /opt/arcade/arcade.conf
           curl -fsS http://127.0.0.1:5051/healthz
-          read -r code url < <(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' -d 'username=ciuser&password=geheim123' http://127.0.0.1:5051/login)
+          read -r code url < <(curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' -d 'username=ciuser&password=geheim123' http://127.0.0.1:5051/login)
           test "$code" = 302
           test "$url" = "http://127.0.0.1:5051/"
 
