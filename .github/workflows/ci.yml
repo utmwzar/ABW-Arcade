@@ -51,6 +51,7 @@ jobs:
 
       - name: install.ps1 parst ohne Fehler
         run: |
+          # shellcheck disable=SC2016  # $errors gehoert zu PowerShell
           pwsh -NoProfile -Command '
             $errors = $null
             [void][System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path install.ps1).Path, [ref]$null, [ref]$errors)
@@ -62,7 +63,8 @@ jobs:
       - name: Windows-Skripte nur ASCII
         # PowerShell 5.1 liest Skripte ohne BOM in der ANSI-Codepage.
         run: |
-          python - $(git ls-files '*.ps1' '*.cmd' '*.bat') <<'EOF'
+          mapfile -t dateien < <(git ls-files '*.ps1' '*.cmd' '*.bat')
+          python - "${dateien[@]}" <<'EOF'
           import sys
           bad = [p for p in sys.argv[1:] if any(b > 127 for b in open(p, "rb").read())]
           for p in bad:
@@ -161,7 +163,7 @@ jobs:
       - name: Account auf v1.0 registrieren
         run: |
           set -euxo pipefail
-          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:5077/healthz && break; sleep 1; done
+          for _ in $(seq 1 30); do curl -fsS http://127.0.0.1:5077/healthz && break; sleep 1; done
           code=$(curl -s -o /dev/null -w '%{http_code}' -d 'username=ciuser&password=geheim123&password2=geheim123' http://127.0.0.1:5077/register)
           test "$code" = 302
 
@@ -248,13 +250,14 @@ jobs:
           curl -fsS http://127.0.0.1:5051/healthz
           read -r code url < <(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' -d 'username=ciuser&password=geheim123' http://127.0.0.1:5051/login)
           test "$code" = 302
+          test "$url" = "http://127.0.0.1:5051/"
 
       - name: Logs sichern
         if: failure()
         run: |
           mkdir -p logs-macos
           sudo cp -R /opt/arcade/logs/. logs-macos/ || true
-          sudo launchctl print system/io.github.utmwzar.abw-arcade > logs-macos/launchctl.txt 2>&1 || true
+          sudo launchctl print system/io.github.utmwzar.abw-arcade 2>&1 | tee logs-macos/launchctl.txt > /dev/null || true
           sudo chown -R "$(id -u)" logs-macos
           cat logs-macos/* || true
 
