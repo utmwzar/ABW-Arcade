@@ -200,8 +200,10 @@ def bind_socket(host, port):
 
     Unter Windows exklusiv: Dort erlaubt SO_REUSEADDR einem zweiten Prozess,
     denselben Port still mitzubenutzen. SO_EXCLUSIVEADDRUSE verbietet genau
-    das, und zwar auch dann, wenn waitress spaeter noch SO_REUSEADDR setzt
-    (das scheitert dann, und waitress ignoriert den Fehler). Unter Linux und
+    das. waitress versucht auf uebergebenen Sockets zwar noch SO_REUSEADDR
+    zu setzen, aber erst nach dem bind und in try/except (waitress 3.0,
+    BaseWSGIServer.__init__); dass dabei kein fremder Socket dazwischenkommt,
+    prueft tests/test_run_config.py auch unter Windows. Unter Linux und
     macOS ist SO_REUSEADDR richtig: Es erlaubt nur den schnellen Neustart,
     solange alte Verbindungen noch in TIME_WAIT haengen.
     """
