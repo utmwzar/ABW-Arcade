@@ -397,6 +397,9 @@ linux_installieren() {
 
   zusammenfassung "Linux" "arcade.service (systemd), Benutzer arcade" "$APP_DIR (arcade.db, secret_key)"
   bestaetigen
+  if systemd_laeuft; then
+    port_vorab_pruefen "$PORT_WERT"
+  fi
 
   if command -v apt-get >/dev/null 2>&1; then
     info "Pakete installieren (python3, python3-venv, python3-pip) ..."
@@ -419,12 +422,9 @@ linux_installieren() {
     useradd --system --home "$APP_DIR" --shell /usr/sbin/nologin arcade
   fi
 
-  if systemd_laeuft; then
-    port_vorab_pruefen "$PORT_WERT"
-    if systemctl is-active --quiet arcade.service; then
-      info "Dienst anhalten ..."
-      systemctl stop arcade.service
-    fi
+  if systemd_laeuft && systemctl is-active --quiet arcade.service; then
+    info "Dienst anhalten ..."
+    systemctl stop arcade.service
   fi
 
   programm_abgleichen python3
