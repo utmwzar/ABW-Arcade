@@ -34,6 +34,8 @@ function icon(name) {
 const hint = (key) => el("span", { class: "hint" }, key);
 // "Platz 3 von 5" bricht nie um.
 const place = (text) => el("span", { class: "nowrap" }, text);
+// Tasten, mit denen gespielt wird und die sonst die Seite scrollen
+const SCROLL_KEYS = new Set([" ", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]);
 
 function editing(target) {
   return target instanceof Element &&
@@ -468,6 +470,11 @@ export function createArcade(cfg) {
     if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || editing(e.target)) return;
     if (document.querySelector("dialog[open]")) return;
     const k = e.key;
+    // Auch vor und nach dem Run verschieben Spieltasten nie die Seite;
+    // Knöpfe und Links behalten ihre Leertaste.
+    if (SCROLL_KEYS.has(k) && !(e.target instanceof Element && e.target.closest("button, a, summary"))) {
+      e.preventDefault();
+    }
     if (k === "Enter") {
       if (e.repeat) return;
       // Ein fokussierter Knopf oder Link behält seine eigene Bedeutung.

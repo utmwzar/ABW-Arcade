@@ -3,7 +3,7 @@
  * Vorlage: templates/game_base.html. Die Spielfarbe kommt als --game aus der Registry.
  */
 
-.game-page { padding-top: var(--s-6); }
+.game-page { padding-top: var(--s-6); padding-bottom: var(--s-8); }
 .game-shell { width: fit-content; max-width: 100%; margin-inline: auto; }
 
 /* ---------- Anordnung ---------- */
@@ -44,10 +44,11 @@
   overflow: hidden; box-shadow: var(--shadow-2);
 }
 .board-wrap canvas { display: block; max-width: 100%; height: auto; }
-/* Spielfeld (Makro game_canvas): füllt die Fensterhöhe (--board-reserve:
-   Platz für Kopfzeile, Titel und Ränder), wächst aber höchstens auf das
-   1,75-Fache und wird nie breiter als seine Spalte. Die Bildpunkte setzt
-   static/js/canvas.js. */
+/* Spielfeld (Makro game_canvas): füllt die Fensterhöhe, wächst aber höchstens
+   auf das 1,75-Fache und wird nie breiter als seine Spalte. --board-reserve
+   ist alles über und unter dem Feld: Kopfleiste 65, Ränder der Seite 24 + 32,
+   Titelzeile 56, Rahmen 2, dazu etwa 10 px Luft, damit die Seite nie scrollt.
+   Die Bildpunkte setzt static/js/canvas.js. */
 .game-layout { --board-reserve: 190px; --board-min: 220px; }
 .game-canvas {
   aspect-ratio: var(--bw) / var(--bh);
@@ -68,9 +69,9 @@
   .overlay-card { padding: var(--s-4); }
   .overlay-actions .btn-lg { padding-inline: var(--s-3); font-size: var(--fs-md); }
 }
-/* Steht die Steuerung daneben im Panel, zeigt die Startkarte nur Ziel und Knopf. */
-@media (min-width: 1101px) { .overlay-controls { display: none; } }
-@media (min-width: 761px) { .game-layout-wide .overlay-controls { display: none; } }
+/* Steht die Steuerung neben oder unter dem Feld im Panel, zeigt die Startkarte
+   nur Ziel und Knopf. Erst auf dem Handy rückt das Panel unter das Leaderboard. */
+@media (min-width: 761px) { .overlay-controls { display: none; } }
 .overlay-text { display: grid; gap: var(--s-3); color: var(--text-muted); }
 .overlay-text b { color: var(--text); }
 .overlay-text .controls { color: var(--text); font-size: var(--fs-sm); }
@@ -170,8 +171,8 @@
     grid-template-areas:
       "board stats"
       "board extra"
-      "board lb"
-      "board controls";
+      "board controls"
+      "board lb";
     grid-template-rows: auto auto auto 1fr;
   }
 }
