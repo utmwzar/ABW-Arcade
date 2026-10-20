@@ -6,5 +6,5 @@
 {% block board %}<canvas id="board" width="440" height="520"></canvas>{% endblock %}
 {% block scripts %}
 <script src="{{ url_for('static', filename='breakout_engine.js') }}"></script>
-<script src="{{ url_for('static', filename='breakout.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='breakout.js') }}"></script>
 {% endblock %}

@@ -647,10 +647,24 @@ def geometry_dash():
     return render_template("gd.html", game=GAMES_BY_SLUG["geometry-dash"])
 
 
+DOOM_DIR = os.path.join(BASE_DIR, "static", "doom")
+DOOM_WADS = (("doom1.wad", "DOOM"), ("doom2.wad", "DOOM II"))
+
+
+def _doom_wads():
+    """Eigene WADs, die ein Admin in static/doom/ abgelegt hat – in jeder Schreibweise."""
+    try:
+        names = {n.lower(): n for n in os.listdir(DOOM_DIR)}
+    except OSError:
+        return []
+    return [{"wad": key, "file": names[key], "title": title}
+            for key, title in DOOM_WADS if key in names]
+
+
 @app.route("/games/doom")
 @login_required
 def doom():
-    return render_template("doom.html", game=GAMES_BY_SLUG["doom"])
+    return render_template("doom.html", game=GAMES_BY_SLUG["doom"], wads=_doom_wads())
 
 
 # --------------------------------------------------------------------------
@@ -660,7 +674,8 @@ def doom():
 def api_leaderboard():
     db = get_db()
     game = request.args.get("game", "tetris")
-    # Best run per user for this game (score + the lines/level of that run).
+    # Bester Run je Spieler (Score samt Lines/Level dieses Runs); Runs ohne
+    # Punkte kommen nicht ins Leaderboard.
     rows = db.execute(
         """
         SELECT u.username AS username, s.score AS score,
@@ -668,7 +683,7 @@ def api_leaderboard():
         FROM scores s
         JOIN users u ON u.id = s.user_id
         JOIN (SELECT user_id, MAX(score) AS mx FROM scores
-              WHERE game = ? GROUP BY user_id) b
+              WHERE game = ? AND score > 0 GROUP BY user_id) b
           ON b.user_id = s.user_id AND b.mx = s.score
         WHERE s.game = ?
         GROUP BY s.user_id
@@ -680,25 +695,9 @@ def api_leaderboard():
     leaderboard = [dict(r) for r in rows]
 
     me = None
-    uid = session.get("user_id")
-    if uid:
-        u = db.execute("SELECT username FROM users WHERE id = ?", (uid,)).fetchone()
-        best = db.execute(
-            "SELECT MAX(score) AS best FROM scores WHERE user_id = ? AND game = ?",
-            (uid, game),
-        ).fetchone()["best"] or 0
-        rank = None
-        if best > 0:
-            rank = db.execute(
-                """
-                SELECT COUNT(*) + 1 AS rank FROM
-                  (SELECT user_id, MAX(score) AS mx FROM scores
-                   WHERE game = ? GROUP BY user_id)
-                WHERE mx > ?
-                """,
-                (game, best),
-            ).fetchone()["rank"]
-        me = {"username": u["username"] if u else None, "best": best, "rank": rank}
+    user = current_user()
+    if user is not None:
+        me = {"username": user["username"], **_standing(db, user["id"], game)}
 
     return jsonify({"leaderboard": leaderboard, "me": me})
 
@@ -716,6 +715,48 @@ def _claim_finish(db, game_id):
         "UPDATE games SET status = 'finished' WHERE id = ? AND status = 'open'", (game_id,)
     )
     return cur.rowcount == 1
+
+
+def _standing(db, uid, game):
+    """Highscore und Platz eines Spielers in einem Leaderboard samt Zahl der
+    Spieler darin. Runs ohne Punkte zählen nicht."""
+    best = db.execute(
+        "SELECT MAX(score) AS b FROM scores WHERE user_id = ? AND game = ? AND score > 0",
+        (uid, game),
+    ).fetchone()["b"]
+    players = db.execute(
+        "SELECT COUNT(DISTINCT user_id) AS c FROM scores WHERE game = ? AND score > 0", (game,)
+    ).fetchone()["c"]
+    if best is None:
+        return {"best": 0, "rank": None, "players": players}
+    rank = db.execute(
+        """
+        SELECT COUNT(*) + 1 AS r FROM
+          (SELECT MAX(score) AS mx FROM scores WHERE game = ? AND score > 0 GROUP BY user_id)
+        WHERE mx > ?
+        """,
+        (game, best),
+    ).fetchone()["r"]
+    return {"best": best, "rank": rank, "players": players}
+
+
+def _save_score(db, uid, game, game_id, score, lines=0, level=1):
+    """Trägt einen nachgerechneten Score ein – je Spiel genau einmal – und
+    liefert den Stand davor und danach (für „Platz 7 → 5“). None, wenn die
+    Partie schon abgeschlossen war."""
+    if not _claim_finish(db, game_id):
+        db.rollback()
+        return None
+    before = _standing(db, uid, game)
+    db.execute(
+        "INSERT INTO scores (user_id, game, score, lines, level, game_id) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (uid, game, score, lines, level, game_id),
+    )
+    after = _standing(db, uid, game)
+    db.commit()
+    return {**after, "previous_best": before["best"], "previous_rank": before["rank"],
+            "new_best": score > before["best"]}
 
 
 @app.route("/api/game/start", methods=["POST"])
@@ -772,12 +813,14 @@ def api_game_finish():
 
     db = get_db()
     game = db.execute(
-        "SELECT user_id, seed, status FROM games WHERE id = ?", (game_id,)
+        "SELECT user_id, game, seed, status FROM games WHERE id = ?", (game_id,)
     ).fetchone()
     if game is None:
         return jsonify({"error": "unknown_game"}), 404
     if game["user_id"] != uid:
         return jsonify({"error": "forbidden"}), 403
+    if game["game"] != "tetris":
+        return jsonify({"error": "wrong_game"}), 409
     if game["status"] != "open":
         return jsonify({"error": "already_finished"}), 409
 
@@ -785,17 +828,12 @@ def api_game_finish():
     result = tetris_engine.simulate(game["seed"], clean)
     score, lines, level = int(result["score"]), int(result["lines"]), int(result["level"])
 
-    if not _claim_finish(db, game_id):
-        db.rollback()
+    standing = _save_score(db, uid, "tetris", game_id, score, lines=lines, level=level)
+    if standing is None:
         return jsonify({"error": "already_finished"}), 409
-    db.execute(
-        "INSERT INTO scores (user_id, game, score, lines, level, game_id) "
-        "VALUES (?, 'tetris', ?, ?, ?, ?)",
-        (uid, score, lines, level, game_id),
-    )
-    db.commit()
     return jsonify({
         "ok": True,
+        "standing": standing,
         "score": score,
         "lines": lines,
         "level": level,
@@ -875,17 +913,12 @@ def api_snake_finish():
     score = int(result["score"])
     length = int(result["length"])
 
-    if not _claim_finish(db, game_id):
-        db.rollback()
+    standing = _save_score(db, uid, "snake", game_id, score, lines=length)
+    if standing is None:
         return jsonify({"error": "already_finished"}), 409
-    db.execute(
-        "INSERT INTO scores (user_id, game, score, lines, level, game_id) "
-        "VALUES (?, 'snake', ?, ?, 1, ?)",
-        (uid, score, length, game_id),
-    )
-    db.commit()
     return jsonify({
         "ok": True,
+        "standing": standing,
         "score": score,
         "length": length,
         "won": bool(result["won"]),
@@ -965,17 +998,12 @@ def api_breakout_finish():
     score = int(result["score"])
     bricks = int(result["bricks"])
 
-    if not _claim_finish(db, game_id):
-        db.rollback()
+    standing = _save_score(db, uid, "breakout", game_id, score, lines=bricks)
+    if standing is None:
         return jsonify({"error": "already_finished"}), 409
-    db.execute(
-        "INSERT INTO scores (user_id, game, score, lines, level, game_id) "
-        "VALUES (?, 'breakout', ?, ?, 1, ?)",
-        (uid, score, bricks, game_id),
-    )
-    db.commit()
     return jsonify({
         "ok": True,
+        "standing": standing,
         "score": score,
         "bricks": bricks,
         "won": bool(result["won"]),
@@ -1058,17 +1086,12 @@ def api_g2048_finish():
     score = int(result["score"])
     highest = int(result["highest"])
 
-    if not _claim_finish(db, game_id):
-        db.rollback()
+    standing = _save_score(db, uid, "2048", game_id, score, lines=highest)
+    if standing is None:
         return jsonify({"error": "already_finished"}), 409
-    db.execute(
-        "INSERT INTO scores (user_id, game, score, lines, level, game_id) "
-        "VALUES (?, '2048', ?, ?, 1, ?)",
-        (uid, score, highest, game_id),
-    )
-    db.commit()
     return jsonify({
         "ok": True,
+        "standing": standing,
         "score": score,
         "highest": highest,
         "won": bool(result["won"]),
@@ -1153,17 +1176,12 @@ def api_gd_finish():
     result = gd_engine.simulate(game["seed"], clean)
     score = int(result["score"])
 
-    if not _claim_finish(db, game_id):
-        db.rollback()
+    standing = _save_score(db, uid, "geometry-dash", game_id, score)
+    if standing is None:
         return jsonify({"error": "already_finished"}), 409
-    db.execute(
-        "INSERT INTO scores (user_id, game, score, lines, level, game_id) "
-        "VALUES (?, 'geometry-dash', ?, 0, 1, ?)",
-        (uid, score, game_id),
-    )
-    db.commit()
     return jsonify({
         "ok": True,
+        "standing": standing,
         "score": score,
         "won": bool(result["won"]),
         "game_over": bool(result["gameOver"]),

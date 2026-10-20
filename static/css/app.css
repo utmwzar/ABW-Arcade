@@ -157,6 +157,8 @@ a:hover { color: var(--accent-hover); }
   background: rgb(0 0 0 / 0.16); color: inherit;
 }
 .btn-secondary .hint, .btn-ghost .hint { background: var(--bg); color: var(--text-muted); }
+/* Tastenhinweise nur, wo es eine Tastatur gibt */
+@media (hover: none) { .btn .hint { display: none; } }
 
 code {
   font: 600 0.92em/1 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;

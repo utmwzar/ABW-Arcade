@@ -8,5 +8,5 @@
 {% block start_label %}Run starten{% endblock %}
 {% block scripts %}
 <script src="{{ url_for('static', filename='gd_engine.js') }}"></script>
-<script src="{{ url_for('static', filename='gd.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='gd.js') }}"></script>
 {% endblock %}

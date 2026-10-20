@@ -9,6 +9,7 @@ ABW Arcade hat keinen Build-Schritt und kein React. Bewegung entsteht mit der We
 (`element.animate`), CSS-Transitions und zwei Projektmodulen:
 
 - `static/js/fx.js` für DOM-Bewegung (Overlays, Panels, Zahlen, Schachfiguren);
+  die Overlays der Arcade-Spiele steuert `static/js/arcade.js` mit diesen Bausteinen;
 - `static/js/fx-canvas.js` für Effekte im Spielfeld (Partikel, Wackeln, Blitze, Texte).
 
 Die Prinzipien von Framer Motion gelten trotzdem: Federn statt starrer Kurven, gestaffeltes
@@ -101,9 +102,9 @@ fx.busy()  fx.reset()
 
 | Moment | Bewegung |
 |---|---|
-| Overlay erscheint | `enter(card, { from: 'scale' })` 320 ms, Inhalt gestaffelt |
+| Overlay erscheint | Abdunklung blendet ein, die Karte federt herein (`spring()`); weg in 200 ms |
 | Game Over | Spielfeld läuft weiter, bis `fx.busy()` falsch ist; nach etwa 400 ms erscheint das Overlay |
-| Neuer Highscore | Badge mit `spring()`, Score per `countTo` |
+| Neuer Highscore | Score per `countTo`, danach `bump`; goldene Statuszeile unter dem Score (kein Badge über dem Titel) |
 | Leaderboard-Rang neu | Zeile kurz hervorheben (`flash`), keine Sortier-Animation |
 | Schachzug | Figur per `flip` (200 ms); geschlagene Figur blendet aus; Turm bei Rochade mit |
 | Schach | Königsfeld pulsiert einmal, keine Endlosschleife |

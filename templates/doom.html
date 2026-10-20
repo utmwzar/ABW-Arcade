@@ -20,7 +20,10 @@
         <h2 id="doomTitle" class="overlay-title">DOOM</h2>
         <p id="doomText" class="overlay-text">Läuft komplett in deinem Browser. Beim ersten Start lädt er etwa 36&nbsp;MB.</p>
         <div id="wadButtons" class="doom-wads">
-          <button class="btn btn-lg" data-wad="freedoom1.wad">Starten mit FreeDoom</button>
+          <button class="btn btn-lg" type="button" data-wad="freedoom1.wad">Starten mit FreeDoom</button>
+          {% for w in wads %}
+          <button class="btn btn-secondary btn-lg" type="button" data-wad="{{ w.wad }}" data-file="{{ w.file }}">Starten mit {{ w.title }}</button>
+          {% endfor %}
         </div>
         <div id="doomProgressWrap" class="doom-progress-wrap" style="display:none">
           <div id="doomProgress" class="doom-progress"></div>

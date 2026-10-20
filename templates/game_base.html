@@ -18,20 +18,25 @@
 <div class="game-layout {% block layout %}{% endblock %}" style="--game: var(--game-{{ game.slug }})">
   <section class="panel stats" aria-label="Spielstand">
     {% block stats %}{% endblock %}
+    <button class="btn btn-secondary btn-sm stats-pause" type="button" data-pause hidden></button>
   </section>
 
   <section class="board-wrap" aria-label="Spielfeld">
     {% block board %}{% endblock %}
     <div id="overlay" class="overlay">
-      <div class="overlay-card">
+      <div class="overlay-card" role="group" aria-labelledby="overlay-title" tabindex="-1">
         <h2 id="overlay-title" class="overlay-title">BEREIT?</h2>
         <div id="overlay-text" class="overlay-text">
           <p>{{ game.goal }}</p>
           {{ controls(game) }}
         </div>
-        <button id="startBtn" class="btn btn-lg" type="button">{% block start_label %}Spiel starten{% endblock %} <span class="hint">Enter</span></button>
+        <div class="overlay-actions">
+          <button id="startBtn" class="btn btn-lg" type="button" data-label="{% block start_label %}Spiel starten{% endblock %}">{{ self.start_label() }} <span class="hint">Enter</span></button>
+          <button id="overlay-secondary" class="btn btn-secondary btn-lg" type="button" hidden></button>
+        </div>
       </div>
     </div>
+    <p id="arcade-live" class="visually-hidden" aria-live="polite"></p>
   </section>
 
   {% block side_extra %}{% endblock %}

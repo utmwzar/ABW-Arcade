@@ -153,5 +153,28 @@ class AdminClearTest(unittest.TestCase):
         self.assertEqual(count_scores("tetris") + count_scores("breakout"), 0)
 
 
+class DoomWadTest(unittest.TestCase):
+    def test_own_wads_in_any_case_get_a_button(self):
+        import os
+        import tempfile
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as d:
+            open(os.path.join(d, "DOOM1.WAD"), "wb").close()
+            open(os.path.join(d, "readme.txt"), "wb").close()
+            with mock.patch.object(arcade, "DOOM_DIR", d):
+                self.assertEqual(arcade._doom_wads(),
+                                 [{"wad": "doom1.wad", "file": "DOOM1.WAD", "title": "DOOM"}])
+                c = support.client()
+                support.register(c)
+                html = c.get("/games/doom").get_data(as_text=True)
+                self.assertIn('data-file="DOOM1.WAD"', html)
+                self.assertIn("Starten mit DOOM", html)
+
+    def test_missing_folder_means_no_extra_buttons(self):
+        from unittest import mock
+        with mock.patch.object(arcade, "DOOM_DIR", "/gibt/es/nicht"):
+            self.assertEqual(arcade._doom_wads(), [])
+
+
 if __name__ == "__main__":
     unittest.main()

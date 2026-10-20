@@ -6,5 +6,5 @@
 {% block board %}<canvas id="board" width="460" height="460"></canvas>{% endblock %}
 {% block scripts %}
 <script src="{{ url_for('static', filename='g2048_engine.js') }}"></script>
-<script src="{{ url_for('static', filename='g2048.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='g2048.js') }}"></script>
 {% endblock %}
