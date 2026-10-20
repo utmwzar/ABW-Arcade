@@ -27,7 +27,7 @@
         <span class="stat-note">Noch kein Score</span>
         {% elif gm.board == 'elo' and chess.rated %}
         <span class="stat-label">Elo</span>
-        <span class="stat-value">{{ chess.rating|num }}</span>
+        <span class="stat-value stat-elo">{{ chess.rating|num }}</span>
         {% elif gm.board == 'elo' %}
         <span class="stat-note">Noch keine gewertete Partie</span>
         {% else %}
@@ -75,8 +75,8 @@
       <ul class="hub-list">
         {% for game in chess.your_turn[:3] %}
         <li class="hub-row">
-          <span class="hub-row-text"><b>Du bist am Zug</b><span class="muted">gegen {{ game.opponent }}</span></span>
-          <a class="btn btn-sm" href="{{ url_for('chess_game_page', game_id=game.id) }}">Zum Brett</a>
+          <span class="hub-row-text"><b>gegen {{ game.opponent }}</b><span class="tag tag-accent">Du bist am Zug</span></span>
+          <a class="btn btn-secondary btn-sm" href="{{ url_for('chess_game_page', game_id=game.id) }}">Zum Brett</a>
         </li>
         {% endfor %}
         {% for c in chess.challenges %}

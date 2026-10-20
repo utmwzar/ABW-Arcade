@@ -165,8 +165,8 @@ class GamePageTest(unittest.TestCase):
             html = self.c.get(f"/games/{game['slug']}").get_data(as_text=True)
             if game.get("touch"):
                 self.assertIn("controls controls-touch", html, game["slug"])
-                for gesture, does in game["touch"]:
-                    self.assertIn(f'<span class="gesture">{gesture}</span>', html, game["slug"])
+                for parts, does in game["touch"]:
+                    self.assertIn(f'<span class="gesture">{parts[0]}', html, game["slug"])
                     self.assertIn(does, html, game["slug"])
             else:
                 self.assertNotIn("controls-touch", html, game["slug"])

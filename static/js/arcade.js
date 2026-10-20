@@ -3,7 +3,7 @@
 // und Eingaben bleiben im jeweiligen Spiel-Skript; es meldet sich hier mit
 // createArcade() an. Bewegung nach .claude/skills/motion-gaming.
 
-import { animate, countTo, bump, flash, spring, DUR, EASE_IN, EASE_OUT } from "./fx.js";
+import { animate, countTo, bump, flash, enter, spring, DUR, EASE_IN, EASE_OUT } from "./fx.js";
 import { toast } from "./shell.js";
 
 export const fmt = (n) => Number(n || 0).toLocaleString("de-DE");
@@ -32,6 +32,8 @@ function icon(name) {
 }
 
 const hint = (key) => el("span", { class: "hint" }, key);
+// "Platz 3 von 5" bricht nie um.
+const place = (text) => el("span", { class: "nowrap" }, text);
 
 function editing(target) {
   return target instanceof Element &&
@@ -301,6 +303,7 @@ export function createArcade(cfg) {
       payload: { game_id: gameId, inputs: cfg.inputs() },
       title: local.won ? "GESCHAFFT!" : "GAME OVER",
       scoreEl: el("p", { class: "result-score" }, "0"),
+      bestEl: el("p", { class: "result-best", hidden: true }),   // gold, erst wenn der Server einen Highscore bestätigt
       detailEl: el("p", { class: "result-detail" }, local.detail || ""),
       statusEl: el("div", { class: "result-status", role: "status" }),
       retry: false,
@@ -312,7 +315,7 @@ export function createArcade(cfg) {
     const show = () => {
       if (result !== r || r.shown || state !== "over") return;
       r.shown = true;
-      view({ title: r.title, body: [r.scoreEl, r.detailEl, r.statusEl], ...resultActions(r.retry) });
+      view({ title: r.title, body: [r.scoreEl, r.bestEl, r.detailEl, r.statusEl], ...resultActions(r.retry) });
       countTo(r.scoreEl, 0, local.score, { ms: 700, format: fmt }).then(r.countDone);
     };
     if (reveal) reveal.then(show, show); else show();
@@ -327,26 +330,22 @@ export function createArcade(cfg) {
         "Der Server rechnet nach …"));
       return;
     }
+    const verified = line("status-note", "Vom Server nachgerechnet");
     if (kind === "saved") {
       const st = data.standing || {};
-      const lines = [line("status-line status-ok", icon("check"), "Gespeichert, vom Server nachgerechnet")];
-      if (!data.score) {
-        lines.push(line("status-note", "Ohne Punkte kommt das Spiel nicht ins Leaderboard."));
-      } else if (st.new_best && st.previous_rank == null) {
-        lines.push(line("status-line status-gold", icon("trophy"),
-          `Dein erster Highscore · Platz ${st.rank} von ${st.players}`));
-      } else if (st.new_best) {
-        const move = st.previous_rank !== st.rank ? `Platz ${st.previous_rank} → ${st.rank}` : `Platz ${st.rank}`;
-        lines.push(line("status-line status-gold", icon("trophy"), `Neuer Highscore · ${move} von ${st.players}`));
-        lines.push(line("status-note", `Bisher ${fmt(st.previous_best)}`));
-      } else if (st.rank) {
-        lines.push(line("status-note", `Dein Highscore bleibt ${fmt(st.best)} · Platz ${st.rank} von ${st.players}`));
-      }
+      // Ein Textelement neben dem Symbol, sonst verschluckt das Flex-Layout die Leerzeichen.
+      const text = el("span", {}, "Gespeichert");
+      if (data.score && st.rank) text.append(" · ", place(`Platz ${st.rank} von ${st.players}`));
+      const lines = [line("status-line status-ok", icon("check"), text)];
+      if (!data.score) lines.push(line("status-note", "Ohne Punkte kommt das Spiel nicht ins Leaderboard."));
+      else if (st.new_best && st.previous_best > 0) lines.push(line("status-note", `Bisher ${fmt(st.previous_best)}`));
+      else if (!st.new_best && st.best) lines.push(line("status-note", `Dein Highscore bleibt ${fmt(st.best)}`));
+      lines.push(verified);
       s.replaceChildren(...lines);
       return;
     }
     if (kind === "known") {
-      s.replaceChildren(line("status-line status-ok", icon("check"), "Gespeichert, vom Server nachgerechnet"));
+      s.replaceChildren(line("status-line status-ok", icon("check"), "Gespeichert"), verified);
       return;
     }
     const texts = {
@@ -392,9 +391,23 @@ export function createArcade(cfg) {
       const differs = d.score !== r.local.score;
       // Darf nicht vorkommen: Client und Server rechnen mit derselben Engine.
       if (differs) console.warn("Client- und Server-Score weichen ab", { client: r.local.score, server: d.score });
+      // Zweiter Schlag nach dem Hochzählen: Bei einem Highscore wird die Zahl
+      // golden, und die Zeile mit dem Pokal blendet darunter ein.
+      const st = d.standing || {};
+      const best = st.new_best && d.score > 0;
+      if (best) {
+        const moved = st.previous_rank != null && st.previous_rank !== st.rank;
+        r.bestEl.replaceChildren(icon("trophy"), el("span", {},
+          ...(st.previous_rank == null ? ["Dein erster Highscore"]
+            : moved ? ["Neuer Highscore · ", place(`Platz ${st.previous_rank} → ${st.rank}`)]
+            : ["Neuer Highscore"])));
+      }
       r.counted.then(async () => {
         if (differs) await countTo(r.scoreEl, r.local.score, d.score, { ms: 400, format: fmt });
-        if (d.standing && d.standing.new_best && d.score > 0) bump(r.scoreEl);
+        if (!best) return;
+        r.scoreEl.classList.add("is-best");
+        enter(r.bestEl, { from: "up" });
+        bump(r.scoreEl);
       });
       if (cfg.detail) r.detailEl.textContent = cfg.detail(d);
       if (d.won && !r.local.won) {
@@ -402,8 +415,7 @@ export function createArcade(cfg) {
         if (r.shown) ui.title.textContent = r.title;
       }
       status(r, "saved", d);
-      const st = d.standing || {};
-      announce(`${d.won ? "Geschafft" : "Game Over"}. Score ${fmt(d.score)}. Gespeichert` +
+      announce(`${d.won ? "Geschafft" : "Game Over"}. Score ${fmt(d.score)}.${best ? " Neuer Highscore." : ""} Gespeichert` +
         (st.rank ? `, Platz ${st.rank} von ${st.players}.` : "."));
       loadLeaderboard({ highlight: true });
       return;

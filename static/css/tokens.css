@@ -110,5 +110,5 @@
 
   /* Seitenbreite */
   --page-max: 1320px;
-  --gutter: max(16px, env(safe-area-inset-left, 0px));
+  --gutter: max(clamp(16px, 3vw, 40px), env(safe-area-inset-left, 0px));   /* Handy 16 px, Laptop bis 40 px */
 }

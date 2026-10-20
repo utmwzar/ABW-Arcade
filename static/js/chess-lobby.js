@@ -44,10 +44,11 @@ function update(name, data, build) {
 
 function renderActive(list) {
   const sorted = [...list].sort((a, b) => b.your_turn - a.your_turn);
-  $('[data-list="active"]').replaceChildren(...(sorted.length ? sorted.map((g) => row(
+  // Gefüllt ist nur der erste Knopf, und nur wenn du dort am Zug bist.
+  $('[data-list="active"]').replaceChildren(...(sorted.length ? sorted.map((g, i) => row(
     ["gegen ", el("b", {}, g.opponent || "?"), g.your_turn ? [" ", el("span", { class: "tag tag-accent" }, "Du bist am Zug")] : []],
     `${g.moves} ${g.moves === 1 ? "Zug" : "Züge"} · du spielst ${g.you === "w" ? "Weiß" : "Schwarz"}${g.bot ? " · Übung" : ""}`,
-    el("a", { class: `btn btn-sm${g.your_turn ? "" : " btn-secondary"}`, href: `/games/chess/${g.id}` }, "Zum Brett"),
+    el("a", { class: `btn btn-sm${i === 0 && g.your_turn ? "" : " btn-secondary"}`, href: `/games/chess/${g.id}` }, "Zum Brett"),
   )) : [empty("Gerade läuft keine Partie. Fordere jemanden heraus oder spiel gegen den Bot.")]));
 }
 
@@ -56,7 +57,7 @@ function renderOpen(list) {
     ? row("Deine Herausforderung", "wartet auf einen Gegner",
       el("button", { class: "btn btn-secondary btn-sm", type: "button", "data-cancel": g.id }, "Zurückziehen"))
     : row(el("b", {}, g.creator), "sucht einen Gegner",
-      el("button", { class: "btn btn-sm", type: "button", "data-join": g.id }, "Beitreten")),
+      el("button", { class: "btn btn-secondary btn-sm", type: "button", "data-join": g.id }, "Beitreten")),
   ) : [empty("Keine offene Herausforderung. Mit „Neue Herausforderung“ wartest du auf einen Gegner.")]));
 }
 
@@ -72,7 +73,7 @@ function renderFinished(list) {
 function renderMe(me) {
   const games = me.wins + me.draws + me.losses;
   $("[data-me-stats]").replaceChildren(...(games
-    ? [el("b", {}, fmt(me.rating)), el("span", { class: "muted" },
+    ? [el("span", { class: "elo-label" }, "Elo"), el("b", {}, fmt(me.rating)), el("span", { class: "muted" },
       `${me.wins} ${me.wins === 1 ? "Sieg" : "Siege"} · ${me.draws} Remis · ${me.losses} ${me.losses === 1 ? "Niederlage" : "Niederlagen"}`)]
     : [el("span", { class: "muted" }, `Noch keine gewertete Partie. Du startest mit Elo ${fmt(me.rating)}.`)]));
 }

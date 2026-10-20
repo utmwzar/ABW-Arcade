@@ -31,8 +31,11 @@
   grid-template-areas:
     "board board    board"
     "stats controls lb";
-  max-width: 940px; margin-inline: auto;
 }
+/* Die Hülle ist so breit wie das Feld, damit die Titelzeile mit ihm beginnt. */
+.game-shell.is-wide { width: min(1140px, 100%); }
+.game-layout-wide > .board-wrap { justify-self: stretch; }
+.game-layout-wide .game-canvas { width: 100%; }
 
 /* ---------- Spielfeld ---------- */
 .board-wrap {
@@ -41,13 +44,14 @@
   overflow: hidden; box-shadow: var(--shadow-2);
 }
 .board-wrap canvas { display: block; max-width: 100%; height: auto; }
-/* Spielfeld (Makro game_canvas): so groß wie vorgesehen, aber nie höher als
-   das Fenster (--board-reserve: Platz für Kopfzeile, Titel, Werte und Ränder)
-   und nie breiter als die Spalte. Die Bildpunkte setzt static/js/canvas.js. */
+/* Spielfeld (Makro game_canvas): füllt die Fensterhöhe (--board-reserve:
+   Platz für Kopfzeile, Titel und Ränder), wächst aber höchstens auf das
+   1,75-Fache und wird nie breiter als seine Spalte. Die Bildpunkte setzt
+   static/js/canvas.js. */
 .game-layout { --board-reserve: 190px; --board-min: 220px; }
 .game-canvas {
   aspect-ratio: var(--bw) / var(--bh);
-  width: min(calc(var(--bw) * 1px), max(var(--board-min), calc((100dvh - var(--board-reserve)) * var(--bw) / var(--bh))));
+  width: max(var(--board-min), min(calc(var(--bw) * 1.75px), calc((100dvh - var(--board-reserve)) * var(--bw) / var(--bh))));
   -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
 }
 
@@ -57,20 +61,26 @@
   background: rgb(8 6 18 / 0.72);
 }
 .overlay.is-leaving { pointer-events: none; }   /* beim Ausblenden gehört der Finger schon dem Feld */
-/* Schmales Feld (Tetris im kleinen Fenster): weniger Rand, Knöpfe ohne Tastenhinweis.
+/* Schmales Feld (Tetris im kleinen Fenster): weniger Rand, kleinere Knöpfe.
    Das Overlay ist so breit wie das Feld, nie wie sein Inhalt, und taugt darum als Container. */
 .overlay { container-type: inline-size; }
 @container (max-width: 300px) {
   .overlay-card { padding: var(--s-4); }
-  .overlay-actions .btn .hint { display: none; }
+  .overlay-actions .btn-lg { padding-inline: var(--s-3); font-size: var(--fs-md); }
 }
+/* Steht die Steuerung daneben im Panel, zeigt die Startkarte nur Ziel und Knopf. */
+@media (min-width: 1101px) { .overlay-controls { display: none; } }
+@media (min-width: 761px) { .game-layout-wide .overlay-controls { display: none; } }
 .overlay-text { display: grid; gap: var(--s-3); color: var(--text-muted); }
 .overlay-text b { color: var(--text); }
 .overlay-text .controls { color: var(--text); font-size: var(--fs-sm); }
 .overlay-text .controls-hint { margin-top: 0; }
 
 /* Ergebnis am Spielende: der laute Moment */
-.result-score { font-size: 3.5rem; font-weight: 800; line-height: 1; color: var(--gold); letter-spacing: -0.01em; }
+.result-score { font-size: 3.5rem; font-weight: 800; line-height: 1; color: var(--text); letter-spacing: -0.01em; }
+.result-score.is-best { color: var(--gold); }
+.result-best { display: flex; align-items: center; gap: var(--s-2); color: var(--gold); font-weight: 700; }
+.result-best .icon { width: 18px; height: 18px; flex: none; }
 .result-detail { color: var(--text-muted); font-size: var(--fs-sm); }
 .result-status { display: grid; gap: var(--s-1); padding-top: var(--s-3); border-top: 1px solid var(--line); }
 .status-line { display: flex; align-items: center; gap: var(--s-2); font-weight: 700; font-size: var(--fs-sm); color: var(--text-muted); }
@@ -109,6 +119,7 @@
 .stat-label { font-size: var(--fs-xs); font-weight: 600; color: var(--text-muted); }
 .stat-value { font-size: var(--fs-xl); font-weight: 800; line-height: 1.1; }
 .stat-main .stat-value { font-size: var(--fs-3xl); line-height: 1; }
+.stat-value.stat-gold { color: var(--gold); }
 
 .next-panel canvas { width: 120px; height: 120px; }
 .controls-panel .controls { font-size: var(--fs-sm); }
@@ -119,11 +130,11 @@
   display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: var(--s-2);
   min-height: 36px; padding: var(--s-1) var(--s-2); border-radius: var(--r-sm);
 }
-.lb-list li:nth-child(odd):not(.lb-empty) { background: rgb(255 255 255 / 0.025); }
 .lb-rank { color: var(--text-muted); font-weight: 700; text-align: right; }
 .lb-list li:first-child .lb-rank { color: var(--gold); }
 .lb-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lb-name.is-me { color: var(--accent); font-weight: 700; }
+.lb-list li.is-me { background: var(--accent-soft); }
+.lb-list li.is-me .lb-name { color: var(--accent); font-weight: 700; }
 .lb-score { font-weight: 700; }
 .lb-list .lb-empty { display: block; color: var(--text-muted); padding: var(--s-2) 0; }
 .personal { margin-top: var(--s-3); padding-top: var(--s-3); border-top: 1px solid var(--line); color: var(--text-muted); font-size: var(--fs-sm); }

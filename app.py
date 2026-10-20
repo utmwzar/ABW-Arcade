@@ -76,7 +76,8 @@ MAX_STARTS_PER_HOUR = 200   # per-user rate limit on game starts
 #   goal:     one sentence: what you do in the game (hub, start overlay)
 #   controls: (keys, what they do); "Left/Right/Up/Down" render as arrow keys
 #   hint:     optional extra line under the keyboard controls
-#   touch:    optional (gesture, what it does) for phones and tablets; the
+#   touch:    optional ((gesture, arrows...), what it does) for phones and
+#             tablets; arrows "Left/Right/Up/Down" render as arrow icons. The
 #             gestures themselves live in static/js/touch.js
 # Hub, start overlay and sidebar read these texts only from here.
 # --------------------------------------------------------------------------
@@ -84,7 +85,7 @@ GAMES = [
     {
         "slug": "tetris", "title": "Tetris", "endpoint": "tetris", "status": "live",
         "board": "score",
-        "goal": "Reihen füllen, bevor der Stapel oben ankommt.",
+        "goal": "Reihen füllen und abräumen.",
         "controls": [
             (("Left", "Right"), "bewegen"),
             (("Up",), "drehen"),
@@ -93,66 +94,66 @@ GAMES = [
             (("P",), "Pause"),
         ],
         "touch": [
-            ("Ziehen", "bewegen"),
-            ("Tippen", "drehen"),
-            ("Nach unten ziehen", "schneller fallen"),
-            ("Nach unten wischen", "sofort ablegen"),
+            (("Ziehen", "Left", "Right"), "bewegen"),
+            (("Tippen",), "drehen"),
+            (("Ziehen", "Down"), "schneller fallen"),
+            (("Wischen", "Down"), "sofort ablegen"),
         ],
     },
     {
         "slug": "snake", "title": "Snake", "endpoint": "snake", "status": "live",
         "board": "score",
-        "goal": "Futter einsammeln, länger werden, nirgends anstoßen.",
+        "goal": "Futter sammeln, nicht anstoßen.",
         "controls": [
             (("Up", "Left", "Down", "Right"), "lenken"),
             (("W", "A", "S", "D"), "lenken"),
             (("P",), "Pause"),
         ],
-        "touch": [("Wischen", "lenken, auch mehrmals ohne abzusetzen")],
+        "touch": [(("Wischen",), "lenken")],
     },
     {
         "slug": "breakout", "title": "Breakout", "endpoint": "breakout", "status": "live",
         "board": "score",
-        "goal": "Die Mauer abräumen und den Ball im Spiel halten.",
+        "goal": "Die Mauer abräumen.",
         "controls": [
             (("Left", "Right"), "Paddle bewegen"),
             (("A", "D"), "Paddle bewegen"),
             (("P",), "Pause"),
         ],
-        "touch": [("Finger aufs Feld", "das Paddle folgt ihm")],
+        "touch": [(("Ziehen", "Left", "Right"), "Paddle folgt dem Finger")],
     },
     {
         "slug": "2048", "title": "2048", "endpoint": "game_2048", "status": "live",
         "board": "score",
-        "goal": "Kacheln schieben und gleiche zusammenlegen, bis zur 2048.",
+        "goal": "Kacheln verdoppeln bis zur 2048.",
         "controls": [
             (("Up", "Left", "Down", "Right"), "schieben"),
             (("W", "A", "S", "D"), "schieben"),
             (("R",), "neue Partie"),
         ],
-        "touch": [("Wischen", "schieben")],
+        "touch": [(("Wischen",), "schieben")],
     },
     {
         "slug": "geometry-dash", "title": "Geometry Dash", "endpoint": "geometry_dash",
         "status": "live", "board": "score",
-        "goal": "Im Takt springen und den Stacheln ausweichen.",
+        "goal": "Im Takt über Stacheln springen.",
         "controls": [
             (("Leertaste", "Up", "W"), "springen"),
             (("R",), "neuer Run"),
         ],
         "hint": "Gedrückt halten springt immer wieder. Ein Klick ins Spielfeld springt auch.",
-        "touch": [("Tippen", "springen"), ("Halten", "springt immer wieder")],
+        "touch": [(("Tippen",), "springen"), (("Halten",), "springt immer wieder")],
     },
     {
         "slug": "chess", "title": "Schach", "endpoint": "chess_lobby_page", "status": "live",
         "board": "elo",
-        "goal": "Gegen Kollegen oder den Bot, mit Elo-Rangliste.",
+        "goal": "Gegen Kollegen oder den Bot.",
         "controls": [],
     },
     {
         "slug": "doom", "title": "DOOM", "endpoint": "doom", "status": "live",
         "board": None,
-        "goal": "Der Klassiker von 1993, direkt im Browser.",
+        "goal": "Der Klassiker von 1993.",
         "controls": [
             (("W", "S"), "vor und zurück"),
             (("A", "D"), "seitwärts"),

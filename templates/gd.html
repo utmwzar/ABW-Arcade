@@ -3,7 +3,7 @@
 {% block layout %}game-layout-wide{% endblock %}
 {% block stats %}
 <div class="stat stat-main"><span class="stat-label">Distance</span><span id="score" class="stat-value">0</span></div>
-<div class="stat"><span class="stat-label">Highscore</span><span id="best" class="stat-value">0</span></div>
+<div class="stat"><span class="stat-label">Highscore</span><span id="best" class="stat-value stat-gold">0</span></div>
 {% endblock %}
 {% block board %}{{ game_canvas(900, 280) }}{% endblock %}
 {% block start_label %}Run starten{% endblock %}

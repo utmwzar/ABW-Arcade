@@ -9,7 +9,7 @@
 {% block main_class %}page game-page{% endblock %}
 
 {% block content %}
-<div class="game-shell">
+<div class="game-shell{% if self.layout()|trim %} is-wide{% endif %}">
 <div class="game-head">
   <a class="back-link" href="{{ url_for('index') }}"><svg class="icon icon-back" aria-hidden="true"><use href="#i-chevron"/></svg>Alle Spiele</a>
   <h1 class="page-title">{{ game.title }}</h1>
@@ -28,7 +28,7 @@
         <h2 id="overlay-title" class="overlay-title">BEREIT?</h2>
         <div id="overlay-text" class="overlay-text">
           <p>{{ game.goal }}</p>
-          {{ controls(game) }}
+          <div class="overlay-controls">{{ controls(game) }}</div>
         </div>
         <div class="overlay-actions">
           <button id="startBtn" class="btn btn-lg" type="button" data-label="{% block start_label %}Spiel starten{% endblock %}">{{ self.start_label() }} <span class="hint">Enter</span></button>

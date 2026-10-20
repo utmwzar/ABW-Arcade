@@ -1,6 +1,7 @@
 {# Gemeinsame Bausteine. Einbinden mit {% from "_macros.html" import ... %}. #}
 
 {% set ARROWS = {"Left": "Pfeil links", "Right": "Pfeil rechts", "Up": "Pfeil hoch", "Down": "Pfeil runter"} %}
+{% set TOWARDS = {"Left": "nach links", "Right": "nach rechts", "Up": "nach oben", "Down": "nach unten"} %}
 
 {# Eine Taste als Tastenkappe; Pfeiltasten erscheinen als Pfeil-Symbol. #}
 {% macro key(name) -%}
@@ -24,8 +25,11 @@
 {% if game.hint %}<p class="hint-text controls-hint{{ kbd }}">{{ game.hint }}</p>{% endif %}
 {% if game.touch %}
 <ul class="controls controls-touch">
-  {% for gesture, does in game.touch %}
-  <li><span class="controls-keys"><span class="gesture">{{ gesture }}</span></span><span>{{ does }}</span></li>
+  {% for parts, does in game.touch %}
+  <li><span class="controls-keys"><span class="gesture">{{ parts[0] }}
+    {%- for a in parts[1:] %}<svg class="icon icon-{{ a|lower }}" aria-hidden="true"><use href="#i-up"/></svg>{% endfor -%}
+    {%- if parts|length > 1 %}<span class="visually-hidden"> {% for a in parts[1:] %}{{ TOWARDS[a] }}{% if not loop.last %} oder {% endif %}{% endfor %}</span>{% endif -%}
+  </span></span><span>{{ does }}</span></li>
   {% endfor %}
 </ul>
 {% endif %}

@@ -24,9 +24,14 @@
   transition: transform var(--dur-base) var(--ease-out), border-color var(--dur-short) var(--ease-out),
               box-shadow var(--dur-base) var(--ease-out);
 }
-.capsule:hover {
-  color: var(--text); transform: translateY(-2px);
-  border-color: color-mix(in oklab, var(--game) 55%, var(--line)); box-shadow: var(--shadow-2);
+.capsule:hover { color: var(--text); }   /* gegen die allgemeine Linkfarbe, auch nach einem Tipp */
+/* Anheben und Rahmen nur mit Maus: Auf Touchgeräten bliebe der Hover nach dem Tippen hängen. */
+@media (hover: hover) {
+  .capsule:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--game) 55%, var(--line)); box-shadow: var(--shadow-2);
+  }
+  .capsule:hover .capsule-cta { background: var(--accent-hover); }
 }
 .capsule:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .capsule:active, .capsule.is-pressed { transform: none; border-color: var(--accent); }
@@ -52,6 +57,7 @@
 .capsule-stat { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: var(--s-2); min-width: 0; }
 .stat-label { flex-basis: 100%; font-size: var(--fs-xs); font-weight: 600; color: var(--text-muted); }
 .stat-value { font-size: var(--fs-xl); font-weight: 800; line-height: 1.15; color: var(--gold); }
+.stat-value.stat-elo { color: var(--text); }   /* Gold heißt Highscore */
 .stat-note { font-size: var(--fs-xs); color: var(--text-muted); }
 .capsule-key { flex: none; color: var(--text-muted); }
 
@@ -65,7 +71,6 @@
 .capsule-wide .capsule-foot { flex-wrap: wrap; align-items: center; }
 .capsule-wide .capsule-stat { flex-basis: 100%; margin-bottom: var(--s-2); }
 .capsule-cta { margin-right: auto; }
-.capsule:hover .capsule-cta { background: var(--accent-hover); }
 
 .capsule-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-5); }
 .capsule-grid > li { display: flex; }
@@ -75,7 +80,7 @@
 .hub-panel .panel-title { margin-bottom: 0; }
 .hub-panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3); }
 .hub-elo { color: var(--text-muted); font-size: var(--fs-sm); }
-.hub-elo b { color: var(--gold); font-size: var(--fs-lg); font-weight: 800; }
+.hub-elo b { color: var(--text); font-size: var(--fs-lg); font-weight: 800; }
 .hub-list { display: grid; }
 .hub-row {
   display: flex; align-items: center; justify-content: space-between; gap: var(--s-3);
@@ -86,6 +91,7 @@
 .hub-row.muted { font-size: var(--fs-sm); }
 .hub-row-text { display: grid; gap: 2px; min-width: 0; }
 .hub-row-text .muted { font-size: var(--fs-sm); }
+.hub-row-text .tag { justify-self: start; }
 .hub-game { display: inline-flex; align-items: center; gap: var(--s-2); font-weight: 600; }
 .hub-game::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--game); }
 .hub-score { display: flex; align-items: center; gap: var(--s-2); }

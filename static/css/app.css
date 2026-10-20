@@ -183,7 +183,7 @@ kbd {
   min-width: 26px; height: 26px; padding: 0 var(--s-2);
   font: 700 var(--fs-xs)/1 var(--font-ui); color: var(--text);
   background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: var(--r-sm);
-  box-shadow: 0 2px 0 var(--line-strong);
+  box-shadow: var(--shadow-1);
 }
 
 kbd.key-arrow { padding: 0; }
@@ -207,10 +207,13 @@ html[data-touch="on"] .controls.controls-touch { display: grid; }
   html:not([data-touch="off"]) .has-touch { display: none; }
 }
 .gesture {
-  display: inline-flex; align-items: center; height: 26px; padding: 0 var(--s-3);
+  display: inline-flex; align-items: center; gap: 2px; height: 26px; padding: 0 var(--s-3);
   font: 700 var(--fs-xs)/1 var(--font-ui); color: var(--text); white-space: nowrap;
   background: var(--surface-2); border-radius: var(--r-pill);
 }
+.gesture .icon { width: 13px; height: 13px; stroke-width: 2.4; }
+.gesture .icon:first-of-type { margin-left: var(--s-1); }
+.nowrap { white-space: nowrap; }
 
 /* ---------- Markierungen ---------- */
 .tag {
