@@ -51,6 +51,12 @@ mkdir -p "$APP_DIR"
 rsync -a --delete \
   --exclude='.git/' \
   --exclude='.gitignore' \
+  --exclude='.gitattributes' \
+  --exclude='.claude/' \
+  --exclude='.github/' \
+  --exclude='tests/' \
+  --exclude='PRODUCT.md' \
+  --exclude='DESIGN.md' \
   --exclude='.venv/' \
   --exclude='__pycache__/' \
   --exclude='*.pyc' \

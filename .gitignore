@@ -15,5 +15,8 @@ __pycache__/
 .DS_Store
 *.swp
 
+# Lokale Claude-Code-Einstellungen (nur fuer diesen Rechner)
+.claude/settings.local.json
+
 # Gebautes Verteilpaket (entsteht durch paket-bauen.sh)
 abw-arcade.tar.gz
