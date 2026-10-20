@@ -29,3 +29,6 @@ __pycache__/
 
 # Gebautes Verteilpaket (entsteht durch paket-bauen.sh)
 abw-arcade.tar.gz
+
+# Arbeitsverzeichnisse von Hintergrund-Agenten (git worktree)
+.claude/worktrees/
