@@ -15,6 +15,7 @@ import os
 import json
 import sqlite3
 import secrets
+import mimetypes
 from functools import wraps
 
 import click
@@ -33,8 +34,29 @@ import chess_engine
 import chess_bot
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-DB_PATH = os.path.join(BASE_DIR, "arcade.db")
-SECRET_PATH = os.path.join(BASE_DIR, "secret_key")
+# arcade.db und secret_key liegen standardmäßig im Programmordner, wie bisher.
+# ARCADE_DATA_DIR verlegt beides an einen anderen Ort (Tests, Dienste unter
+# macOS und Windows, bei denen der Code nicht vom Dienstkonto beschreibbar ist).
+DATA_DIR = os.path.abspath(os.environ.get("ARCADE_DATA_DIR") or BASE_DIR)
+os.makedirs(DATA_DIR, exist_ok=True)
+DB_PATH = os.path.join(DATA_DIR, "arcade.db")
+SECRET_PATH = os.path.join(DATA_DIR, "secret_key")
+
+# Windows liest Dateitypen aus der Registry, und dort steht .js mitunter als
+# text/plain. Browser verweigern dann ES-Module, und WebAssembly startet nur
+# über einen langsameren Umweg. Die Typen der ausgelieferten Dateien werden
+# deshalb hier fest eingetragen; add_type überschreibt dabei die Registry.
+for _ext, _type in (
+    (".js", "text/javascript"),
+    (".mjs", "text/javascript"),
+    (".css", "text/css"),
+    (".json", "application/json"),
+    (".svg", "image/svg+xml"),
+    (".wasm", "application/wasm"),
+    (".woff2", "font/woff2"),
+    (".wad", "application/octet-stream"),
+):
+    mimetypes.add_type(_type, _ext)
 
 # Replay limits (bound server work and payload size).
 MAX_INPUTS = 100_000        # max recorded input events per game

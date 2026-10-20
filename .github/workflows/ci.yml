@@ -1,0 +1,43 @@
+# Prüfungen bei jedem Push und Pull Request.
+#
+# checks: Gleichlauf der Engines (Python gegen JavaScript), Python-Tests
+# (Perft, jede Seite rendert, API, statische Dateien) und Shell-Skripte.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Prüfungen (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.13"]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Abhängigkeiten
+        run: python -m pip install -r requirements.txt
+
+      - name: Gleichlauf der Engines
+        run: node pruefe-engines.js
+
+      - name: Python-Tests
+        run: python -W error::ResourceWarning -m unittest discover -s tests -t . -v
+
+      - name: Shell-Skripte
+        run: shellcheck install.sh paket-bauen.sh
