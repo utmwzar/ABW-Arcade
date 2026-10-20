@@ -418,6 +418,14 @@ python3 -m venv .venv
 Oder so, wie der Dienst startet (waitress, Einstellungen aus `arcade.conf`
 oder `ARCADE_PORT` usw.): `.venv/bin/python run.py`.
 
+### Gestaltung und Texte
+
+Tonfall und Begriffe (Score, Leaderboard, Gesten usw.) stehen in
+`PRODUCT.md`, Farben, Schrift, Abstände und Bausteine in `DESIGN.md`. Die
+Werte selbst liegen in `static/css/tokens.css`. Für Bewegung und Effekte gilt
+der Projekt-Skill `.claude/skills/motion-gaming/`, für gespeicherte
+Einstellungen `.claude/skills/local-storage-state/`.
+
 ### Tests
 
 ```bash
