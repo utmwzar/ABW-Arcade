@@ -215,6 +215,12 @@ def init_db() -> None:
     ccols = [r[1] for r in db.execute("PRAGMA table_info(chess_games)").fetchall()]
     if ccols and "bot_level" not in ccols:
         db.execute("ALTER TABLE chess_games ADD COLUMN bot_level TEXT")
+    if ccols and "version" not in ccols:
+        db.execute("ALTER TABLE chess_games ADD COLUMN version INTEGER NOT NULL DEFAULT 0")
+    if ccols and "white_delta" not in ccols:
+        db.execute("ALTER TABLE chess_games ADD COLUMN white_delta INTEGER")
+    if ccols and "black_delta" not in ccols:
+        db.execute("ALTER TABLE chess_games ADD COLUMN black_delta INTEGER")
 
     # Indexes last — now every referenced column is guaranteed to exist.
     db.executescript(
@@ -234,6 +240,9 @@ def init_db() -> None:
             end_reason TEXT,                             -- checkmate|stalemate|resign|draw_agreed|fifty_move|repetition|material
             draw_offer TEXT,                             -- NULL | 'w' | 'b'
             bot_level  TEXT,                             -- NULL = PvP | easy|medium|hard
+            version    INTEGER NOT NULL DEFAULT 0,       -- +1 bei jeder Änderung der Partie
+            white_delta INTEGER,                         -- Elo-Änderung bei Partieende (nur gewertet)
+            black_delta INTEGER,
             created_at TEXT NOT NULL DEFAULT (datetime('now')),
             updated_at TEXT NOT NULL DEFAULT (datetime('now'))
         );
@@ -510,6 +519,18 @@ def api_leaderboard():
 # --------------------------------------------------------------------------
 # Game lifecycle — server-authoritative scoring via replay
 # --------------------------------------------------------------------------
+def _claim_finish(db, game_id):
+    """Markiert eine offene Partie als beendet – genau einmal.
+
+    Kommen zwei Abschlüsse gleichzeitig an (etwa „Erneut senden“ nach einer
+    verlorenen Antwort), gewinnt einer; der andere bekommt 409 statt eines
+    doppelten Scores."""
+    cur = db.execute(
+        "UPDATE games SET status = 'finished' WHERE id = ? AND status = 'open'", (game_id,)
+    )
+    return cur.rowcount == 1
+
+
 @app.route("/api/game/start", methods=["POST"])
 def api_game_start():
     uid = session.get("user_id")
@@ -577,7 +598,9 @@ def api_game_finish():
     result = tetris_engine.simulate(game["seed"], clean)
     score, lines, level = int(result["score"]), int(result["lines"]), int(result["level"])
 
-    db.execute("UPDATE games SET status = 'finished' WHERE id = ?", (game_id,))
+    if not _claim_finish(db, game_id):
+        db.rollback()
+        return jsonify({"error": "already_finished"}), 409
     db.execute(
         "INSERT INTO scores (user_id, game, score, lines, level, game_id) "
         "VALUES (?, 'tetris', ?, ?, ?, ?)",
@@ -665,7 +688,9 @@ def api_snake_finish():
     score = int(result["score"])
     length = int(result["length"])
 
-    db.execute("UPDATE games SET status = 'finished' WHERE id = ?", (game_id,))
+    if not _claim_finish(db, game_id):
+        db.rollback()
+        return jsonify({"error": "already_finished"}), 409
     db.execute(
         "INSERT INTO scores (user_id, game, score, lines, level, game_id) "
         "VALUES (?, 'snake', ?, ?, 1, ?)",
@@ -753,7 +778,9 @@ def api_breakout_finish():
     score = int(result["score"])
     bricks = int(result["bricks"])
 
-    db.execute("UPDATE games SET status = 'finished' WHERE id = ?", (game_id,))
+    if not _claim_finish(db, game_id):
+        db.rollback()
+        return jsonify({"error": "already_finished"}), 409
     db.execute(
         "INSERT INTO scores (user_id, game, score, lines, level, game_id) "
         "VALUES (?, 'breakout', ?, ?, 1, ?)",
@@ -844,7 +871,9 @@ def api_g2048_finish():
     score = int(result["score"])
     highest = int(result["highest"])
 
-    db.execute("UPDATE games SET status = 'finished' WHERE id = ?", (game_id,))
+    if not _claim_finish(db, game_id):
+        db.rollback()
+        return jsonify({"error": "already_finished"}), 409
     db.execute(
         "INSERT INTO scores (user_id, game, score, lines, level, game_id) "
         "VALUES (?, '2048', ?, ?, 1, ?)",
@@ -937,7 +966,9 @@ def api_gd_finish():
     result = gd_engine.simulate(game["seed"], clean)
     score = int(result["score"])
 
-    db.execute("UPDATE games SET status = 'finished' WHERE id = ?", (game_id,))
+    if not _claim_finish(db, game_id):
+        db.rollback()
+        return jsonify({"error": "already_finished"}), 409
     db.execute(
         "INSERT INTO scores (user_id, game, score, lines, level, game_id) "
         "VALUES (?, 'geometry-dash', ?, 0, 1, ?)",
@@ -961,12 +992,25 @@ ELO_START = 1000
 
 
 def _chess_rating_row(db, uid):
+    """Rating-Zeile eines Spielers; legt sie beim ersten gewerteten Ergebnis an."""
     row = db.execute("SELECT * FROM chess_ratings WHERE user_id = ?", (uid,)).fetchone()
     if row is None:
         db.execute("INSERT INTO chess_ratings (user_id, rating) VALUES (?, ?)",
                    (uid, ELO_START))
         row = db.execute("SELECT * FROM chess_ratings WHERE user_id = ?", (uid,)).fetchone()
     return row
+
+
+def _chess_rating(db, uid):
+    """Nur lesen: Wer noch keine gewertete Partie hat, steht bei ELO_START.
+
+    Abfragen dürfen keine Zeilen anlegen – sonst landen Spieler ohne Partie in
+    der Rangliste, und jeder Status-Abruf bräuchte die Schreibsperre."""
+    row = db.execute("SELECT rating, wins, draws, losses FROM chess_ratings WHERE user_id = ?",
+                     (uid,)).fetchone()
+    if row is None:
+        return {"rating": ELO_START, "wins": 0, "draws": 0, "losses": 0}
+    return dict(row)
 
 
 def _chess_apply_result(db, game, result):
@@ -990,6 +1034,9 @@ def _chess_apply_result(db, game, result):
         (new_b, 1 if result == "black" else 0, 1 if result == "draw" else 0,
          1 if result == "white" else 0, game["black_id"]),
     )
+    # Für den Ende-Bildschirm: die Änderung genau dieser Partie.
+    db.execute("UPDATE chess_games SET white_delta = ?, black_delta = ? WHERE id = ?",
+               (new_w - w["rating"], new_b - b["rating"], game["id"]))
 
 
 def _chess_game(db, game_id):
@@ -1017,40 +1064,41 @@ def _bot_color(game):
     return "w" if game["white_id"] is None else "b"
 
 
-def _bot_move_if_due(db, game_id):
-    """If it's the bot's turn in an active bot game: pick + apply its move."""
-    game = _chess_game(db, game_id)
-    if game is None or game["status"] != "active" or not game["bot_level"]:
-        return
-    state = json.loads(game["state"])
-    if state["turn"] != _bot_color(game):
-        return
-    mv = chess_bot.choose_move(state, game["bot_level"])
+def _bot_reply(state, level):
+    """Zug des Bots auf eine Stellung: (neuer Zustand, info) oder None.
+
+    Läuft ohne Datenbankzugriff, damit während des Nachdenkens (bis zu einigen
+    Sekunden auf „schwer“) keine Schreibsperre gehalten wird."""
+    mv = chess_bot.choose_move(state, level)
     if mv is None:
-        return
-    new_state, info = chess_engine.make_move(state, mv[0], mv[1], mv[2])
-    db.execute(
-        "UPDATE chess_games SET state = ?, updated_at = datetime('now') WHERE id = ?",
-        (json.dumps(new_state), game_id),
-    )
-    if info["status"] == "finished":
-        if info["reason"] == "checkmate":
-            result = "white" if info["winner"] == "w" else "black"
-        else:
-            result = "draw"
-        _chess_finish(db, game_id, result, info["reason"])
+        return None
+    return chess_engine.make_move(state, mv[0], mv[1], mv[2])
+
+
+def _result_of(info):
+    if info["reason"] == "checkmate":
+        return "white" if info["winner"] == "w" else "black"
+    return "draw"
 
 
 def _chess_finish(db, game_id, result, reason):
-    db.execute(
+    """Beendet eine aktive Partie genau einmal. False, wenn sie schon beendet war.
+
+    Ohne die Bedingung status = 'active' könnten Aufgabe und Matt (oder zwei
+    Tabs) dieselbe Partie zweimal werten – mit doppelter Elo-Änderung."""
+    cur = db.execute(
         "UPDATE chess_games SET status = 'finished', result = ?, end_reason = ?, "
-        "draw_offer = NULL, updated_at = datetime('now') WHERE id = ?",
+        "draw_offer = NULL, version = version + 1, updated_at = datetime('now') "
+        "WHERE id = ? AND status = 'active'",
         (result, reason, game_id),
     )
+    if cur.rowcount == 0:
+        return False
     game = _chess_game(db, game_id)
     # Bot games are unrated: no Elo, no W/D/L bookkeeping.
     if not game["bot_level"]:
         _chess_apply_result(db, game, result)
+    return True
 
 
 def _chess_state_payload(db, game, uid):
@@ -1060,14 +1108,18 @@ def _chess_state_payload(db, game, uid):
     for col, key in (("white_id", "white"), ("black_id", "black")):
         if game[col]:
             u = db.execute("SELECT username FROM users WHERE id = ?", (game[col],)).fetchone()
-            r = _chess_rating_row(db, game[col])
-            names[key] = {"name": u["username"] if u else "?", "rating": r["rating"]}
+            names[key] = {"name": u["username"] if u else "?",
+                          "rating": _chess_rating(db, game[col])["rating"]}
         elif game["bot_level"]:
             names[key] = {"name": _bot_name(game["bot_level"]), "rating": None, "bot": True}
         else:
             names[key] = None
+    rating_delta = None
+    if game["white_delta"] is not None and game["black_delta"] is not None:
+        rating_delta = {"white": game["white_delta"], "black": game["black_delta"]}
     payload = {
         "game_id": game["id"],
+        "version": game["version"],
         "status": game["status"],
         "bot_level": game["bot_level"],
         "white": names["white"],
@@ -1083,6 +1135,7 @@ def _chess_state_payload(db, game, uid):
         "result": game["result"],
         "end_reason": game["end_reason"],
         "draw_offer": game["draw_offer"],
+        "rating_delta": rating_delta,
         "updated_at": game["updated_at"],
     }
     if game["status"] == "active" and you == state["turn"]:
@@ -1135,14 +1188,18 @@ def api_chess_create():
 
         as_white = bool(secrets.randbits(1)) if color == "random" else (color == "w")
         game_id = secrets.token_urlsafe(12)
+        state = chess_engine.initial_state()
+        if not as_white:
+            # Der Bot hat Weiß und eröffnet sofort – gerechnet vor dem Schreiben.
+            reply = _bot_reply(state, level)
+            if reply is not None:
+                state = reply[0]
         db.execute(
             "INSERT INTO chess_games (id, white_id, black_id, creator_id, status, "
             "state, bot_level) VALUES (?, ?, ?, ?, 'active', ?, ?)",
             (game_id, uid if as_white else None, None if as_white else uid, uid,
-             json.dumps(chess_engine.initial_state()), level),
+             json.dumps(state), level),
         )
-        # If the bot has White it opens immediately.
-        _bot_move_if_due(db, game_id)
         db.commit()
         return jsonify({"ok": True, "game_id": game_id})
 
@@ -1179,13 +1236,13 @@ def api_chess_join(game_id):
     # Atomic claim of the empty seat — protects against double joins.
     if game["white_id"] is None:
         cur = db.execute(
-            "UPDATE chess_games SET white_id = ?, status = 'active', "
+            "UPDATE chess_games SET white_id = ?, status = 'active', version = version + 1, "
             "updated_at = datetime('now') WHERE id = ? AND status = 'waiting'",
             (uid, game_id),
         )
     else:
         cur = db.execute(
-            "UPDATE chess_games SET black_id = ?, status = 'active', "
+            "UPDATE chess_games SET black_id = ?, status = 'active', version = version + 1, "
             "updated_at = datetime('now') WHERE id = ? AND status = 'waiting'",
             (uid, game_id),
         )
@@ -1250,6 +1307,7 @@ def api_chess_lobby():
         """
         SELECT u.username, r.rating, r.wins, r.draws, r.losses
         FROM chess_ratings r JOIN users u ON u.id = r.user_id
+        WHERE r.wins + r.draws + r.losses > 0
         ORDER BY r.rating DESC LIMIT 10
         """
     ).fetchall()
@@ -1275,8 +1333,7 @@ def api_chess_lobby():
         return {"id": g["id"], "opponent": opp, "outcome": outcome,
                 "reason": g["end_reason"]}
 
-    me = _chess_rating_row(db, uid)
-    db.commit()  # in case the rating row was just created
+    me = _chess_rating(db, uid)
     return jsonify({
         "open": [{"id": r["id"], "creator": r["creator"], "mine": r["creator_id"] == uid}
                  for r in open_rows],
@@ -1299,9 +1356,7 @@ def api_chess_state(game_id):
         return jsonify({"error": "unknown_game"}), 404
     if _chess_color_of(game, uid) is None:
         return jsonify({"error": "forbidden"}), 403
-    payload = _chess_state_payload(db, game, uid)
-    db.commit()
-    return jsonify(payload)
+    return jsonify(_chess_state_payload(db, game, uid))
 
 
 @app.route("/api/chess/move/<game_id>", methods=["POST"])
@@ -1325,6 +1380,10 @@ def api_chess_move(game_id):
     if game["status"] != "active":
         return jsonify({"error": "not_active"}), 409
 
+    expected = data.get("expected_version")
+    if expected is not None and expected != game["version"]:
+        return jsonify({"error": "conflict", "state": _chess_state_payload(db, game, uid)}), 409
+
     state = json.loads(game["state"])
     if state["turn"] != you:
         return jsonify({"error": "not_your_turn"}), 409
@@ -1334,20 +1393,28 @@ def api_chess_move(game_id):
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 
-    db.execute(
-        "UPDATE chess_games SET state = ?, draw_offer = NULL, "
-        "updated_at = datetime('now') WHERE id = ?",
-        (json.dumps(new_state), game_id),
+    # Bot-Partien: Der Bot antwortet im selben Request. Er rechnet, bevor
+    # irgendetwas geschrieben wird – so blockiert sein Nachdenken keine
+    # anderen Schreibzugriffe (Scores, andere Partien).
+    if info["status"] != "finished" and game["bot_level"] \
+            and new_state["turn"] == _bot_color(game):
+        reply = _bot_reply(new_state, game["bot_level"])
+        if reply is not None:
+            new_state, info = reply
+
+    # Gespeichert wird nur, wenn seit dem Lesen niemand die Partie verändert
+    # hat (zweiter Tab, Doppelklick, gleichzeitige Aufgabe).
+    cur = db.execute(
+        "UPDATE chess_games SET state = ?, draw_offer = NULL, version = version + 1, "
+        "updated_at = datetime('now') WHERE id = ? AND version = ? AND status = 'active'",
+        (json.dumps(new_state), game_id, game["version"]),
     )
+    if cur.rowcount == 0:
+        db.rollback()
+        game = _chess_game(db, game_id)
+        return jsonify({"error": "conflict", "state": _chess_state_payload(db, game, uid)}), 409
     if info["status"] == "finished":
-        if info["reason"] == "checkmate":
-            result = "white" if info["winner"] == "w" else "black"
-        else:
-            result = "draw"
-        _chess_finish(db, game_id, result, info["reason"])
-    else:
-        # Bot games: the bot replies within the same request.
-        _bot_move_if_due(db, game_id)
+        _chess_finish(db, game_id, _result_of(info), info["reason"])
     db.commit()
     game = _chess_game(db, game_id)
     return jsonify(_chess_state_payload(db, game, uid))
@@ -1367,7 +1434,9 @@ def api_chess_resign(game_id):
         return jsonify({"error": "forbidden"}), 403
     if game["status"] != "active":
         return jsonify({"error": "not_active"}), 409
-    _chess_finish(db, game_id, "black" if you == "w" else "white", "resign")
+    if not _chess_finish(db, game_id, "black" if you == "w" else "white", "resign"):
+        db.rollback()
+        return jsonify({"error": "not_active"}), 409
     db.commit()
     game = _chess_game(db, game_id)
     return jsonify(_chess_state_payload(db, game, uid))
@@ -1396,17 +1465,19 @@ def api_chess_draw(game_id):
     if action == "offer":
         if game["draw_offer"]:
             return jsonify({"error": "offer_pending"}), 409
-        db.execute("UPDATE chess_games SET draw_offer = ?, updated_at = datetime('now') "
-                   "WHERE id = ?", (you, game_id))
+        db.execute("UPDATE chess_games SET draw_offer = ?, version = version + 1, "
+                   "updated_at = datetime('now') WHERE id = ?", (you, game_id))
     elif action == "accept":
         if not game["draw_offer"] or game["draw_offer"] == you:
             return jsonify({"error": "no_offer"}), 409
-        _chess_finish(db, game_id, "draw", "draw_agreed")
+        if not _chess_finish(db, game_id, "draw", "draw_agreed"):
+            db.rollback()
+            return jsonify({"error": "not_active"}), 409
     else:  # decline
         if not game["draw_offer"] or game["draw_offer"] == you:
             return jsonify({"error": "no_offer"}), 409
-        db.execute("UPDATE chess_games SET draw_offer = NULL, updated_at = datetime('now') "
-                   "WHERE id = ?", (game_id,))
+        db.execute("UPDATE chess_games SET draw_offer = NULL, version = version + 1, "
+                   "updated_at = datetime('now') WHERE id = ?", (game_id,))
     db.commit()
     game = _chess_game(db, game_id)
     return jsonify(_chess_state_payload(db, game, uid))
