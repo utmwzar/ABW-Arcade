@@ -47,22 +47,10 @@
   display: grid; place-items: center; padding: var(--s-4);
   background: rgb(8 6 18 / 0.72);
 }
-.overlay-card {
-  width: min(100%, 360px); display: grid; gap: var(--s-4);
-  background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r-lg);
-  padding: var(--s-6); box-shadow: var(--shadow-3);
-  max-height: 100%; overflow: auto;
-}
-/* Die Karte bekommt den Fokus nur, damit Tasten nicht auf einem Knopf landen;
-   bedienbar sind ihre Knöpfe, und die zeigen den Fokus. */
-.overlay-card:focus, .overlay-card:focus-visible { outline: none; }
-.overlay-title { font: var(--pixel-sm)/1.4 var(--font-pixel); color: var(--text); }
 .overlay-text { display: grid; gap: var(--s-3); color: var(--text-muted); }
 .overlay-text b { color: var(--text); }
 .overlay-text .controls { color: var(--text); font-size: var(--fs-sm); }
 .overlay-text .controls-hint { margin-top: 0; }
-.overlay-actions { display: grid; gap: var(--s-2); }
-.overlay-actions .btn { width: 100%; }
 
 /* Ergebnis am Spielende: der laute Moment */
 .result-score { font-size: 3.5rem; font-weight: 800; line-height: 1; color: var(--gold); letter-spacing: -0.01em; }

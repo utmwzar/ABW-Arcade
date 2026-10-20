@@ -301,6 +301,20 @@ kbd .icon { width: 14px; height: 14px; stroke-width: 2.4; }
 .check { display: flex; align-items: center; gap: var(--s-3); cursor: pointer; }
 .check input { width: 20px; height: 20px; accent-color: var(--accent); margin: 0; }
 
+/* ---------- Overlay-Karte (Spiele und Schach) ---------- */
+.overlay-card {
+  width: min(100%, 360px); display: grid; gap: var(--s-4);
+  background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r-lg);
+  padding: var(--s-6); box-shadow: var(--shadow-3);
+  max-height: 100%; overflow: auto;
+}
+/* Die Karte bekommt den Fokus nur, damit Tasten nicht auf einem Knopf landen;
+   bedienbar sind ihre Knöpfe, und die zeigen den Fokus. */
+.overlay-card:focus, .overlay-card:focus-visible { outline: none; }
+.overlay-title { font: var(--pixel-sm)/1.4 var(--font-pixel); color: var(--text); }
+.overlay-actions { display: grid; gap: var(--s-2); }
+.overlay-actions .btn { width: 100%; }
+
 /* ---------- Kurzmeldungen ---------- */
 .toasts {
   position: fixed; left: 50%; bottom: max(var(--s-6), env(safe-area-inset-bottom, 0px));

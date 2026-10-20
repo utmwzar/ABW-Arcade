@@ -52,23 +52,28 @@ if (dialog) {
 }
 
 // ---------- Rückfrage vor endgültigen Aktionen ----------
-// <form data-confirm="Frage" data-confirm-action="Löschen"> fragt erst nach.
 const confirmDialog = document.getElementById("confirm");
-document.addEventListener("submit", (e) => {
+
+// ask("Frage", "Löschen") -> Promise<boolean>
+export function ask(question, action = "Bestätigen") {
+  if (!confirmDialog || typeof confirmDialog.showModal !== "function") {
+    return Promise.resolve(window.confirm(question));
+  }
+  confirmDialog.querySelector("[data-confirm-text]").textContent = question;
+  confirmDialog.querySelector("[data-confirm-ok]").textContent = action;
+  confirmDialog.returnValue = "";
+  return new Promise((resolve) => {
+    confirmDialog.addEventListener("close", () => resolve(confirmDialog.returnValue === "ok"), { once: true });
+    confirmDialog.showModal();
+  });
+}
+
+// <form data-confirm="Frage" data-confirm-action="Löschen"> fragt erst nach.
+document.addEventListener("submit", async (e) => {
   const form = e.target;
   if (!(form instanceof HTMLFormElement) || !form.dataset.confirm) return;
   e.preventDefault();
-  if (!confirmDialog || typeof confirmDialog.showModal !== "function") {
-    if (window.confirm(form.dataset.confirm)) form.submit();
-    return;
-  }
-  confirmDialog.querySelector("[data-confirm-text]").textContent = form.dataset.confirm;
-  confirmDialog.querySelector("[data-confirm-ok]").textContent = form.dataset.confirmAction || "Bestätigen";
-  confirmDialog.returnValue = "";
-  confirmDialog.addEventListener("close", () => {
-    if (confirmDialog.returnValue === "ok") form.submit();
-  }, { once: true });
-  confirmDialog.showModal();
+  if (await ask(form.dataset.confirm, form.dataset.confirmAction)) form.submit();
 });
 
 // ---------- Kurzmeldungen ----------

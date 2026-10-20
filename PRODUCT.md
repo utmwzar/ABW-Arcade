@@ -70,8 +70,9 @@ DOOM läuft komplett im Browser und hat deshalb bewusst kein Leaderboard.
   | Game Over | Spielende durch Niederlage |
   | Pause | angehaltenes Spiel |
 
-- **Für Siege gibt es genau einen Titel:** „Geschafft!“. GEWONNEN!, DURCHGESPIELT! und andere
-  Varianten werden nicht mehr verwendet.
+- **Für Siege in den Arcade-Spielen gibt es genau einen Titel:** „Geschafft!“. GEWONNEN!,
+  DURCHGESPIELT! und andere Varianten werden nicht mehr verwendet. Im Schach endet eine Partie aus
+  deiner Sicht: „Du hast gewonnen“, „Du hast verloren“ oder „Remis“.
 - **Schachbegriffe sind deutsch:** Partie, Zug, Schach, Schachmatt, Patt, Remis, Remis anbieten,
   Aufgeben, Weiß, Schwarz, Bauer, Springer, Läufer, Turm, Dame, König, Elo, Lobby.
 - **Bedienelemente sind deutsch:** Anmelden, Abmelden, Registrieren, Benutzername, Passwort,

@@ -1257,7 +1257,7 @@ def _chess_color_of(game, uid):
 
 
 BOT_LEVELS = ("easy", "medium", "hard")
-BOT_NAME_DE = {"easy": "Bot · leicht", "medium": "Bot · mittel", "hard": "Bot · schwer"}
+BOT_NAME_DE = {"easy": "Bot (leicht)", "medium": "Bot (mittel)", "hard": "Bot (schwer)"}
 MAX_ACTIVE_BOT_GAMES = 3
 
 
