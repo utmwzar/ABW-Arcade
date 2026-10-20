@@ -17,6 +17,8 @@
     try {
       var m = JSON.parse(localStorage.getItem("abw.v1.ui.motion"));
       if (m === "full" || m === "reduced" || m === "off") document.documentElement.dataset.motion = m;
+      var t = JSON.parse(localStorage.getItem("abw.v1.ui.touch"));
+      if (t === "on" || t === "off") document.documentElement.dataset.touch = t;
     } catch (e) {}
   </script>
 </head>

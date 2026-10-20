@@ -52,7 +52,9 @@ function editing(target) {
  *   board(me)    optional: eigener Stand aus dem Leaderboard (best, rank, players)
  * }
  * Das Spiel fragt arcade.state bzw. arcade.running ab und meldet das Ende mit
- * arcade.over({ score, won, detail }).
+ * arcade.over({ score, won, detail }, { reveal }). Das Spiel ist damit sofort
+ * vorbei und wird gespeichert; die Ergebniskarte erscheint, sobald die
+ * Promise reveal erfüllt ist (Effekte im Spielfeld ausgelaufen).
  */
 export function createArcade(cfg) {
   const ui = {
@@ -94,6 +96,7 @@ export function createArcade(cfg) {
     setButton(ui.primary, primary);
     setButton(ui.secondary, secondary);
     if (fade) { fade.cancel(); fade = null; }
+    ui.overlay.classList.remove("is-leaving");
     ui.overlay.hidden = false;
     if (!shown) {
       shown = true;
@@ -112,6 +115,8 @@ export function createArcade(cfg) {
     if (!shown) return;
     shown = false;
     if (document.activeElement && ui.overlay.contains(document.activeElement)) document.activeElement.blur();
+    // Schon beim Ausblenden gehören Finger und Maus dem Spielfeld.
+    ui.overlay.classList.add("is-leaving");
     const a = animate(ui.overlay, [{ opacity: 1 }, { opacity: 0 }],
       { duration: DUR.base, easing: EASE_IN, fill: "forwards" });
     fade = a;
@@ -119,6 +124,7 @@ export function createArcade(cfg) {
       if (fade !== a) return;
       fade = null;
       ui.overlay.hidden = true;
+      ui.overlay.classList.remove("is-leaving");
       if (a) a.cancel();
     };
     if (a) a.finished.then(done, done); else done();
@@ -127,11 +133,18 @@ export function createArcade(cfg) {
   ui.primary.addEventListener("click", () => actions.primary && actions.primary());
   if (ui.secondary) ui.secondary.addEventListener("click", () => actions.secondary && actions.secondary());
 
+  // Knopf im Werte-Panel: Pause, oder bei Spielen ohne Pause (2048) „Neues
+  // Spiel“ mit Rückfrage – so geht beides auch ohne Tastatur.
   function syncPause() {
     if (!ui.pause) return;
-    ui.pause.hidden = !cfg.canPause || !(state === "playing" || state === "paused");
-    ui.pause.replaceChildren(icon(state === "paused" ? "play" : "pause"),
-      state === "paused" ? "Weiter" : "Pause", " ", hint("P"));
+    if (cfg.canPause) {
+      ui.pause.hidden = !(state === "playing" || state === "paused");
+      ui.pause.replaceChildren(icon(state === "paused" ? "play" : "pause"),
+        state === "paused" ? "Weiter" : "Pause", " ", hint("P"));
+    } else {
+      ui.pause.hidden = !(cfg.restart && state === "playing");
+      ui.pause.replaceChildren(icon("retry"), "Neues Spiel", " ", hint("R"));
+    }
   }
 
   // ---------- Start ----------
@@ -276,22 +289,33 @@ export function createArcade(cfg) {
     return { ok: false, kind: res.status >= 500 ? "server" : "rejected" };
   }
 
-  function finish(local) {
+  // Das Spiel ist sofort vorbei und wird gespeichert; die Karte kommt, wenn
+  // reveal erfüllt ist. Startet vorher schon das nächste Spiel (R, Leertaste),
+  // erscheint sie nicht mehr, das Ergebnis kommt dann als Kurzmeldung.
+  function finish(local, { reveal = null } = {}) {
     if (state === "over" || state === "idle" || state === "starting") return;
     state = "over";
     syncPause();
-    const scoreEl = el("p", { class: "result-score" }, "0");
-    const detailEl = el("p", { class: "result-detail" }, local.detail || "");
-    const statusEl = el("div", { class: "result-status", role: "status" });
-    result = { local, payload: { game_id: gameId, inputs: cfg.inputs() }, scoreEl, statusEl, detailEl };
-    view({
+    const r = {
+      local,
+      payload: { game_id: gameId, inputs: cfg.inputs() },
       title: local.won ? "GESCHAFFT!" : "GAME OVER",
-      body: [scoreEl, detailEl, statusEl],
-      primary: { label: "Nochmal", key: "Enter", run: start },
-      secondary: { label: "Alle Spiele" },
-    });
-    countTo(scoreEl, 0, local.score, { ms: 700, format: fmt });
-    save();
+      scoreEl: el("p", { class: "result-score" }, "0"),
+      detailEl: el("p", { class: "result-detail" }, local.detail || ""),
+      statusEl: el("div", { class: "result-status", role: "status" }),
+      retry: false,
+      shown: false,
+    };
+    r.counted = new Promise((resolve) => { r.countDone = resolve; });
+    result = r;
+    save(r);
+    const show = () => {
+      if (result !== r || r.shown || state !== "over") return;
+      r.shown = true;
+      view({ title: r.title, body: [r.scoreEl, r.detailEl, r.statusEl], ...resultActions(r.retry) });
+      countTo(r.scoreEl, 0, local.score, { ms: 700, format: fmt }).then(r.countDone);
+    };
+    if (reveal) reveal.then(show, show); else show();
   }
 
   function status(r, kind, data) {
@@ -338,17 +362,25 @@ export function createArcade(cfg) {
     s.replaceChildren(...lines);
   }
 
-  function resultButtons(retry) {
-    setButton(ui.primary, retry ? { label: "Erneut senden", key: "Enter" } : { label: "Nochmal", key: "Enter" });
-    setButton(ui.secondary, retry ? { label: "Ohne Speichern weiter" } : { label: "Alle Spiele" });
-    actions = retry
-      ? { primary: () => save(), secondary: start }
-      : { primary: start, secondary: () => window.location.assign("/") };
+  function resultActions(retry) {
+    return retry
+      ? { primary: { label: "Erneut senden", key: "Enter", run: () => save() },
+          secondary: { label: "Ohne Speichern weiter", run: start } }
+      : { primary: { label: "Nochmal", key: "Enter", run: start },
+          secondary: { label: "Alle Spiele", run: () => window.location.assign("/") } };
+  }
+
+  function resultButtons(r) {
+    const a = resultActions(r.retry);
+    setButton(ui.primary, a.primary);
+    setButton(ui.secondary, a.secondary);
+    actions = { primary: a.primary.run, secondary: a.secondary.run };
   }
 
   async function save(r = result) {
+    r.retry = false;
     status(r, "pending");
-    resultButtons(false);
+    if (r.shown) resultButtons(r);
     const outcome = await send(r.payload);
     if (r !== result) {          // inzwischen läuft schon das nächste Spiel
       report(outcome, r.payload, r.local);
@@ -357,15 +389,19 @@ export function createArcade(cfg) {
     if (outcome.ok) {
       const d = outcome.data;
       if (cfg.sync) cfg.sync(d);
-      if (d.score !== r.local.score) {
-        // Darf nicht vorkommen: Client und Server rechnen mit derselben Engine.
-        console.warn("Client- und Server-Score weichen ab", { client: r.local.score, server: d.score });
-        countTo(r.scoreEl, r.local.score, d.score, { ms: 400, format: fmt });
-      }
+      const differs = d.score !== r.local.score;
+      // Darf nicht vorkommen: Client und Server rechnen mit derselben Engine.
+      if (differs) console.warn("Client- und Server-Score weichen ab", { client: r.local.score, server: d.score });
+      r.counted.then(async () => {
+        if (differs) await countTo(r.scoreEl, r.local.score, d.score, { ms: 400, format: fmt });
+        if (d.standing && d.standing.new_best && d.score > 0) bump(r.scoreEl);
+      });
       if (cfg.detail) r.detailEl.textContent = cfg.detail(d);
-      if (d.won && !r.local.won) ui.title.textContent = "GESCHAFFT!";
+      if (d.won && !r.local.won) {
+        r.title = "GESCHAFFT!";
+        if (r.shown) ui.title.textContent = r.title;
+      }
       status(r, "saved", d);
-      if (d.standing && d.standing.new_best && d.score > 0) bump(r.scoreEl);
       const st = d.standing || {};
       announce(`${d.won ? "Geschafft" : "Game Over"}. Score ${fmt(d.score)}. Gespeichert` +
         (st.rank ? `, Platz ${st.rank} von ${st.players}.` : "."));
@@ -375,7 +411,10 @@ export function createArcade(cfg) {
     status(r, outcome.kind);
     if (outcome.kind === "known") { loadLeaderboard({ highlight: true }); return; }
     announce("Game Over. Score nicht gespeichert.");
-    if (outcome.kind !== "rejected") resultButtons(true);
+    if (outcome.kind !== "rejected") {
+      r.retry = true;
+      if (r.shown) resultButtons(r);
+    }
   }
 
   // ---------- Leaderboard ----------
@@ -443,7 +482,13 @@ export function createArcade(cfg) {
   document.addEventListener("click", (e) => {
     if (e.target instanceof Element && e.target.closest("[data-settings-open]")) autoPause();
   });
-  if (ui.pause) ui.pause.addEventListener("click", () => (state === "paused" ? resume() : pause("key")));
+  if (ui.pause) {
+    ui.pause.addEventListener("click", () => {
+      if (!cfg.canPause) askRestart();
+      else if (state === "paused") resume();
+      else pause("key");
+    });
+  }
 
   loadLeaderboard();
 

@@ -75,7 +75,9 @@ MAX_STARTS_PER_HOUR = 200   # per-user rate limit on game starts
 #             None    -> no ranking (DOOM)
 #   goal:     one sentence: what you do in the game (hub, start overlay)
 #   controls: (keys, what they do); "Left/Right/Up/Down" render as arrow keys
-#   hint:     optional extra line under the controls
+#   hint:     optional extra line under the keyboard controls
+#   touch:    optional (gesture, what it does) for phones and tablets; the
+#             gestures themselves live in static/js/touch.js
 # Hub, start overlay and sidebar read these texts only from here.
 # --------------------------------------------------------------------------
 GAMES = [
@@ -90,6 +92,12 @@ GAMES = [
             (("Leertaste",), "sofort ablegen"),
             (("P",), "Pause"),
         ],
+        "touch": [
+            ("Ziehen", "bewegen"),
+            ("Tippen", "drehen"),
+            ("Nach unten ziehen", "schneller fallen"),
+            ("Nach unten wischen", "sofort ablegen"),
+        ],
     },
     {
         "slug": "snake", "title": "Snake", "endpoint": "snake", "status": "live",
@@ -100,6 +108,7 @@ GAMES = [
             (("W", "A", "S", "D"), "lenken"),
             (("P",), "Pause"),
         ],
+        "touch": [("Wischen", "lenken, auch mehrmals ohne abzusetzen")],
     },
     {
         "slug": "breakout", "title": "Breakout", "endpoint": "breakout", "status": "live",
@@ -110,6 +119,7 @@ GAMES = [
             (("A", "D"), "Paddle bewegen"),
             (("P",), "Pause"),
         ],
+        "touch": [("Finger aufs Feld", "das Paddle folgt ihm")],
     },
     {
         "slug": "2048", "title": "2048", "endpoint": "game_2048", "status": "live",
@@ -120,7 +130,7 @@ GAMES = [
             (("W", "A", "S", "D"), "schieben"),
             (("R",), "neue Partie"),
         ],
-        "hint": "Auf dem Handy wischst du.",
+        "touch": [("Wischen", "schieben")],
     },
     {
         "slug": "geometry-dash", "title": "Geometry Dash", "endpoint": "geometry_dash",
@@ -131,6 +141,7 @@ GAMES = [
             (("R",), "neuer Run"),
         ],
         "hint": "Gedrückt halten springt immer wieder. Ein Klick ins Spielfeld springt auch.",
+        "touch": [("Tippen", "springen"), ("Halten", "springt immer wieder")],
     },
     {
         "slug": "chess", "title": "Schach", "endpoint": "chess_lobby_page", "status": "live",

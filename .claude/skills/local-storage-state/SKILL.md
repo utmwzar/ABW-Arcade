@@ -59,9 +59,9 @@ createPrefs(storage)     // eigene Instanz über einem Storage, für Tests
 4. **Versionierung:** `v1` steckt im Schlüssel. Ändert sich die Bedeutung eines Werts, kommt ein neuer
    Schlüssel mit `v2` dazu, mit einer kleinen Übernahme beim Start; alte Schlüssel werden danach
    gelöscht.
-5. **Kein Flackern:** Was das erste Bild beeinflusst (Bewegung, Touch-Leiste), setzt ein kleines
-   Inline-Skript im `<head>` als Klasse auf `<html>`, ebenfalls in try/catch. Alles andere darf nach
-   dem Laden greifen.
+5. **Kein Flackern:** Was das erste Bild beeinflusst (Bewegung, Gesten-Hinweise), setzt ein kleines
+   Inline-Skript im `<head>` als `data-motion` bzw. `data-touch` auf `<html>`, ebenfalls in
+   try/catch; `shell.js` hält die Attribute danach aktuell. Alles andere darf nach dem Laden greifen.
 6. **Nichts Großes:** keine Bilder und keine Listen ohne Obergrenze; `help.seen` enthält nur bekannte
    Slugs.
 

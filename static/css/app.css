@@ -186,6 +186,20 @@ kbd .icon { width: 14px; height: 14px; stroke-width: 2.4; }
 .controls-keys { display: flex; gap: var(--s-1); }
 .controls-hint { margin-top: var(--s-3); }
 
+/* Gesten (game.touch): "Immer" zeigt sie überall, "Automatisch" auf Handy und
+   Tablet statt der Tasten. data-touch setzen base.html und shell.js. */
+.controls.controls-touch { display: none; margin-top: var(--s-3); }
+html[data-touch="on"] .controls.controls-touch { display: grid; }
+@media (pointer: coarse) {
+  html:not([data-touch="off"]) .controls.controls-touch { display: grid; margin-top: 0; }
+  html:not([data-touch="off"]) .has-touch { display: none; }
+}
+.gesture {
+  display: inline-flex; align-items: center; height: 26px; padding: 0 var(--s-3);
+  font: 700 var(--fs-xs)/1 var(--font-ui); color: var(--text); white-space: nowrap;
+  background: var(--surface-2); border-radius: var(--r-pill);
+}
+
 /* ---------- Markierungen ---------- */
 .tag {
   display: inline-flex; align-items: center; height: 22px; padding: 0 var(--s-2);

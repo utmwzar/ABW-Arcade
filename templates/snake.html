@@ -1,9 +1,10 @@
 {% extends "game_base.html" %}
+{% from "_macros.html" import game_canvas %}
 {% block stats %}
 <div class="stat stat-main"><span class="stat-label">Score</span><span id="score" class="stat-value">0</span></div>
 <div class="stat"><span class="stat-label">Length</span><span id="length" class="stat-value">3</span></div>
 {% endblock %}
-{% block board %}<canvas id="board" width="440" height="440"></canvas>{% endblock %}
+{% block board %}{{ game_canvas(440, 440) }}{% endblock %}
 {% block scripts %}
 <script src="{{ url_for('static', filename='snake_engine.js') }}"></script>
 <script type="module" src="{{ url_for('static', filename='snake.js') }}"></script>

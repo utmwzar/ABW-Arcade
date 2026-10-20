@@ -522,7 +522,10 @@ abw-arcade/
 ├── templates/              Hub, Spiele, Login/Registrierung, admin/, thumbs/
 └── static/
     ├── css/                tokens.css (Design-Tokens), app.css und je Bereich eine Datei
-    ├── js/                 gemeinsame ES-Module: prefs.js, fx.js, shell.js, hub.js
+    ├── js/                 gemeinsame ES-Module: arcade.js (Start, Pause, Spielende),
+    │                       touch.js (Gesten), fx.js und fx-canvas.js (Bewegung,
+    │                       Effekte), canvas.js, prefs.js, shell.js, hub.js, chess-*.js
+    ├── js/observe/         lesen die Engines und melden Ereignisse fuer die Effekte
     ├── fonts/              Archivo und Press Start 2P (OFL), lokal statt vom CDN
     ├── chess/pieces/       Schachfiguren "Chessnut" (Apache 2.0)
     ├── *_engine.js         die JS-Gegenstuecke zu den .py-Engines

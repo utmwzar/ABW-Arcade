@@ -61,3 +61,11 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
   das dunkle Brett der Skizze lag bei 1,4 : 1 und schied deshalb aus.
 - Overlay-Titel (BEREIT?, PAUSE, GAME OVER) stehen in Press Start 2P 16 px wie ein Bildschirmtitel;
   laut ist am Spielende die Zahl, nicht der Titel.
+- Effekte im Spielfeld (Phase 4b): quadratische Partikel in der Farbe dessen, was getroffen wurde
+  (Stein, Futter, Würfel), in normaler Deckkraft, kein Glow. Blitze nur hell beim Abräumen einer
+  Reihe und rot bei Leben-Verlust oder Game Over, höchstens drei pro Sekunde, nie weiß über das
+  ganze Feld. Texte im Feld („TETRIS“, „LEVEL 2“) stehen wie ein Bildschirmtitel in Press Start 2P
+  16 oder 24 px.
+- Touch (Phase 4b): Gesten erscheinen als Pillen (Tippen, Ziehen, Wischen, Halten) statt als
+  Tastenkappen und ersetzen auf Handy und Tablet die Tasten in den Hinweisen. Das Spielfeld passt in
+  die Fensterhöhe; mobil stehen die Werte darüber, und nichts ragt über den Rand.

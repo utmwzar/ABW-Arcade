@@ -25,6 +25,15 @@ function applyMotion(value) {
 applyMotion(get("ui.motion"));
 subscribe("ui.motion", applyMotion);
 
+// ---------- Touch: Gesten statt Tasten in den Hinweisen ----------
+// "auto" lässt das Attribut weg; dann entscheidet CSS mit (pointer: coarse).
+function applyTouch(value) {
+  if (value === "auto") delete document.documentElement.dataset.touch;
+  else document.documentElement.dataset.touch = value;
+}
+applyTouch(get("ui.touch"));
+subscribe("ui.touch", applyTouch);
+
 // ---------- Einstellungsdialog ----------
 const dialog = document.getElementById("settings");
 if (dialog) {

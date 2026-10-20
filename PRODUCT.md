@@ -77,6 +77,8 @@ DOOM läuft komplett im Browser und hat deshalb bewusst kein Leaderboard.
   Aufgeben, Weiß, Schwarz, Bauer, Springer, Läufer, Turm, Dame, König, Elo, Lobby.
 - **Bedienelemente sind deutsch:** Anmelden, Abmelden, Registrieren, Benutzername, Passwort,
   Einstellungen, Spiele, Spiel starten, Nochmal, Weiter, Abbrechen.
+- **Gesten heißen Tippen, Halten, Ziehen und Wischen.** Auf Handy und Tablet ersetzen sie in den
+  Hinweisen die Tasten.
 - **Spielnamen bleiben im Original:** Tetris, Snake, Breakout, 2048, Geometry Dash, DOOM. Nur
   „Schach“ ist deutsch.
 

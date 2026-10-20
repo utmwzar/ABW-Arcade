@@ -41,11 +41,28 @@
   overflow: hidden; box-shadow: var(--shadow-2);
 }
 .board-wrap canvas { display: block; max-width: 100%; height: auto; }
+/* Spielfeld (Makro game_canvas): so groß wie vorgesehen, aber nie höher als
+   das Fenster (--board-reserve: Platz für Kopfzeile, Titel, Werte und Ränder)
+   und nie breiter als die Spalte. Die Bildpunkte setzt static/js/canvas.js. */
+.game-layout { --board-reserve: 190px; --board-min: 220px; }
+.game-canvas {
+  aspect-ratio: var(--bw) / var(--bh);
+  width: min(calc(var(--bw) * 1px), max(var(--board-min), calc((100dvh - var(--board-reserve)) * var(--bw) / var(--bh))));
+  -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
+}
 
 .overlay {
   position: absolute; inset: 0; z-index: var(--z-overlay);
   display: grid; place-items: center; padding: var(--s-4);
   background: rgb(8 6 18 / 0.72);
+}
+.overlay.is-leaving { pointer-events: none; }   /* beim Ausblenden gehört der Finger schon dem Feld */
+/* Schmales Feld (Tetris im kleinen Fenster): weniger Rand, Knöpfe ohne Tastenhinweis.
+   Das Overlay ist so breit wie das Feld, nie wie sein Inhalt, und taugt darum als Container. */
+.overlay { container-type: inline-size; }
+@container (max-width: 300px) {
+  .overlay-card { padding: var(--s-4); }
+  .overlay-actions .btn .hint { display: none; }
 }
 .overlay-text { display: grid; gap: var(--s-3); color: var(--text-muted); }
 .overlay-text b { color: var(--text); }
@@ -148,6 +165,8 @@
   }
 }
 @media (max-width: 760px) {
+  /* Über dem Feld stehen hier auch die Werte. */
+  .game-layout { --board-reserve: 272px; }
   /* Auf dem Handy ist das flache Feld zu niedrig: die Karte steht darunter. */
   .game-layout-wide .overlay { position: static; background: var(--bg-raised); }
   .game-layout-wide .overlay-card { grid-template-columns: minmax(0, 1fr); grid-template-areas: "title" "body" "actions"; }

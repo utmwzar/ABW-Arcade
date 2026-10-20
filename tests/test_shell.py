@@ -153,6 +153,29 @@ class AdminClearTest(unittest.TestCase):
         self.assertEqual(count_scores("tetris") + count_scores("breakout"), 0)
 
 
+class GamePageTest(unittest.TestCase):
+    def setUp(self):
+        self.c = support.client()
+        support.register(self.c)
+
+    def test_touch_gestures_come_from_the_registry(self):
+        for game in arcade.GAMES:
+            if game["status"] != "live" or not game["controls"]:
+                continue
+            html = self.c.get(f"/games/{game['slug']}").get_data(as_text=True)
+            if game.get("touch"):
+                self.assertIn("controls controls-touch", html, game["slug"])
+                for gesture, does in game["touch"]:
+                    self.assertIn(f'<span class="gesture">{gesture}</span>', html, game["slug"])
+                    self.assertIn(does, html, game["slug"])
+            else:
+                self.assertNotIn("controls-touch", html, game["slug"])
+
+    def test_board_canvas_knows_its_game_size(self):
+        html = self.c.get("/games/tetris").get_data(as_text=True)
+        self.assertIn('class="game-canvas" width="300" height="600" style="--bw: 300; --bh: 600"', html)
+
+
 class DoomWadTest(unittest.TestCase):
     def test_own_wads_in_any_case_get_a_button(self):
         import os
