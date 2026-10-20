@@ -295,9 +295,12 @@ abw-arcade/
 ├── paket-bauen.sh          baut abw-arcade.tar.gz aus git
 ├── pruefe-engines.js       vergleicht die .py- gegen die .js-Engines
 ├── pruefe_engines.py       Python-Seite dieser Pruefung
-├── templates/              Hub, Spiele, Login/Registrierung, admin/
+├── templates/              Hub, Spiele, Login/Registrierung, admin/, thumbs/
 └── static/
-    ├── style.css, chess.css
+    ├── css/                tokens.css (Design-Tokens), app.css und je Bereich eine Datei
+    ├── js/                 gemeinsame ES-Module: prefs.js, fx.js, shell.js, hub.js
+    ├── fonts/              Archivo und Press Start 2P (OFL), lokal statt vom CDN
+    ├── chess/pieces/       Schachfiguren "Chessnut" (Apache 2.0)
     ├── *_engine.js         die JS-Gegenstuecke zu den .py-Engines
     ├── tetris.js, snake.js, breakout.js, g2048.js, gd.js, doom.js
     └── doom/               websockets-doom.js/.wasm, freedoom1.wad, Lizenzen

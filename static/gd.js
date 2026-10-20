@@ -390,7 +390,6 @@
   // ---------- init ----------
   syncHud();
   draw();
-  showOverlay("BEREIT?", 'Drücke <kbd>Leertaste</kbd> zum Springen und Starten', true);
-  startBtn.textContent = "Lauf starten";
+  // Der Startbildschirm (Ziel und Steuerung) kommt aus templates/game_base.html.
   loadLeaderboard();
 })();

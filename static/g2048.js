@@ -89,7 +89,7 @@
     let px = 40;
     if (digits >= 4) px = 27;
     else if (digits === 3) px = 33;
-    return `700 ${px}px "JetBrains Mono", ui-monospace, monospace`;
+    return `800 ${px}px Archivo, system-ui, sans-serif`;
   }
 
   function drawTile(v, x, y, scale) {
@@ -337,7 +337,6 @@
   // ---------- init ----------
   syncHud();
   scheduleDraw();
-  showOverlay("BEREIT?", 'Drücke <kbd>Enter</kbd> zum Start', true);
-  startBtn.textContent = "Spiel starten";
+  // Der Startbildschirm (Ziel und Steuerung) kommt aus templates/game_base.html.
   loadLeaderboard();
 })();

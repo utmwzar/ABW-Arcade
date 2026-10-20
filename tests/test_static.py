@@ -13,7 +13,10 @@ from tests import support
 
 EXPECTED = {
     "/static/tetris.js": "text/javascript",
-    "/static/style.css": "text/css",
+    "/static/css/app.css": "text/css",
+    "/static/js/prefs.js": "text/javascript",
+    "/static/fonts/archivo.woff2": "font/woff2",
+    "/static/chess/pieces/wN.svg": "image/svg+xml",
     "/static/doom/websockets-doom.wasm": "application/wasm",
 }
 

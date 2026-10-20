@@ -74,7 +74,7 @@
         sq.className = `sq ${(r + c) % 2 === 0 ? "light" : "dark"}`;
         sq.dataset.sq = name;
         if (p) {
-          sq.innerHTML = `<span class="${p === p.toUpperCase() ? "piece-w" : "piece-b"}">${GLYPH[p]}</span>`;
+          sq.innerHTML = `<img class="piece" src="/static/chess/pieces/${p === p.toUpperCase() ? "w" : "b"}${p.toUpperCase()}.svg" alt="" draggable="false">`;
         }
         if (vc === 7) sq.insertAdjacentHTML("beforeend", `<span class="coord rank">${8 - r}</span>`);
         if (vr === 7) sq.insertAdjacentHTML("beforeend", `<span class="coord file">${FILES[c]}</span>`);
@@ -161,7 +161,7 @@
     const toMove = state.status === "active" && state.turn === color;
     row.classList.toggle("to-move", toMove);
     row.querySelector(".pname").innerHTML =
-      `<span class="dot">${color === "w" ? "○" : "●"}</span>${player ? esc(player.name) : "—"}`;
+      `<span class="dot dot-${color}" aria-hidden="true"></span>${player ? esc(player.name) : "—"}`;
     row.querySelector(".prating").textContent = (player && player.rating != null) ? player.rating : "";
   }
 

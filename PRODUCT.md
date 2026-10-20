@@ -81,8 +81,11 @@ DOOM läuft komplett im Browser und hat deshalb bewusst kein Leaderboard.
 
 ## Brand Commitments
 
-- Verbindlich ist allein der Name **„ABW Arcade“**. ABW steht für die Ausbildungswerkstatt
-  Wittmund. Es gibt keine Firmenfarben und kein Logo; der Look ist frei.
+- Verbindlich ist der Name **„ABW Arcade“**. ABW steht für die Ausbildungswerkstatt Wittmund.
+  Es gibt keine Firmenfarben und kein Logo.
+- **Look (vom Nutzer gewählt, Oktober 2026):** klassische Arcade – dunkel, ein Neon-Akzent,
+  Pixelschrift nur groß –, geradeaus und sauber umgesetzt. Die Verarbeitung soll neben der
+  Steam-Bibliothek bestehen können.
 - Ton: freundlich und klar, nicht albern.
 
 ## Evidence on Hand

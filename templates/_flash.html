@@ -1,0 +1,12 @@
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="flashes" role="status">
+    {% for category, message in messages %}
+    <p class="flash {{ 'flash-error' if category == 'error' else 'flash-ok' }}">
+      <svg class="icon" aria-hidden="true"><use href="#{{ 'i-alert' if category == 'error' else 'i-check' }}"/></svg>
+      <span>{{ message }}</span>
+    </p>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}

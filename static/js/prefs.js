@@ -22,7 +22,7 @@ export const SCHEMA = {
   "chess.hints":    { default: true,     type: "boolean" },
   "chess.botLevel": { default: "medium", values: ["easy", "medium", "hard"] },
   "chess.botColor": { default: "random", values: ["random", "w", "b"] },
-  "doom.sound":     { default: true,     type: "boolean" },
+  "doom.sound":     { default: false,    type: "boolean" },  // stumm: Arbeitsplatz
   "help.seen":      { default: [],       type: "slugs", max: 16 },  // Spiel-Slugs
 };
 

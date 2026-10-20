@@ -74,8 +74,8 @@ test("gesperrter Speicher: alles läuft im Arbeitsspeicher weiter", () => {
 
 test("volles Kontingent beim Schreiben: der Wert gilt für diese Sitzung", () => {
   const p = createPrefs(new FullStorage());
-  assert.equal(p.set("doom.sound", false), true);
-  assert.equal(p.get("doom.sound"), false);
+  assert.equal(p.set("doom.sound", true), true);
+  assert.equal(p.get("doom.sound"), true);
 });
 
 test("zurückgegebene Listen sind Kopien", () => {

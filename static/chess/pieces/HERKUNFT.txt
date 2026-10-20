@@ -1,0 +1,8 @@
+Schachfiguren "Chessnut"
+
+Gestaltung: Alexis Luengas (https://github.com/LexLuengas/chessnut-pieces)
+Lizenz:     Apache License 2.0, siehe LICENSE.txt in diesem Ordner
+Bezogen am 20.10.2026 aus dem lichess-Repository
+            https://github.com/lichess-org/lila, Ordner public/piece/chessnut
+            (Lizenzangabe dort in COPYING.md).
+Die zwölf SVG-Dateien sind unverändert.

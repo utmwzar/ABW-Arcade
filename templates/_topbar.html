@@ -1,0 +1,26 @@
+<header class="topbar" data-topbar>
+  <div class="topbar-inner">
+    <a class="wordmark" href="{{ url_for('index') }}" aria-label="ABW Arcade – zur Spieleübersicht">ABW <span>ARCADE</span></a>
+    <button class="btn btn-ghost btn-sm menu-btn" type="button" aria-expanded="false" aria-controls="topbar-panel" data-menu-btn>
+      <svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg>Menü
+    </button>
+    <div class="topbar-panel" id="topbar-panel">
+      <nav class="topnav" aria-label="Hauptnavigation">
+        <a href="{{ url_for('index') }}" {% if nav_section == 'games' %}aria-current="page"{% endif %}>Spiele</a>
+        <a href="{{ url_for('chess_lobby_page') }}" {% if nav_section == 'chess' %}aria-current="page"{% endif %}>Schach</a>
+        {% if is_admin %}<a href="{{ url_for('admin_dashboard') }}" {% if nav_section == 'admin' %}aria-current="page"{% endif %}>Admin</a>{% endif %}
+      </nav>
+      <div class="usernav">
+        <span class="who"><span class="avatar" aria-hidden="true">{{ username[:1]|upper }}</span><span><span class="visually-hidden">Angemeldet als </span>{{ username }}</span></span>
+        <button class="btn btn-ghost btn-sm" type="button" data-settings-open aria-haspopup="dialog">
+          <svg class="icon" aria-hidden="true"><use href="#i-gear"/></svg>Einstellungen
+        </button>
+        <form method="post" action="{{ url_for('logout') }}">
+          <button class="btn btn-ghost btn-sm" type="submit">
+            <svg class="icon" aria-hidden="true"><use href="#i-logout"/></svg>Abmelden
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</header>

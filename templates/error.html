@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{{ heading }} · ABW Arcade{% endblock %}
+{% block content %}
+<section class="error-page">
+  <p class="error-code">{{ code }}</p>
+  <h1>{{ heading }}</h1>
+  <p>{{ message }}</p>
+  <a class="btn" href="{{ url_for('index') }}">Zur Spieleübersicht</a>
+</section>
+{% endblock %}

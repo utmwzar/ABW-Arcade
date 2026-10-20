@@ -3,9 +3,11 @@
  * + .wasm, GPL). This file only: detects available WADs, fetches the chosen WAD
  * with a progress bar, wires up the Emscripten Module object and starts main().
  * Everything runs client-side; the server just serves static files.
+ * Loaded as an ES module so the sound setting comes from js/prefs.js.
  */
-(() => {
-  "use strict";
+import { get as pref } from "./js/prefs.js";
+
+{
 
   const BASE = "/static/doom/";
   const canvas = document.getElementById("canvas");
@@ -81,7 +83,8 @@
 
     const args = ["-iwad", wadName, "-window", "-nogui", "-nomusic",
                   "-config", "default.cfg"];
-    if (new URLSearchParams(location.search).has("nosound")) args.push("-nosound");
+    // Ton nur, wenn er in den Einstellungen eingeschaltet ist (Standard: stumm).
+    if (!pref("doom.sound") || new URLSearchParams(location.search).has("nosound")) args.push("-nosound");
 
     window.Module = {
       noInitialRun: true,
@@ -132,4 +135,4 @@
   });
 
   detectWads();
-})();
+}

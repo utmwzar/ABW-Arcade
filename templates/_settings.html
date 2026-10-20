@@ -1,0 +1,47 @@
+{# Einstellungen dieses Browsers. Die Werte verwaltet static/js/prefs.js; shell.js verbindet die Felder. #}
+<dialog class="dialog" id="settings" aria-labelledby="settings-title">
+  <form method="dialog">
+    <div class="dialog-head">
+      <h2 id="settings-title">Einstellungen</h2>
+      <button class="btn btn-ghost btn-sm" type="submit" aria-label="Schließen">
+        <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+      </button>
+    </div>
+    <div class="dialog-body">
+      <p class="hint-text">Gilt nur für diesen Browser. Scores und Partien liegen auf dem Server.</p>
+      <fieldset class="setting">
+        <legend>Bewegung</legend>
+        <div class="segmented">
+          <label><input type="radio" name="ui.motion" value="system"><span>Wie System</span></label>
+          <label><input type="radio" name="ui.motion" value="full"><span>Voll</span></label>
+          <label><input type="radio" name="ui.motion" value="reduced"><span>Reduziert</span></label>
+          <label><input type="radio" name="ui.motion" value="off"><span>Aus</span></label>
+        </div>
+        <p class="hint-text">Reduziert: nur Ein- und Ausblenden, kein Wackeln im Spielfeld.</p>
+      </fieldset>
+      <fieldset class="setting">
+        <legend>Touch-Steuerung</legend>
+        <div class="segmented">
+          <label><input type="radio" name="ui.touch" value="auto"><span>Automatisch</span></label>
+          <label><input type="radio" name="ui.touch" value="on"><span>Immer</span></label>
+          <label><input type="radio" name="ui.touch" value="off"><span>Nie</span></label>
+        </div>
+        <p class="hint-text">Automatisch: auf Geräten mit Touchscreen.</p>
+      </fieldset>
+      <fieldset class="setting">
+        <legend>Schach</legend>
+        <label class="check"><input type="checkbox" name="chess.coords"><span>Koordinaten am Brett</span></label>
+        <label class="check"><input type="checkbox" name="chess.hints"><span>Mögliche Züge anzeigen</span></label>
+      </fieldset>
+      <fieldset class="setting">
+        <legend>DOOM</legend>
+        <label class="check"><input type="checkbox" name="doom.sound"><span>Ton an</span></label>
+        <p class="hint-text">Gilt ab dem nächsten Start von DOOM.</p>
+      </fieldset>
+    </div>
+    <div class="dialog-foot">
+      <button class="btn" type="submit">Fertig</button>
+    </div>
+  </form>
+</dialog>
+<div class="toasts" aria-live="polite" data-toasts></div>

@@ -313,7 +313,6 @@
   syncHud();
   draw();
   drawNext();
-  showOverlay("BEREIT?", 'Drücke <kbd>Enter</kbd> zum Start', true);
-  startBtn.textContent = "Spiel starten";
+  // Der Startbildschirm (Ziel und Steuerung) kommt aus templates/game_base.html.
   loadLeaderboard();
 })();

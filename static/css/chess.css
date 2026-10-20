@@ -1,0 +1,121 @@
+/*
+ * Schach: Lobby und Brett.
+ * Brettfarben: Lavendel, damit schwarze Figuren auch auf dunklen Feldern klar lesbar sind
+ * (Kontrast Schwarz auf dunklem Feld 5,9 : 1, ähnlich dem braunen Brett von lichess).
+ */
+
+.chess-shell {
+  --board-light: #c9bfe8;
+  --board-dark: #8b7fc0;
+  --sq: 58px;
+}
+
+/* ---------- Lobby ---------- */
+.lobby-cols { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--s-6); align-items: start; }
+.side-panel { display: grid; gap: var(--s-5); align-content: start; }
+.lobby-list { display: grid; }
+.lobby-list li {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-3);
+  padding: var(--s-3) 0; border-top: 1px solid var(--line);
+}
+.lobby-list li:first-child { border-top: 0; padding-top: 0; }
+.lobby-list li:last-child { padding-bottom: 0; }
+.lobby-meta { color: var(--text-muted); font-size: var(--fs-sm); }
+.lobby-empty { color: var(--text-muted); }
+.turn-pill {
+  display: inline-flex; align-items: center; height: 22px; padding: 0 var(--s-2); margin-left: var(--s-2);
+  border-radius: var(--r-sm); background: var(--accent-soft); color: var(--accent);
+  font-size: var(--fs-xs); font-weight: 700;
+}
+.outcome-win { color: var(--ok); font-weight: 700; }
+.outcome-loss { color: var(--danger); font-weight: 700; }
+.outcome-draw { color: var(--text-muted); font-weight: 700; }
+.ranking .elo, .elo { color: var(--gold); font-weight: 700; }
+.bot-row { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-3); }
+.bot-row .select { width: auto; flex: 1 1 140px; min-height: 34px; }
+
+/* ---------- Brett ---------- */
+.chess-page { width: fit-content; max-width: 100%; margin-inline: auto; }
+.game-cols { display: grid; grid-template-columns: auto minmax(280px, 340px); gap: var(--s-6); align-items: start; justify-content: center; }
+.board-frame {
+  position: relative; padding: var(--s-3);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-2);
+}
+.board-grid {
+  display: grid; grid-template-columns: repeat(8, var(--sq)); grid-template-rows: repeat(8, var(--sq));
+  border-radius: var(--r-sm); overflow: hidden; user-select: none;
+}
+.sq { position: relative; display: grid; place-items: center; }
+.sq.light { background: var(--board-light); }
+.sq.dark { background: var(--board-dark); }
+.sq .piece { width: 88%; height: 88%; pointer-events: none; }
+.sq .coord { position: absolute; font-size: 11px; font-weight: 700; line-height: 1; }
+.sq .coord.file { right: 4px; bottom: 3px; }
+.sq .coord.rank { left: 4px; top: 3px; }
+.sq.light .coord { color: #5d4f9a; }
+.sq.dark .coord { color: #f1edff; }
+.sq.selectable { cursor: pointer; }
+.sq.lastmove { box-shadow: inset 0 0 0 100px rgb(44 207 227 / 0.32); }
+.sq.incheck { box-shadow: inset 0 0 0 100px rgb(240 96 107 / 0.6); }
+.sq.selected { outline: 3px solid var(--accent); outline-offset: -3px; }
+.sq.target::after {
+  content: ""; position: absolute; width: 26%; height: 26%; border-radius: 50%;
+  background: rgb(17 13 32 / 0.38);
+}
+.sq.target.capture::after {
+  width: 86%; height: 86%; background: transparent; border: 4px solid rgb(17 13 32 / 0.38);
+}
+
+.players { display: grid; gap: var(--s-1); }
+.player-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); padding: var(--s-1) 0; }
+.player-row .pname { display: flex; align-items: center; gap: var(--s-2); font-weight: 600; }
+.dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+.dot-w { background: #fff; box-shadow: inset 0 0 0 1.5px #000; }
+.dot-b { background: #000; box-shadow: 0 0 0 1.5px var(--line-strong); }
+.player-row .prating { color: var(--gold); font-weight: 700; }
+.player-row.to-move .pname::after {
+  content: "am Zug"; height: 22px; padding: 0 var(--s-2); border-radius: var(--r-sm);
+  display: inline-flex; align-items: center; font-size: var(--fs-xs); font-weight: 700;
+  background: var(--accent-soft); color: var(--accent);
+}
+.unrated-tag { color: var(--text-muted); font-size: var(--fs-sm); margin-top: var(--s-2); }
+.status-line { min-height: 28px; font-size: var(--fs-lg); font-weight: 700; }
+.status-line.alert { color: var(--danger); }
+.status-line.gold { color: var(--gold); }
+.movelist { max-height: 300px; overflow-y: auto; font-size: var(--fs-sm); line-height: 1.8; }
+.movelist .mvno { color: var(--text-muted); margin-right: var(--s-1); }
+.movelist .mv { margin-right: var(--s-3); }
+.draw-banner {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-3);
+  padding: var(--s-3) var(--s-4); border-radius: var(--r-md);
+  background: rgb(247 192 74 / 0.12); border: 1px solid rgb(247 192 74 / 0.45);
+}
+.action-row { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.action-row .btn { flex: 1; }
+
+.promo-overlay {
+  position: absolute; inset: 0; z-index: var(--z-overlay);
+  display: grid; place-items: center; background: rgb(8 6 18 / 0.66); border-radius: var(--r-lg);
+}
+.promo-box {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-2);
+  padding: var(--s-5); background: var(--surface); border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-3);
+}
+.promo-title { grid-column: 1 / -1; font-weight: 700; }
+.promo-box button {
+  display: grid; justify-items: center; gap: var(--s-1); padding: var(--s-2);
+  background: var(--board-light); color: #1d1638; font-size: var(--fs-xs); font-weight: 700;
+  border: 2px solid transparent; border-radius: var(--r-md); cursor: pointer;
+}
+.promo-box button:hover, .promo-box button:focus-visible { border-color: var(--accent); }
+.promo-box img { width: 52px; height: 52px; }
+
+/* ---------- Breiten ---------- */
+@media (max-width: 900px) {
+  .lobby-cols, .game-cols { grid-template-columns: minmax(0, 1fr); }
+  .board-frame { justify-self: center; }
+}
+@media (max-width: 560px) {
+  .chess-shell { --sq: calc((100vw - 2 * var(--gutter) - 2 * var(--s-3) - 2px) / 8); }
+}

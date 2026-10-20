@@ -1,0 +1,22 @@
+{# Gemeinsame Bausteine. Einbinden mit {% from "_macros.html" import ... %}. #}
+
+{% set ARROWS = {"Left": "Pfeil links", "Right": "Pfeil rechts", "Up": "Pfeil hoch", "Down": "Pfeil runter"} %}
+
+{# Eine Taste als Tastenkappe; Pfeiltasten erscheinen als Pfeil-Symbol. #}
+{% macro key(name) -%}
+{%- if name in ARROWS -%}
+<kbd class="key-arrow"><svg class="icon icon-{{ name|lower }}" aria-hidden="true"><use href="#i-up"/></svg><span class="visually-hidden">{{ ARROWS[name] }}</span></kbd>
+{%- else -%}
+<kbd>{{ name }}</kbd>
+{%- endif -%}
+{%- endmacro %}
+
+{# Steuerung eines Spiels aus der GAMES-Registry in app.py. #}
+{% macro controls(game) -%}
+<ul class="controls">
+  {% for keys, does in game.controls %}
+  <li><span class="controls-keys">{% for k in keys %}{{ key(k) }}{% endfor %}</span><span>{{ does }}</span></li>
+  {% endfor %}
+</ul>
+{% if game.hint %}<p class="hint-text controls-hint">{{ game.hint }}</p>{% endif %}
+{%- endmacro %}
