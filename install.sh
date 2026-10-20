@@ -237,16 +237,33 @@ port_belegt_melden() {  # PORT PIDS
 }
 
 # Vor dem Anhalten des Dienstes: Ist der Port von einem FREMDEN Programm
-# belegt, wird abgebrochen, bevor sich irgendetwas aendert.
+# belegt, wird abgebrochen, bevor sich irgendetwas aendert. Eigen ist der
+# Hauptprozess des Dienstes und alles, was aus dem Programmordner laeuft.
 port_vorab_pruefen() {  # PORT
   local pids eigen pid fremd=""
   pids="$(port_pids "$1")"
   [ -n "$pids" ] || return 0
   eigen="$(dienst_pid)"
   for pid in $pids; do
-    [ "$pid" = "$eigen" ] || fremd="$fremd $pid"
+    [ "$pid" = "$eigen" ] && continue
+    case "$(ps -o command= -p "$pid" 2>/dev/null || true)" in
+      *"$APP_DIR/"*) continue ;;
+    esac
+    fremd="$fremd $pid"
   done
   [ -z "$fremd" ] || port_belegt_melden "$1" "$fremd"
+}
+
+# Nach dem Anhalten: bis zu 10 Sekunden warten, bis der Port frei ist.
+port_freigabe_abwarten() {  # PORT
+  local pids i=0
+  while [ "$i" -lt 10 ]; do
+    pids="$(port_pids "$1")"
+    [ -n "$pids" ] || return 0
+    sleep 1
+    i=$((i + 1))
+  done
+  port_belegt_melden "$1" "$pids"
 }
 
 # Nach dem Anhalten, vor dem Start: run.py bindet den Port testweise, genau
@@ -425,6 +442,7 @@ linux_installieren() {
   if systemd_laeuft && systemctl is-active --quiet arcade.service; then
     info "Dienst anhalten ..."
     systemctl stop arcade.service
+    port_freigabe_abwarten "$PORT_WERT"
   fi
 
   programm_abgleichen python3
@@ -676,7 +694,7 @@ macos_ip() {
 }
 
 macos_installieren() {
-  local daten="$APP_DIR/data" logs="$APP_DIR/logs" i pids
+  local daten="$APP_DIR/data" logs="$APP_DIR/logs" i
 
   python_finden_macos
   info "Python fuer den Dienst: $PY"
@@ -701,10 +719,7 @@ macos_installieren() {
     sleep 1
     i=$((i + 1))
   done
-  pids="$(port_pids "$PORT_WERT")"
-  if [ -n "$pids" ]; then
-    port_belegt_melden "$PORT_WERT" "$pids"
-  fi
+  port_freigabe_abwarten "$PORT_WERT"
 
   mkdir -p "$APP_DIR"
   chown root:wheel "$APP_DIR"
