@@ -1,0 +1,61 @@
+name: Fehler melden
+description: Etwas funktioniert nicht so, wie es soll.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Danke fürs Melden! Je genauer die Schritte, desto schneller ist der Fehler gefunden.
+        Bitte keine Passwörter und nichts aus `secret_key` oder `arcade.db` hineinschreiben.
+  - type: dropdown
+    id: bereich
+    attributes:
+      label: Wo ist es passiert?
+      options:
+        - Hub (Spieleübersicht)
+        - Tetris
+        - Snake
+        - Breakout
+        - "2048"
+        - Geometry Dash
+        - Schach
+        - DOOM
+        - Anmelden oder Registrieren
+        - Admin-Bereich
+        - Installation oder Update
+        - Anderes
+    validations:
+      required: true
+  - type: textarea
+    id: was
+    attributes:
+      label: Was ist passiert?
+      description: Schritt für Schritt, was du getan hast und was dann passiert ist.
+      placeholder: |
+        1. Tetris gestartet
+        2. …
+    validations:
+      required: true
+  - type: textarea
+    id: erwartet
+    attributes:
+      label: Was hast du erwartet?
+    validations:
+      required: true
+  - type: input
+    id: geraet
+    attributes:
+      label: Gerät und Browser
+      placeholder: z. B. Windows 11 mit Firefox oder iPhone mit Safari
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Steht in der Datei PAKET-INFO im Programmordner (Zeile „Quelle“) und am Ende der Installation.
+      placeholder: z. B. v1.1
+  - type: textarea
+    id: log
+    attributes:
+      label: Meldungen aus dem Log, falls vorhanden
+      description: Wie man die Logs liest, steht in der README im Abschnitt „Betrieb“.
+      render: text
