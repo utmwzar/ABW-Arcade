@@ -1,61 +1,104 @@
 {% extends "base.html" %}
 {% block title %}Partie · Schach · ABW Arcade{% endblock %}
-{% block body_class %}chess-theme{% endblock %}
 {% block extra_head %}
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ url_for('static', filename='chess.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chess.css') }}">
 {% endblock %}
-{% block content %}
-<div class="chess-shell" data-game-id="{{ game_id }}">
-  <header class="topbar">
-    <span class="logo logo-sm">Schach <span class="logo-suffix">im Studierzimmer</span></span>
-    <div class="topbar-right">
-      <span class="who">{{ username }}</span>
-      <a class="btn btn-ghost btn-sm" href="{{ url_for('chess_lobby_page') }}">Lobby</a>
-      <a class="btn btn-ghost btn-sm" href="{{ url_for('index') }}">Arcade</a>
-      <form method="post" action="{{ url_for('logout') }}" class="inline">
-        <button class="btn btn-ghost btn-sm">Logout</button>
-      </form>
-    </div>
-  </header>
 
-  <div class="game-cols">
-    <div class="board-frame">
-      <div id="chessBoard" class="board-grid" aria-label="Schachbrett"></div>
-      <div id="promoOverlay" class="promo-overlay" style="display:none">
-        <div class="promo-box">
-          <div class="promo-title">Umwandeln in …</div>
-          <button data-promo="Q">♛</button>
-          <button data-promo="R">♜</button>
-          <button data-promo="B">♝</button>
-          <button data-promo="N">♞</button>
+{% macro player(slot) %}
+<div class="player-bar" data-player="{{ slot }}">
+  <span data-dot class="dot" aria-hidden="true"></span>
+  <span class="player-name" data-name>…</span>
+  <span class="player-rating" data-rating></span>
+  <span class="tag tag-accent" data-turn hidden>am Zug</span>
+  <span class="player-captured" data-captured></span>
+</div>
+{% endmacro %}
+
+{% block content %}
+<div class="chess-page" data-game-id="{{ game_id }}">
+  <div class="game-head">
+    <a class="back-link" href="{{ url_for('chess_lobby_page') }}"><svg class="icon icon-back" aria-hidden="true"><use href="#i-chevron"/></svg>Lobby</a>
+    <h1 class="page-title">Schach</h1>
+    <p class="chess-sub" data-sub></p>
+  </div>
+
+  <div class="chess-layout">
+    <section class="chess-main" aria-label="Brett">
+      {{ player("top") }}
+      <div class="board-frame">
+        <div data-board></div>
+        <div class="chess-end" data-end hidden>
+          <div class="overlay-card" role="group" aria-labelledby="end-title" tabindex="-1">
+            <h2 class="overlay-title" id="end-title" data-end-title></h2>
+            <p class="chess-end-reason" data-end-reason></p>
+            <p class="chess-end-elo" data-end-elo></p>
+            <div class="overlay-actions">
+              <button class="btn btn-lg" type="button" data-end-act="view">Brett ansehen</button>
+              <button class="btn btn-secondary btn-lg" type="button" data-end-act="again">Neue Bot-Partie</button>
+              <a class="btn btn-secondary btn-lg" href="{{ url_for('chess_lobby_page') }}" data-end-act="lobby">Zur Lobby</a>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+      {{ player("bottom") }}
+    </section>
 
-    <aside class="side-panel">
-      <section class="panel">
-        <div id="rowTop" class="player-row"><span class="pname">…</span><span class="prating"></span></div>
-        <div id="rowBottom" class="player-row"><span class="pname">…</span><span class="prating"></span></div>
-        <div id="unratedTag" class="unrated-tag" style="display:none">Übungspartie gegen den Bot — ohne Elo-Wertung</div>
+    <aside class="chess-side">
+      <p class="chess-status" data-status role="status">Lädt …</p>
+
+      <div class="draw-offer" data-draw hidden>
+        <p data-draw-text></p>
+        <div class="draw-offer-actions" data-draw-actions>
+          <button class="btn btn-sm" type="button" data-draw-act="accept">Annehmen</button>
+          <button class="btn btn-secondary btn-sm" type="button" data-draw-act="decline">Ablehnen</button>
+        </div>
+      </div>
+
+      <section class="panel chess-moves" aria-labelledby="moves-title">
+        <div class="panel-head">
+          <h2 class="panel-title" id="moves-title">Züge</h2>
+          <div class="replay-nav" role="group" aria-label="Nachspielen">
+            <button class="btn btn-ghost btn-sm icon-btn" type="button" data-nav="first" aria-label="Zur Startstellung"><svg class="icon" aria-hidden="true"><use href="#i-skip"/></svg></button>
+            <button class="btn btn-ghost btn-sm icon-btn" type="button" data-nav="prev" aria-label="Ein Zug zurück"><svg class="icon icon-back" aria-hidden="true"><use href="#i-chevron"/></svg></button>
+            <button class="btn btn-ghost btn-sm icon-btn" type="button" data-nav="next" aria-label="Ein Zug vor"><svg class="icon" aria-hidden="true"><use href="#i-chevron"/></svg></button>
+            <button class="btn btn-ghost btn-sm icon-btn" type="button" data-nav="live" aria-label="Zur aktuellen Stellung"><svg class="icon icon-flip" aria-hidden="true"><use href="#i-skip"/></svg></button>
+          </div>
+        </div>
+        <p class="replay-note" data-replay-note hidden>
+          <span data-note-text></span>
+          <button class="btn btn-secondary btn-sm" type="button" data-nav="live">Zur aktuellen Stellung</button>
+        </p>
+        <ol class="movelist" data-moves aria-label="Zugliste"></ol>
+        <p class="hint-text replay-keys"><kbd class="key-arrow"><svg class="icon icon-left" aria-hidden="true"><use href="#i-up"/></svg><span class="visually-hidden">Pfeil links</span></kbd><kbd class="key-arrow"><svg class="icon icon-right" aria-hidden="true"><use href="#i-up"/></svg><span class="visually-hidden">Pfeil rechts</span></kbd> blättern durch die Partie</p>
       </section>
 
-      <div id="statusLine" class="status-line"></div>
-      <div id="drawBanner" class="draw-banner" style="display:none"></div>
-
-      <section class="panel">
-        <h2 class="panel-title">Züge</h2>
-        <div id="movelist" class="movelist"><span class="lobby-empty">Noch keine Züge.</span></div>
-      </section>
-
-      <div class="action-row" id="actionRow">
-        <button id="drawBtn" class="btn btn-ghost btn-sm">Remis anbieten</button>
-        <button id="resignBtn" class="btn btn-danger btn-sm">Aufgeben</button>
+      <div class="chess-actions" data-actions hidden>
+        <button class="btn btn-secondary" type="button" data-act="draw"><svg class="icon" aria-hidden="true"><use href="#i-handshake"/></svg>Remis anbieten</button>
+        <button class="btn btn-danger" type="button" data-act="resign"><svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>Aufgeben</button>
       </div>
     </aside>
   </div>
+  <p class="visually-hidden" aria-live="polite" data-live></p>
 </div>
+
+<dialog class="dialog dialog-sm" id="promo" aria-labelledby="promo-title">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="dialog-title" id="promo-title">Umwandeln in …</h2>
+      <div class="promo-choices">
+        <button type="submit" value="Q" data-promo="Q"><img src="{{ url_for('static', filename='chess/pieces/wQ.svg') }}" alt="">Dame</button>
+        <button type="submit" value="R" data-promo="R"><img src="{{ url_for('static', filename='chess/pieces/wR.svg') }}" alt="">Turm</button>
+        <button type="submit" value="B" data-promo="B"><img src="{{ url_for('static', filename='chess/pieces/wB.svg') }}" alt="">Läufer</button>
+        <button type="submit" value="N" data-promo="N"><img src="{{ url_for('static', filename='chess/pieces/wN.svg') }}" alt="">Springer</button>
+      </div>
+    </div>
+    <div class="dialog-foot">
+      <button class="btn btn-secondary" type="submit" value="">Abbrechen</button>
+    </div>
+  </form>
+</dialog>
 {% endblock %}
+
 {% block scripts %}
-<script src="{{ url_for('static', filename='chess_game.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/chess-game.js') }}"></script>
 {% endblock %}

@@ -1,96 +1,79 @@
 {% extends "base.html" %}
 {% block title %}Schach · ABW Arcade{% endblock %}
-{% block body_class %}chess-theme{% endblock %}
 {% block extra_head %}
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ url_for('static', filename='chess.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chess.css') }}">
 {% endblock %}
 {% block content %}
-<div class="chess-shell">
-  <header class="topbar">
-    <span class="logo logo-sm">Schach <span class="logo-suffix">im Studierzimmer</span></span>
-    <div class="topbar-right">
-      <span class="who">{{ username }}</span>
-      <a class="btn btn-ghost btn-sm" href="{{ url_for('index') }}">Arcade</a>
-      {% if is_admin %}
-      <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_dashboard') }}">Admin</a>
-      {% endif %}
-      <form method="post" action="{{ url_for('logout') }}" class="inline">
-        <button class="btn btn-ghost btn-sm">Logout</button>
-      </form>
-    </div>
-  </header>
+<div class="page-head">
+  <h1 class="page-title">Schach</h1>
+  <p class="page-sub">Gegen Kollegen mit Elo-Wertung oder zum Üben gegen den Bot.</p>
+</div>
 
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <div class="flashes">
-        {% for category, message in messages %}
-          <div class="flash flash-{{ category }}">{{ message }}</div>
-        {% endfor %}
+<div class="lobby" data-lobby data-me="{{ username }}">
+  <div class="lobby-col">
+    <section class="panel" aria-labelledby="active-title">
+      <h2 class="panel-title" id="active-title">Deine Partien</h2>
+      <ul class="lobby-list" data-list="active"><li class="lobby-empty">Lädt …</li></ul>
+    </section>
+
+    <section class="panel" aria-labelledby="open-title">
+      <div class="panel-head">
+        <h2 class="panel-title" id="open-title">Offene Herausforderungen</h2>
+        <button class="btn btn-secondary btn-sm" type="button" data-create>Neue Herausforderung</button>
       </div>
-    {% endif %}
-  {% endwith %}
+      <p class="lobby-msg" role="status" data-msg="open"></p>
+      <ul class="lobby-list" data-list="open"><li class="lobby-empty">Lädt …</li></ul>
+    </section>
 
-  <div class="chess-hero">
-    <h1><span class="knight">♞</span> Zwei Köpfe, ein Brett</h1>
-    <p>Erstelle eine Partie oder tritt einer offenen bei — dein Gegner spielt mit seinem eigenen Account.</p>
+    <section class="panel" aria-labelledby="finished-title">
+      <h2 class="panel-title" id="finished-title">Zuletzt beendet</h2>
+      <ul class="lobby-list" data-list="finished"><li class="lobby-empty">Lädt …</li></ul>
+    </section>
   </div>
 
-  <div class="lobby-cols">
-    <div class="side-panel">
-      <section class="panel">
-        <div class="panel-head">
-          <h2 class="panel-title">Offene Partien</h2>
-          <button id="createBtn" class="btn btn-sm">Neue Partie erstellen</button>
-        </div>
-        <ul id="openList" class="lobby-list"><li class="lobby-empty">lädt …</li></ul>
-      </section>
+  <div class="lobby-col">
+    <section class="panel" aria-labelledby="bot-title">
+      <h2 class="panel-title" id="bot-title">Gegen den Bot</h2>
+      <div class="bot-form">
+        <p class="muted">Übungspartien ohne Elo-Wertung. Der Server zieht für den Bot.</p>
+        <fieldset class="setting">
+          <legend>Stärke</legend>
+          <div class="segmented">
+            <label><input type="radio" name="botLevel" value="easy"><span>Leicht</span></label>
+            <label><input type="radio" name="botLevel" value="medium"><span>Mittel</span></label>
+            <label><input type="radio" name="botLevel" value="hard"><span>Schwer</span></label>
+          </div>
+        </fieldset>
+        <fieldset class="setting">
+          <legend>Deine Farbe</legend>
+          <div class="segmented">
+            <label><input type="radio" name="botColor" value="random"><span>Zufällig</span></label>
+            <label><input type="radio" name="botColor" value="w"><span>Weiß</span></label>
+            <label><input type="radio" name="botColor" value="b"><span>Schwarz</span></label>
+          </div>
+        </fieldset>
+        <button class="btn{% if waiting %} btn-secondary{% endif %}" type="button" data-bot>Bot-Partie starten</button>
+        <p class="lobby-msg" role="status" data-msg="bot"></p>
+      </div>
+    </section>
 
-      <section class="panel">
-        <h2 class="panel-title">Deine laufenden Partien</h2>
-        <ul id="activeList" class="lobby-list"><li class="lobby-empty">lädt …</li></ul>
-      </section>
+    <section class="panel" aria-labelledby="me-title">
+      <h2 class="panel-title" id="me-title">Deine Bilanz</h2>
+      <div class="my-elo" data-me-stats><span class="muted">Lädt …</span></div>
+    </section>
 
-      <section class="panel">
-        <h2 class="panel-title">Zuletzt beendet</h2>
-        <ul id="finishedList" class="lobby-list"><li class="lobby-empty">lädt …</li></ul>
-      </section>
-    </div>
-
-    <div class="side-panel">
-      <section class="panel">
-        <h2 class="panel-title">Gegen den Bot</h2>
-        <p class="lobby-meta" style="margin:0 0 10px">Übungspartien ohne Elo-Wertung — der Server zieht für den Bot.</p>
-        <div class="bot-row">
-          <select id="botLevel" class="bot-select">
-            <option value="easy">Leicht</option>
-            <option value="medium" selected>Mittel</option>
-            <option value="hard">Schwer</option>
-          </select>
-          <select id="botColor" class="bot-select">
-            <option value="random" selected>Zufällige Farbe</option>
-            <option value="w">Ich spiele Weiß</option>
-            <option value="b">Ich spiele Schwarz</option>
-          </select>
-          <button id="botBtn" class="btn btn-sm">Bot-Partie starten</button>
-        </div>
-      </section>
-
-      <section class="panel">
-        <h2 class="panel-title">Rangliste</h2>
-        <table class="ranking">
-          <thead><tr><th>#</th><th>Spieler</th><th class="num">Elo</th><th class="num">S</th><th class="num">R</th><th class="num">N</th></tr></thead>
-          <tbody id="rankingBody"><tr><td colspan="6" class="lobby-empty">lädt …</td></tr></tbody>
+    <section class="panel" aria-labelledby="ranking-title">
+      <h2 class="panel-title" id="ranking-title">Rangliste</h2>
+      <div class="table-wrap" tabindex="0" role="group" aria-labelledby="ranking-title">
+        <table class="table ranking">
+          <thead><tr><th class="num">Platz</th><th>Spieler</th><th class="num">Elo</th><th class="num">Siege</th><th class="num">Remis</th><th class="num">Niederlagen</th></tr></thead>
+          <tbody data-ranking><tr><td colspan="6" class="lobby-empty">Lädt …</td></tr></tbody>
         </table>
-      </section>
-      <section class="panel">
-        <h2 class="panel-title">Deine Bilanz</h2>
-        <p id="myStats" class="lobby-meta">lädt …</p>
-      </section>
-    </div>
+      </div>
+    </section>
   </div>
 </div>
 {% endblock %}
 {% block scripts %}
-<script src="{{ url_for('static', filename='chess_lobby.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/chess-lobby.js') }}"></script>
 {% endblock %}

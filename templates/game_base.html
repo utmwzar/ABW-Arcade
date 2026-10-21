@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% from "_macros.html" import controls %}
+{# Gemeinsame Hülle der Arcade-Spiele. Die IDs (board, overlay, overlay-title, overlay-text,
+   startBtn, leaderboard, personal und die Werte im Block stats) lesen die Spiel-Skripte. #}
+{% block title %}{{ game.title }} · ABW Arcade{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/games.css') }}">
+{% endblock %}
+{% block main_class %}page game-page{% endblock %}
+
+{% block content %}
+<div class="game-shell{% if self.layout()|trim %} is-wide{% endif %}">
+<div class="game-head">
+  <a class="back-link" href="{{ url_for('index') }}"><svg class="icon icon-back" aria-hidden="true"><use href="#i-chevron"/></svg>Alle Spiele</a>
+  <h1 class="page-title">{{ game.title }}</h1>
+</div>
+
+<div class="game-layout {% block layout %}{% endblock %}" style="--game: var(--game-{{ game.slug }})">
+  <section class="panel stats" aria-label="Spielstand">
+    {% block stats %}{% endblock %}
+    <button class="btn btn-secondary btn-sm stats-pause" type="button" data-pause hidden></button>
+  </section>
+
+  <section class="board-wrap" aria-label="Spielfeld">
+    {% block board %}{% endblock %}
+    <div id="overlay" class="overlay">
+      <div class="overlay-card" role="group" aria-labelledby="overlay-title" tabindex="-1">
+        <h2 id="overlay-title" class="overlay-title">BEREIT?</h2>
+        <div id="overlay-text" class="overlay-text">
+          <p>{{ game.goal }}</p>
+          <div class="overlay-controls">{{ controls(game) }}</div>
+        </div>
+        <div class="overlay-actions">
+          <button id="startBtn" class="btn btn-lg" type="button" data-label="{% block start_label %}Spiel starten{% endblock %}">{{ self.start_label() }} <span class="hint">Enter</span></button>
+          <button id="overlay-secondary" class="btn btn-secondary btn-lg" type="button" hidden></button>
+        </div>
+      </div>
+    </div>
+    <p id="arcade-live" class="visually-hidden" aria-live="polite"></p>
+  </section>
+
+  {% block side_extra %}{% endblock %}
+
+  <section class="panel controls-panel" aria-labelledby="controls-title">
+    <h2 class="panel-title" id="controls-title">Steuerung</h2>
+    {{ controls(game) }}
+  </section>
+
+  <section class="panel leaderboard" aria-labelledby="lb-title">
+    <h2 class="panel-title" id="lb-title">Leaderboard</h2>
+    <ol id="leaderboard" class="lb-list"><li class="lb-empty">Lädt …</li></ol>
+    <p id="personal" class="personal"></p>
+  </section>
+</div>
+</div>
+{% endblock %}

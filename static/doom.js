@@ -3,9 +3,11 @@
  * + .wasm, GPL). This file only: detects available WADs, fetches the chosen WAD
  * with a progress bar, wires up the Emscripten Module object and starts main().
  * Everything runs client-side; the server just serves static files.
+ * Loaded as an ES module so the sound setting comes from js/prefs.js.
  */
-(() => {
-  "use strict";
+import { get as pref } from "./js/prefs.js";
+
+{
 
   const BASE = "/static/doom/";
   const canvas = document.getElementById("canvas");
@@ -18,22 +20,6 @@
   const fsBtn = document.getElementById("fsBtn");
 
   let started = false;
-
-  // Offer original WADs if the admin dropped them into static/doom/.
-  async function detectWads() {
-    for (const wad of ["doom1.wad", "doom2.wad"]) {
-      try {
-        const res = await fetch(BASE + wad, { method: "HEAD" });
-        if (res.ok) {
-          const btn = document.createElement("button");
-          btn.className = "btn";
-          btn.dataset.wad = wad;
-          btn.textContent = `Starten (${wad})`;
-          wadButtons.appendChild(btn);
-        }
-      } catch (e) { /* not present */ }
-    }
-  }
 
   async function fetchWithProgress(url, onPct) {
     const res = await fetch(url);
@@ -53,35 +39,38 @@
     return buf;
   }
 
-  async function start(wadName) {
+  // wadName: Name im Spiel (doom1.wad, freedoom1.wad …), file: Datei auf dem Server
+  // in ihrer echten Schreibweise (DOOM1.WAD geht auch).
+  async function start(wadName, file) {
     if (started) return;
     started = true;
     wadButtons.style.display = "none";
     progWrap.style.display = "";
-    titleEl.textContent = "LÄDT …";
+    titleEl.textContent = "LÄDT";
 
     let wadBytes, cfgBytes;
     try {
-      textEl.textContent = `${wadName} wird geladen`;
-      wadBytes = await fetchWithProgress(BASE + wadName, (pct) => {
+      textEl.textContent = "Spieldaten werden geladen …";
+      wadBytes = await fetchWithProgress(BASE + file, (pct) => {
         prog.style.width = pct + "%";
-        textEl.textContent = `${wadName} wird geladen — ${pct}%`;
+        textEl.textContent = `Spieldaten werden geladen: ${pct} %`;
       });
       cfgBytes = new Uint8Array(await (await fetch(BASE + "default.cfg")).arrayBuffer());
     } catch (e) {
       started = false;
-      titleEl.textContent = "FEHLER";
-      textEl.textContent = "Download fehlgeschlagen — Seite neu laden und erneut versuchen.";
+      titleEl.textContent = "KEINE VERBINDUNG";
+      textEl.textContent = "Die Spieldaten ließen sich nicht laden. Lade die Seite neu und versuch es noch einmal.";
       wadButtons.style.display = "";
       progWrap.style.display = "none";
       return;
     }
 
-    textEl.textContent = "Engine startet …";
+    textEl.textContent = "DOOM startet …";
 
     const args = ["-iwad", wadName, "-window", "-nogui", "-nomusic",
                   "-config", "default.cfg"];
-    if (new URLSearchParams(location.search).has("nosound")) args.push("-nosound");
+    // Ton nur, wenn er in den Einstellungen eingeschaltet ist (Standard: stumm).
+    if (!pref("doom.sound") || new URLSearchParams(location.search).has("nosound")) args.push("-nosound");
 
     window.Module = {
       noInitialRun: true,
@@ -92,35 +81,37 @@
         Module.FS.writeFile("default.cfg", cfgBytes);
       }],
       onRuntimeInitialized: () => {
-        overlay.classList.add("hidden");
+        overlay.hidden = true;
         fsBtn.disabled = false;
         canvas.focus();
         const main = window.callMain || Module.callMain;
         if (main) {
           main(args);
         } else {
-          overlay.classList.remove("hidden");
-          titleEl.textContent = "FEHLER";
-          textEl.textContent = "Engine-Einstieg (callMain) nicht gefunden.";
+          overlay.hidden = false;
+          titleEl.textContent = "STARTFEHLER";
+          textEl.textContent = "DOOM ließ sich nicht starten. Lade die Seite neu; wenn es bleibt, sag einem Admin Bescheid.";
+          console.error("DOOM: callMain fehlt in websockets-doom.js");
         }
       },
       print: (t) => console.log(t),
       printErr: (t) => console.error(t),
-      setStatus: (t) => { if (t) textEl.textContent = t; },
+      setStatus: () => {},   // Statusmeldungen der Engine sind englisch und technisch
     };
 
     const s = document.createElement("script");
     s.src = BASE + "websockets-doom.js";
     s.onerror = () => {
-      titleEl.textContent = "FEHLER";
-      textEl.textContent = "Engine (websockets-doom.js) nicht gefunden.";
+      titleEl.textContent = "STARTFEHLER";
+      textEl.textContent = "DOOM ließ sich nicht starten. Lade die Seite neu; wenn es bleibt, sag einem Admin Bescheid.";
+      console.error("DOOM: websockets-doom.js nicht gefunden");
     };
     document.body.appendChild(s);
   }
 
   wadButtons.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-wad]");
-    if (btn) start(btn.dataset.wad);
+    if (btn) start(btn.dataset.wad, btn.dataset.file || btn.dataset.wad);
   });
 
   fsBtn.addEventListener("click", () => {
@@ -130,6 +121,4 @@
       canvas.requestFullscreen();
     }
   });
-
-  detectWads();
-})();
+}

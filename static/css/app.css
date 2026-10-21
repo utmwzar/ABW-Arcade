@@ -1,0 +1,362 @@
+/*
+ * ABW Arcade – Grundgerüst: Seite, Kopfleiste, Bedienelemente, Meldungen,
+ * Einstellungen. Alle Werte kommen aus tokens.css.
+ */
+
+/* ---------- Basis ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scrollbar-color: var(--line-strong) var(--bg); }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font: 400 var(--fs-md)/1.5 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4, p, ol, ul, dl, dd, figure { margin: 0; }
+h1, h2, h3, h4 { text-wrap: balance; }
+p, li, dd { text-wrap: pretty; }
+ol, ul { padding: 0; list-style: none; }
+img, svg, canvas { display: block; max-width: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:hover { color: var(--accent-hover); }
+::selection { background: var(--accent); color: var(--accent-ink); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+[hidden] { display: none !important; }
+.visually-hidden {
+  position: absolute !important; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* Bewegung: Systemvorgabe, außer der Spieler hat „Voll“ gewählt; „Reduziert“
+   und „Aus“ aus den Einstellungen gelten immer. JS-Animationen prüft fx.js. */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="full"]) *, :root:not([data-motion="full"]) *::before, :root:not([data-motion="full"]) *::after {
+    animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important; scroll-behavior: auto !important;
+  }
+}
+:root[data-motion="reduced"] *, :root[data-motion="reduced"] *::before, :root[data-motion="reduced"] *::after,
+:root[data-motion="off"] *, :root[data-motion="off"] *::before, :root[data-motion="off"] *::after {
+  animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important; scroll-behavior: auto !important;
+}
+
+.icon {
+  width: 20px; height: 20px; flex: none;
+  fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+
+.skip-link {
+  position: absolute; left: var(--s-4); top: -100px; z-index: var(--z-toast);
+  background: var(--accent); color: var(--accent-ink); font-weight: 700;
+  padding: var(--s-2) var(--s-4); border-radius: var(--r-sm); text-decoration: none;
+}
+.skip-link:focus { top: var(--s-2); }
+
+/* ---------- Kopfleiste ---------- */
+.topbar {
+  position: relative; z-index: var(--z-topbar);
+  background: var(--bg-raised); border-bottom: 1px solid var(--line);
+}
+.topbar-inner {
+  max-width: var(--page-max); margin-inline: auto; height: 64px;
+  padding-inline: var(--gutter);
+  display: flex; align-items: center; gap: var(--s-8);
+}
+.wordmark {
+  font: var(--pixel-sm)/1 var(--font-pixel); color: var(--text);
+  text-decoration: none; white-space: nowrap;
+}
+.wordmark span { color: var(--accent); }
+.wordmark:hover { color: var(--text); }
+.topbar-panel { flex: 1; display: flex; align-items: center; gap: var(--s-8); align-self: stretch; }
+.topnav { display: flex; gap: var(--s-6); align-self: stretch; }
+.topnav a {
+  display: flex; align-items: center; padding-top: 3px;
+  color: var(--text-muted); text-decoration: none; font-weight: 600;
+  border-bottom: 3px solid transparent;
+  transition: color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out);
+}
+.topnav a:hover { color: var(--text); }
+.topnav a[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); }
+.usernav { margin-left: auto; display: flex; align-items: center; gap: var(--s-2); }
+.who { display: flex; align-items: center; gap: var(--s-2); font-weight: 600; margin-right: var(--s-2); }
+.avatar {
+  width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--surface-2); color: var(--accent); font-weight: 800; font-size: var(--fs-sm);
+  border: 1px solid var(--line-strong);
+}
+.who-name { max-width: 16ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.usernav form { margin: 0; }
+.btn.menu-btn { display: none; }
+
+/* Mittlere Breiten (Tablet quer, kleines Fenster): Einstellungen und Abmelden
+   nur als Symbol; die Beschriftung bleibt für Screenreader und als Tooltip. */
+@media (min-width: 861px) and (max-width: 1080px) {
+  .usernav .btn-label {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip-path: inset(50%); white-space: nowrap;
+  }
+  .usernav .btn { padding-inline: var(--s-2); }
+}
+
+/* Schmal (Handy, Tablet hochkant): alles hinter „Menü“. */
+@media (max-width: 860px) {
+  .topbar-inner { height: 56px; gap: var(--s-4); }
+  .btn.menu-btn { display: inline-flex; margin-left: auto; }
+  .topbar-panel {
+    display: none; position: absolute; left: 0; right: 0; top: 100%;
+    flex-direction: column; align-items: stretch; gap: var(--s-4);
+    padding: var(--s-4) var(--gutter) var(--s-5);
+    background: var(--bg-raised); border-bottom: 1px solid var(--line); box-shadow: var(--shadow-3);
+  }
+  .topbar.is-open .topbar-panel { display: flex; }
+  .topnav { flex-direction: column; gap: 0; }
+  .topnav a { padding: var(--s-3) 0; border-bottom: 1px solid var(--line); }
+  .topnav a[aria-current="page"] { border-bottom-color: var(--line); color: var(--accent); }
+  .usernav { margin-left: 0; flex-wrap: wrap; }
+}
+
+/* ---------- Seite ---------- */
+.page {
+  max-width: var(--page-max); margin-inline: auto;
+  padding: var(--s-8) var(--gutter) var(--s-12);
+}
+.page-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-2) var(--s-5); margin-bottom: var(--s-6); }
+.page-title { font: var(--pixel-md)/1.3 var(--font-pixel); letter-spacing: 0; }
+.page-sub { color: var(--text-muted); max-width: 70ch; }
+.section-title { font-size: var(--fs-xl); font-weight: 700; line-height: 1.25; }
+/* Kopf einer Unterseite: Zurück-Link und Titel (Spiele, Schach) */
+.game-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-5); margin-bottom: var(--s-6); }
+.back-link {
+  display: inline-flex; align-items: center; gap: var(--s-1);
+  color: var(--text-muted); font-weight: 600; text-decoration: none;
+}
+.back-link:hover { color: var(--text); }
+.icon-back { width: 18px; height: 18px; transform: rotate(180deg); }
+
+/* ---------- Schaltflächen ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+  min-height: 42px; padding: 0 var(--s-4);
+  border: 1px solid transparent; border-radius: var(--r-md);
+  background: var(--accent); color: var(--accent-ink);
+  font-weight: 700; font-size: var(--fs-md); line-height: 1.1; text-decoration: none;
+  cursor: pointer; user-select: none;
+  transition: background-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out),
+              border-color var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-out);
+}
+.btn:hover { background: var(--accent-hover); color: var(--accent-ink); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled, .btn[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; transform: none; }
+.btn-secondary { background: var(--surface-2); color: var(--text); border-color: var(--line-strong); }
+.btn-secondary:hover { background: var(--surface-2-hover); color: var(--text); }
+.btn-ghost { background: transparent; color: var(--text-muted); }
+.btn-ghost:hover { background: var(--surface); color: var(--text); }
+.btn-danger { background: transparent; color: var(--danger); border-color: rgb(240 96 107 / 0.5); }
+.btn-danger:hover { background: var(--danger-soft); color: var(--danger); }
+.btn-danger-solid { background: var(--danger); color: var(--danger-ink); }
+.btn-danger-solid:hover { background: var(--danger-hover); color: var(--danger-ink); }
+.btn-sm { min-height: 34px; padding: 0 var(--s-3); font-size: var(--fs-sm); border-radius: var(--r-sm); }
+.btn-lg { min-height: 50px; padding: 0 var(--s-6); font-size: var(--fs-lg); }
+.btn .icon { width: 18px; height: 18px; }
+.btn .hint {
+  font: 700 var(--fs-xs)/1 var(--font-ui); padding: 4px 6px; border-radius: 4px;
+  background: rgb(0 0 0 / 0.16); color: inherit;
+}
+.btn-secondary .hint, .btn-ghost .hint { background: var(--bg); color: var(--text-muted); }
+/* Tastenhinweise nur, wo es eine Tastatur gibt */
+@media (hover: none) { .btn .hint { display: none; } }
+
+code {
+  font: 600 0.92em/1 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  background: var(--surface-2); padding: 2px 5px; border-radius: 4px;
+}
+
+/* ---------- Tastenkappen ---------- */
+kbd {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 26px; height: 26px; padding: 0 var(--s-2);
+  font: 700 var(--fs-xs)/1 var(--font-ui); color: var(--text);
+  background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+  box-shadow: var(--shadow-1);
+}
+
+kbd.key-arrow { padding: 0; }
+kbd .icon { width: 14px; height: 14px; stroke-width: 2.4; }
+.icon-left { transform: rotate(-90deg); }
+.icon-right { transform: rotate(90deg); }
+.icon-down { transform: rotate(180deg); }
+
+/* Steuerung eines Spiels (Registry in app.py, Baustein in _macros.html) */
+.controls { display: grid; grid-template-columns: auto 1fr; gap: var(--s-2) var(--s-3); }
+.controls li { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; align-items: center; }
+.controls-keys { display: flex; gap: var(--s-1); }
+.controls-hint { margin-top: var(--s-3); }
+
+/* Gesten (game.touch): "Immer" zeigt sie überall, "Automatisch" auf Handy und
+   Tablet statt der Tasten. data-touch setzen base.html und shell.js. */
+.controls.controls-touch { display: none; margin-top: var(--s-3); }
+html[data-touch="on"] .controls.controls-touch { display: grid; }
+@media (pointer: coarse) {
+  html:not([data-touch="off"]) .controls.controls-touch { display: grid; margin-top: 0; }
+  html:not([data-touch="off"]) .has-touch { display: none; }
+}
+.gesture {
+  display: inline-flex; align-items: center; gap: 2px; height: 26px; padding: 0 var(--s-3);
+  font: 700 var(--fs-xs)/1 var(--font-ui); color: var(--text); white-space: nowrap;
+  background: var(--surface-2); border-radius: var(--r-pill);
+}
+.gesture .icon { width: 13px; height: 13px; stroke-width: 2.4; }
+.gesture .icon:first-of-type { margin-left: var(--s-1); }
+.nowrap { white-space: nowrap; }
+
+/* ---------- Markierungen ---------- */
+.tag {
+  display: inline-flex; align-items: center; height: 22px; padding: 0 var(--s-2);
+  border-radius: var(--r-sm); font-size: var(--fs-xs); font-weight: 700; line-height: 1; white-space: nowrap;
+}
+.tag-accent { background: var(--accent-soft); color: var(--accent); }
+.tag-gold { background: var(--gold-soft); color: var(--gold); }
+/* Gold heißt Highscore und nichts anderes (DESIGN.md); Werte bekommen es nur ausdrücklich. */
+.stat-gold { color: var(--gold); }
+.tag-muted { background: var(--surface-2); color: var(--text-muted); }
+
+/* ---------- Formulare ---------- */
+.form { display: grid; gap: var(--s-4); }
+.field { display: grid; gap: var(--s-2); }
+.field > label, .label { font-weight: 600; font-size: var(--fs-sm); }
+.hint-text { font-size: var(--fs-xs); color: var(--text-muted); }
+.input, .select {
+  width: 100%; min-height: 44px; padding: 0 var(--s-3);
+  background: var(--bg); color: var(--text);
+  border: 1px solid var(--line-strong); border-radius: var(--r-md);
+  transition: border-color var(--dur-short) var(--ease-out);
+}
+.input::placeholder { color: var(--text-muted); }
+.input:hover, .select:hover { border-color: var(--line-hover); }
+.input:focus-visible, .select:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
+.input[aria-invalid="true"] { border-color: var(--danger); }
+
+/* ---------- Flächen ---------- */
+.panel {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
+  padding: var(--s-5);
+  min-width: 0;   /* im Grid nie breiter als die Spalte: breite Tabellen scrollen in .table-wrap */
+}
+.panel-title { font-size: var(--fs-lg); font-weight: 700; line-height: 1.3; margin-bottom: var(--s-3); }
+.panel-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-3); margin-bottom: var(--s-4); }
+.panel-head .panel-title { margin-bottom: 0; }
+.panel-head-actions { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.muted { color: var(--text-muted); }
+
+/* ---------- Meldungen ---------- */
+.flashes { display: grid; gap: var(--s-2); margin-bottom: var(--s-6); }
+.flash {
+  display: flex; gap: var(--s-3); align-items: flex-start;
+  padding: var(--s-3) var(--s-4); border-radius: var(--r-md); border: 1px solid; font-weight: 500;
+}
+.flash .icon { margin-top: 2px; }
+.flash-error { background: var(--danger-soft); border-color: rgb(240 96 107 / 0.45); color: #ffd9dc; }
+.flash-ok { background: var(--ok-soft); border-color: rgb(74 208 138 / 0.45); color: #d3f7e2; }
+
+/* ---------- Tabellen ---------- */
+/* Breite Tabellen scrollen seitlich; per Tab erreichbar, damit das auch mit Pfeiltasten geht. */
+.table-wrap { overflow-x: auto; border-radius: var(--r-sm); }
+.table-wrap:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+.table th {
+  text-align: left; font-weight: 600; color: var(--text-muted);
+  padding: var(--s-2) var(--s-3); border-bottom: 1px solid var(--line-strong); white-space: nowrap;
+}
+.table td { padding: var(--s-3); border-bottom: 1px solid var(--line); vertical-align: middle; }
+.table time { white-space: nowrap; }   /* „2026-10-21“ bricht nie am Bindestrich um */
+.table tr:last-child td { border-bottom: 0; }
+.table .num { text-align: right; }
+.table a { font-weight: 600; text-decoration: none; }
+.table a:hover { text-decoration: underline; }
+
+/* ---------- Anmelden und Registrieren ---------- */
+.auth { min-height: 100vh; display: grid; place-items: center; padding: var(--s-8) var(--gutter); }
+.auth-card {
+  width: min(440px, 100%); display: grid; gap: var(--s-6);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
+  padding: var(--s-8); box-shadow: var(--shadow-2);
+}
+.auth-card .wordmark { display: block; font-size: var(--pixel-md); line-height: 1.3; margin-bottom: var(--s-6); }
+.auth-lead { color: var(--text-muted); margin-top: var(--s-2); }
+.auth-card .flashes { margin-bottom: 0; }
+.auth-card .btn { width: 100%; }
+.auth-alt { color: var(--text-muted); font-size: var(--fs-sm); }
+
+/* ---------- Fehlerseiten ---------- */
+.error-page { max-width: 600px; margin: 12vh auto 0; display: grid; gap: var(--s-4); justify-items: start; }
+.error-page .error-code { font: var(--pixel-lg)/1 var(--font-pixel); color: var(--text-muted); }
+.error-page h1 { font-size: var(--fs-2xl); line-height: 1.2; }
+.error-page p { color: var(--text-muted); }
+
+/* ---------- Einstellungen ---------- */
+.dialog {
+  width: min(460px, calc(100vw - 32px)); max-height: calc(100dvh - 32px);
+  padding: 0; color: var(--text); background: var(--surface);
+  border: 1px solid var(--line-strong); border-radius: var(--r-lg); box-shadow: var(--shadow-3);
+}
+.dialog::backdrop { background: rgb(8 6 18 / 0.66); }
+.dialog-head {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-4);
+  padding: var(--s-5) var(--s-6); border-bottom: 1px solid var(--line);
+}
+.dialog-head h2, .dialog-title { font-size: var(--fs-xl); font-weight: 700; line-height: 1.25; }
+.dialog-sm { width: min(400px, calc(100vw - 32px)); }
+.dialog-sm .dialog-body { gap: var(--s-2); padding-top: var(--s-6); }
+.dialog-sm .dialog-body p { color: var(--text-muted); }
+.dialog-body { padding: var(--s-5) var(--s-6); display: grid; gap: var(--s-6); }
+.dialog-foot { padding: var(--s-4) var(--s-6) var(--s-5); display: flex; justify-content: flex-end; gap: var(--s-3); }
+.setting { border: 0; margin: 0; padding: 0; display: grid; gap: var(--s-2); }
+.setting legend { font-weight: 700; padding: 0; margin-bottom: var(--s-2); }
+.setting .hint-text { margin-top: calc(var(--s-1) * -1); }
+.segmented {
+  display: flex; gap: var(--s-1); padding: var(--s-1);
+  background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-md);
+}
+.segmented label { flex: 1; position: relative; }
+.segmented input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.segmented span {
+  display: block; text-align: center; padding: var(--s-2) var(--s-2); border-radius: var(--r-sm);
+  font-weight: 600; font-size: var(--fs-sm); color: var(--text-muted); cursor: pointer;
+}
+.segmented input:checked + span { background: var(--surface-2); color: var(--text); box-shadow: var(--shadow-1); }
+.segmented input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 1px; }
+.check { display: flex; align-items: center; gap: var(--s-3); cursor: pointer; }
+.check input { width: 20px; height: 20px; accent-color: var(--accent); margin: 0; }
+
+/* ---------- Overlay-Karte (Spiele und Schach) ---------- */
+.overlay-card {
+  width: min(100%, 360px); display: grid; gap: var(--s-4);
+  background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r-lg);
+  padding: var(--s-6); box-shadow: var(--shadow-3);
+  max-height: 100%; overflow: auto;
+}
+/* Die Karte bekommt den Fokus nur, damit Tasten nicht auf einem Knopf landen;
+   bedienbar sind ihre Knöpfe, und die zeigen den Fokus. */
+.overlay-card:focus, .overlay-card:focus-visible { outline: none; }
+.overlay-title { font: var(--pixel-sm)/1.4 var(--font-pixel); color: var(--text); }
+.overlay-actions { display: grid; gap: var(--s-2); }
+.overlay-actions .btn { width: 100%; }
+
+/* ---------- Kurzmeldungen ---------- */
+.toasts {
+  position: fixed; left: 50%; bottom: max(var(--s-6), env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%); z-index: var(--z-toast);
+  display: grid; gap: var(--s-2); width: min(480px, calc(100vw - 32px));
+}
+.toast {
+  display: flex; align-items: center; gap: var(--s-3); padding: var(--s-3) var(--s-4);
+  background: var(--surface-2); border: 1px solid var(--line-strong); border-radius: var(--r-md);
+  box-shadow: var(--shadow-3);
+}
+.toast .btn { margin-left: auto; }

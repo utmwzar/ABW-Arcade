@@ -1,33 +1,37 @@
 {% extends "base.html" %}
 {% block title %}Registrieren · ABW Arcade{% endblock %}
+{% block main_class %}auth{% endblock %}
+{% block flashes %}{% endblock %}
 {% block content %}
-<section class="card auth">
-  <h1 class="logo">ABW Arcade</h1>
-  <p class="tagline">Account erstellen</p>
-
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <div class="flashes">
-        {% for category, message in messages %}
-          <div class="flash flash-{{ category }}">{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
-  {% endwith %}
-
-  <form method="post" class="form" autocomplete="on">
-    <label>Username
-      <input name="username" autocomplete="username" minlength="3" maxlength="20" required autofocus>
-    </label>
-    <label>Passwort
-      <input name="password" type="password" autocomplete="new-password" minlength="6" required>
-    </label>
-    <label>Passwort wiederholen
-      <input name="password2" type="password" autocomplete="new-password" minlength="6" required>
-    </label>
-    <button type="submit" class="btn">Registrieren</button>
+<section class="auth-card" aria-labelledby="register-title">
+  <div>
+    <p class="wordmark" aria-hidden="true">ABW <span>ARCADE</span></p>
+    <h1 class="section-title" id="register-title">Account erstellen</h1>
+    <p class="auth-lead">Mit einem Account spielst du alle Spiele und erscheinst in den Leaderboards.</p>
+  </div>
+  {% include "_flash.html" %}
+  <form method="post" class="form" autocomplete="on" novalidate>
+    <div class="field">
+      <label for="username">Benutzername</label>
+      <input class="input" id="username" name="username" autocomplete="username" minlength="3" maxlength="20"
+             required aria-describedby="username-hint" value="{{ form_username }}"
+             {% if error_field != 'password' %}autofocus{% endif %}
+             {% if error_field == 'username' %}aria-invalid="true"{% endif %}>
+      <p class="hint-text" id="username-hint">3 bis 20 Zeichen: Buchstaben, Zahlen und Unterstrich.</p>
+    </div>
+    <div class="field">
+      <label for="password">Passwort</label>
+      <input class="input" id="password" name="password" type="password" autocomplete="new-password" minlength="6" required
+             aria-describedby="password-hint" {% if error_field == 'password' %}autofocus aria-invalid="true"{% endif %}>
+      <p class="hint-text" id="password-hint">Mindestens 6 Zeichen.</p>
+    </div>
+    <div class="field">
+      <label for="password2">Passwort wiederholen</label>
+      <input class="input" id="password2" name="password2" type="password" autocomplete="new-password" minlength="6" required
+             {% if error_field == 'password' %}aria-invalid="true"{% endif %}>
+    </div>
+    <button type="submit" class="btn btn-lg">Account erstellen</button>
   </form>
-
-  <p class="alt">Schon einen Account? <a href="{{ url_for('login') }}">Einloggen</a></p>
+  <p class="auth-alt">Schon einen Account? <a href="{{ url_for('login') }}">Anmelden</a></p>
 </section>
 {% endblock %}

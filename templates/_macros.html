@@ -1,0 +1,42 @@
+{# Gemeinsame Bausteine. Einbinden mit {% from "_macros.html" import ... %}. #}
+
+{% set ARROWS = {"Left": "Pfeil links", "Right": "Pfeil rechts", "Up": "Pfeil hoch", "Down": "Pfeil runter"} %}
+{% set TOWARDS = {"Left": "nach links", "Right": "nach rechts", "Up": "nach oben", "Down": "nach unten"} %}
+
+{# Eine Taste als Tastenkappe; Pfeiltasten erscheinen als Pfeil-Symbol. #}
+{% macro key(name) -%}
+{%- if name in ARROWS -%}
+<kbd class="key-arrow"><svg class="icon icon-{{ name|lower }}" aria-hidden="true"><use href="#i-up"/></svg><span class="visually-hidden">{{ ARROWS[name] }}</span></kbd>
+{%- else -%}
+<kbd>{{ name }}</kbd>
+{%- endif -%}
+{%- endmacro %}
+
+{# Steuerung eines Spiels aus der GAMES-Registry in app.py. Hat das Spiel Gesten
+   (game.touch), stehen sie in einer zweiten Liste; auf Handy und Tablet ersetzt
+   sie die Tasten (CSS: html[data-touch], (pointer: coarse)). #}
+{% macro controls(game) -%}
+{%- set kbd = " has-touch" if game.touch else "" -%}
+<ul class="controls{{ kbd }}">
+  {% for keys, does in game.controls %}
+  <li><span class="controls-keys">{% for k in keys %}{{ key(k) }}{% endfor %}</span><span>{{ does }}</span></li>
+  {% endfor %}
+</ul>
+{% if game.hint %}<p class="hint-text controls-hint{{ kbd }}">{{ game.hint }}</p>{% endif %}
+{% if game.touch %}
+<ul class="controls controls-touch">
+  {% for parts, does in game.touch %}
+  <li><span class="controls-keys"><span class="gesture">{{ parts[0] }}
+    {%- for a in parts[1:] %}<svg class="icon icon-{{ a|lower }}" aria-hidden="true"><use href="#i-up"/></svg>{% endfor -%}
+    {%- if parts|length > 1 %}<span class="visually-hidden"> {% for a in parts[1:] %}{{ TOWARDS[a] }}{% if not loop.last %} oder {% endif %}{% endfor %}</span>{% endif -%}
+  </span></span><span>{{ does }}</span></li>
+  {% endfor %}
+</ul>
+{% endif %}
+{%- endmacro %}
+
+{# Spielfeld der Arcade-Spiele: w × h sind die Spielkoordinaten. Die Größe auf
+   der Seite rechnet games.css aus --bw/--bh, die Bildpunkte static/js/canvas.js. #}
+{% macro game_canvas(w, h) -%}
+<canvas id="board" class="game-canvas" width="{{ w }}" height="{{ h }}" style="--bw: {{ w }}; --bh: {{ h }}"></canvas>
+{%- endmacro %}

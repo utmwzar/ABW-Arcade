@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "description": "Kennzeichnet static/js/ als ES-Module, damit node --test die Module laden kann. Die Engines in static/ bleiben davon unberührt (CommonJS/UMD).",
+  "type": "module"
+}

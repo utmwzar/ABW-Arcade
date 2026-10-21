@@ -4,82 +4,125 @@
  * does rendering, input and the fixed-timestep loop, and it RECORDS every
  * input as { tick, action }. On game over it posts the recorded log to the
  * server, which replays it and computes the authoritative score. The client
- * never sends a score.
+ * never sends a score. Start, pause and the result screen: js/arcade.js.
  *
  * The loop must match tetris_engine.simulate() exactly: for each tick we first apply
  * the inputs recorded at that tick, then one gravityStep, then advance.
+ * Effects only read the engine (js/observe/tetris.js) and keep their own clock.
  */
-(() => {
-  "use strict";
+import { createArcade, fmt } from "./js/arcade.js";
+import { crisp } from "./js/canvas.js";
+import { createCanvasFx } from "./js/fx-canvas.js";
+import { motion } from "./js/fx.js";
+import { bindTetris } from "./js/touch.js";
+import * as observe from "./js/observe/tetris.js";
 
-  const TE = window.TetrisEngine;
-  const CELL = 30;
-  const COLS = TE ? TE.COLS : 10;
-  const ROWS = TE ? TE.ROWS : 20;
+const TE = window.TetrisEngine;
+const CELL = 30;
+const COLS = TE.COLS;
+const ROWS = TE.ROWS;
+const W = COLS * CELL;   // 300 x 600 game units
+const H = ROWS * CELL;
+const NEXT = 120;
 
-  const COLORS = {
-    1: "#00e5e5", 2: "#f5d90a", 3: "#b249f8", 4: "#3cdc5a",
-    5: "#ff4d5e", 6: "#3d7bff", 7: "#ff9d2f",
-  };
+// Farben aus static/css/tokens.css; L bleibt wie gewohnt orange.
+const COLORS = {
+  1: "#2ccfe3", 2: "#f7c04a", 3: "#a98bfa", 4: "#4ad08a",
+  5: "#f0606b", 6: "#6c8cff", 7: "#f6a35f",
+};
+const COL_GRID = "rgba(255,255,255,0.04)";
+const COL_TEXT = "#eeeafe";
+const COL_DANGER = "#f0606b";
 
-  // Wall-clock per logical tick. Only affects feel/speed, not correctness:
-  // the server replays the recorded ticks regardless of real time.
-  const TICK_MS = 20;
-  const MAX_CATCHUP = 6; // cap ticks processed per frame (avoid stall spirals)
+// Wall-clock per logical tick. Only affects feel/speed, not correctness:
+// the server replays the recorded ticks regardless of real time.
+const TICK_MS = 20;
+const MAX_CATCHUP = 6; // cap ticks processed per frame (avoid stall spirals)
+const REVEAL = { min: 350, max: 1000 };   // Ergebniskarte nach den Effekten
 
-  const canvas = document.getElementById("board");
-  const ctx = canvas.getContext("2d");
-  const nextCanvas = document.getElementById("next");
-  const nctx = nextCanvas.getContext("2d");
+const canvas = document.getElementById("board");
+const nextCanvas = document.getElementById("next");
+const ctx = crisp(canvas, { width: W, height: H, onResize: () => draw() });
+const nctx = crisp(nextCanvas, { width: NEXT, height: NEXT, onResize: () => drawNext() });
+const fx = createCanvasFx({ width: W, height: H, motion });
+const scoreEl = document.getElementById("score");
+const linesEl = document.getElementById("lines");
+const levelEl = document.getElementById("level");
 
-  const scoreEl = document.getElementById("score");
-  const linesEl = document.getElementById("lines");
-  const levelEl = document.getElementById("level");
-  const overlay = document.getElementById("overlay");
-  const overlayTitle = document.getElementById("overlay-title");
-  const overlayText = document.getElementById("overlay-text");
-  const startBtn = document.getElementById("startBtn");
+let engine = null;
+let recorded = [];
+let tickCount = 0;
+// { action, piece }: piece ist bei Gesten der Stein, auf dem sie begann.
+const pending = [];
+let accMs = 0;
+let lastFrame = 0;
+let rafId = null;
 
-  let engine = null;
-  let recorded = [];
-  let tickCount = 0;
-  let pending = [];
-  let accMs = 0;
-  let lastFrame = 0;
-  let playing = false, paused = false, finished = false, starting = false;
-  let currentGameId = null;
-  let rafId = null;
+const detail = (lines, level) => `${fmt(lines)} Lines · Level ${level}`;
+const local = () => ({ score: engine.score, detail: detail(engine.lines, engine.level) });
 
-  // ---------- rendering ----------
-  function drawCell(c, x, y, colorId, size = CELL) {
-    const px = x * size, py = y * size;
-    c.fillStyle = COLORS[colorId];
-    c.fillRect(px + 1, py + 1, size - 2, size - 2);
-    c.fillStyle = "rgba(255,255,255,0.18)";
-    c.fillRect(px + 1, py + 1, size - 2, Math.max(2, size * 0.14));
+const arcade = createArcade({
+  slug: "tetris",
+  startUrl: "/api/game/start",
+  finishUrl: "/api/game/finish",
+  canPause: true,
+  begin(data) {
+    engine = new TE.Engine(data.seed >>> 0);
+    engine.start();
+    recorded = [];
+    tickCount = 0;
+    pending.length = 0;
+    accMs = 0;
+    lastFrame = performance.now();
+    fx.reset();
+    syncHud();
+    drawNext();
+    draw();
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(frame);
+  },
+  resume() { lastFrame = performance.now(); },
+  inputs: () => recorded,
+  snapshot: local,
+  detail: (d) => detail(d.lines, d.level),
+  sync(d) {
+    scoreEl.textContent = fmt(d.score);
+    linesEl.textContent = fmt(d.lines);
+    levelEl.textContent = d.level;
+  },
+});
+
+// ---------- rendering ----------
+function drawCell(c, x, y, colorId, size = CELL) {
+  const px = x * size, py = y * size;
+  c.fillStyle = COLORS[colorId];
+  c.fillRect(px + 1, py + 1, size - 2, size - 2);
+  c.fillStyle = "rgba(255,255,255,0.22)";
+  c.fillRect(px + 1, py + 1, size - 2, Math.max(2, size * 0.12));
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.save();
+  fx.applyShake(ctx);
+
+  ctx.strokeStyle = COL_GRID;
+  ctx.lineWidth = 1;
+  for (let x = 1; x < COLS; x++) {
+    ctx.beginPath(); ctx.moveTo(x * CELL + 0.5, 0); ctx.lineTo(x * CELL + 0.5, H); ctx.stroke();
+  }
+  for (let y = 1; y < ROWS; y++) {
+    ctx.beginPath(); ctx.moveTo(0, y * CELL + 0.5); ctx.lineTo(W, y * CELL + 0.5); ctx.stroke();
   }
 
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    ctx.strokeStyle = "rgba(150,120,255,0.06)";
-    ctx.lineWidth = 1;
-    for (let x = 1; x < COLS; x++) {
-      ctx.beginPath(); ctx.moveTo(x * CELL, 0); ctx.lineTo(x * CELL, canvas.height); ctx.stroke();
-    }
-    for (let y = 1; y < ROWS; y++) {
-      ctx.beginPath(); ctx.moveTo(0, y * CELL); ctx.lineTo(canvas.width, y * CELL); ctx.stroke();
-    }
-
-    if (!engine) return;
-
+  if (engine) {
     const grid = engine.grid;
     for (let y = 0; y < ROWS; y++) {
       for (let x = 0; x < COLS; x++) if (grid[y][x]) drawCell(ctx, x, y, grid[y][x]);
     }
 
     const cur = engine.current;
-    if (cur) {
+    if (cur && !engine.gameOver) {
       const gy = engine.ghostY();
       ctx.globalAlpha = 0.18;
       cur.matrix.forEach((row, y) => row.forEach((v, x) => {
@@ -91,229 +134,152 @@
       }));
     }
   }
+  fx.draw(ctx);
+  ctx.restore();
+}
 
-  function drawNext() {
-    nctx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
-    if (!engine || !engine.nextType) return;
-    const m = TE.SHAPES[engine.nextType], size = 24;
-    let minX = 99, maxX = -1, minY = 99, maxY = -1;
-    m.forEach((row, y) => row.forEach((v, x) => {
-      if (v) { minX = Math.min(minX, x); maxX = Math.max(maxX, x); minY = Math.min(minY, y); maxY = Math.max(maxY, y); }
-    }));
-    const w = maxX - minX + 1, h = maxY - minY + 1;
-    const offX = (nextCanvas.width - w * size) / 2;
-    const offY = (nextCanvas.height - h * size) / 2;
-    for (let y = minY; y <= maxY; y++) {
-      for (let x = minX; x <= maxX; x++) {
-        if (!m[y][x]) continue;
-        const px = offX + (x - minX) * size, py = offY + (y - minY) * size;
-        nctx.fillStyle = COLORS[m[y][x]];
-        nctx.fillRect(px + 1, py + 1, size - 2, size - 2);
-        nctx.fillStyle = "rgba(255,255,255,0.18)";
-        nctx.fillRect(px + 1, py + 1, size - 2, Math.max(2, size * 0.14));
-      }
+function drawNext() {
+  nctx.clearRect(0, 0, NEXT, NEXT);
+  if (!engine || !engine.nextType) return;
+  const m = TE.SHAPES[engine.nextType], size = 24;
+  let minX = 99, maxX = -1, minY = 99, maxY = -1;
+  m.forEach((row, y) => row.forEach((v, x) => {
+    if (v) { minX = Math.min(minX, x); maxX = Math.max(maxX, x); minY = Math.min(minY, y); maxY = Math.max(maxY, y); }
+  }));
+  const offX = (NEXT - (maxX - minX + 1) * size) / 2;
+  const offY = (NEXT - (maxY - minY + 1) * size) / 2;
+  for (let y = minY; y <= maxY; y++) {
+    for (let x = minX; x <= maxX; x++) {
+      if (!m[y][x]) continue;
+      const px = offX + (x - minX) * size, py = offY + (y - minY) * size;
+      nctx.fillStyle = COLORS[m[y][x]];
+      nctx.fillRect(px + 1, py + 1, size - 2, size - 2);
+      nctx.fillStyle = "rgba(255,255,255,0.22)";
+      nctx.fillRect(px + 1, py + 1, size - 2, Math.max(2, size * 0.12));
     }
   }
+}
 
-  function syncHud() {
-    scoreEl.textContent = engine ? engine.score : 0;
-    linesEl.textContent = engine ? engine.lines : 0;
-    levelEl.textContent = engine ? engine.level : 1;
-  }
+function syncHud() {
+  scoreEl.textContent = fmt(engine ? engine.score : 0);
+  linesEl.textContent = fmt(engine ? engine.lines : 0);
+  levelEl.textContent = engine ? engine.level : 1;
+}
 
-  function showOverlay(title, html, showButton) {
-    overlayTitle.textContent = title;
-    overlayText.innerHTML = html;
-    startBtn.style.display = showButton ? "" : "none";
-    overlay.classList.remove("hidden");
-  }
-
-  // ---------- loop (mirrors tetris_engine.simulate tick order) ----------
-  function stepTick() {
-    if (pending.length) {
-      for (let i = 0; i < pending.length; i++) {
-        recorded.push({ tick: tickCount, action: pending[i] });
-        engine.applyAction(pending[i]);
-        if (engine.gameOver) break;
+// ---------- effects (read-only, from js/observe/tetris.js) ----------
+function react(events) {
+  for (const ev of events) {
+    if (ev.type === "drop") {
+      // Spur je Spalte vom Start bis zur Landung.
+      const dist = ev.to - ev.from;
+      const top = new Map();
+      for (const [x, y, v] of ev.cells) {
+        if (!top.has(x) || y < top.get(x)[0]) top.set(x, [y, v]);
       }
-      pending.length = 0;
+      for (const [x, [y, v]] of top) {
+        fx.trail({ x: x * CELL + 4, y: (y - dist) * CELL, w: CELL - 8, h: dist * CELL, color: COLORS[v], alpha: 0.22, ms: 180 });
+      }
+    } else if (ev.type === "clear") {
+      fx.flash({ rects: ev.rows.map((r) => ({ x: 0, y: r.y * CELL, w: W, h: CELL })), color: COL_TEXT, alpha: 0.5, ms: 220 });
+      for (const row of ev.rows) {
+        row.cells.forEach((v, x) => {
+          fx.burst(x * CELL + CELL / 2, row.y * CELL + CELL / 2, {
+            count: 3, color: COLORS[v], angle: x < COLS / 2 ? Math.PI : 0, spread: 1.8,
+            speed: [60, 240], gravity: 420, life: [350, 650], size: [3, 5],
+          });
+        });
+      }
+      if (ev.rows.length === 4) {
+        // in der Farbe des I-Steins, mit dem ein Tetris meist gelingt; Gold bleibt dem Highscore
+        fx.text(W / 2, H * 0.42, "TETRIS", { color: COLORS[1], size: 24 });
+        fx.shake(3, 220);
+      }
+    } else if (ev.type === "level") {
+      fx.text(W / 2, H * 0.3, `LEVEL ${ev.level}`, { color: COL_TEXT, size: 16 });
+    } else if (ev.type === "over") {
+      fx.shake(5, 360);
+      fx.flash({ color: COL_DANGER, alpha: 0.22, ms: 320 });
     }
-    if (engine.gameOver) return;
-    engine.gravityStep();
-    tickCount++;
-    syncHud();
   }
+}
 
-  function frame(now) {
-    if (!playing) return;
-    if (paused) { lastFrame = now; rafId = requestAnimationFrame(frame); return; }
+// ---------- loop (mirrors tetris_engine.simulate tick order) ----------
+function stepTick() {
+  if (pending.length) {
+    for (let i = 0; i < pending.length; i++) {
+      const { action, piece } = pending[i];
+      // Eine Geste gilt dem Stein, auf dem sie begann. Liegt er schon, verfällt
+      // sie, statt den nächsten Stein zu treffen. Aufgezeichnet wird nur, was
+      // die Engine bekommt.
+      if (piece && piece !== engine.current) continue;
+      recorded.push({ tick: tickCount, action });
+      const before = observe.snap(engine);
+      engine.applyAction(action);
+      react(observe.diff(before, engine, action));
+      if (engine.gameOver) break;
+    }
+    pending.length = 0;
+  }
+  if (engine.gameOver) return;
+  const before = observe.snap(engine);
+  engine.gravityStep();
+  react(observe.diff(before, engine, null));
+  tickCount++;
+  syncHud();
+}
 
-    let dt = now - lastFrame;
-    lastFrame = now;
-    if (dt > 250) dt = 250;        // ignore huge gaps (tab was backgrounded)
+function frame(now) {
+  rafId = null;
+  let dt = now - lastFrame;
+  lastFrame = now;
+  if (dt > 250) dt = 250;        // ignore huge gaps (tab was backgrounded)
+  const state = arcade.state;
+  if (state === "paused" || state === "confirm") { rafId = requestAnimationFrame(frame); return; }
+
+  if (state === "playing") {
     accMs += dt;
-
     let steps = 0;
     while (accMs >= TICK_MS && steps < MAX_CATCHUP && !engine.gameOver) {
       stepTick();
       accMs -= TICK_MS;
       steps++;
     }
-    drawNext();
-    draw();
-
-    if (engine.gameOver) { finishGame(); return; }
-    rafId = requestAnimationFrame(frame);
-  }
-
-  // ---------- start / finish ----------
-  async function startGame() {
-    if (starting || playing) return;
-    if (!TE || !TE.Engine) { showOverlay("FEHLER", "Engine nicht geladen", true); return; }
-    starting = true;
-    showOverlay("LÄDT …", "Starte Spiel", false);
-
-    let data;
-    try {
-      const res = await fetch("/api/game/start", { method: "POST" });
-      if (res.status === 401) { window.location.href = "/login"; return; }
-      if (res.status === 429) {
-        starting = false;
-        showOverlay("LANGSAM", "Zu viele Spiele in kurzer Zeit – kurz warten", true);
-        startBtn.textContent = "Spiel starten";
-        return;
-      }
-      if (!res.ok) throw new Error("start failed");
-      data = await res.json();
-    } catch (e) {
-      starting = false;
-      showOverlay("FEHLER", "Server nicht erreichbar", true);
-      startBtn.textContent = "Erneut versuchen";
-      return;
-    }
-
-    currentGameId = data.game_id;
-    engine = new TE.Engine(data.seed >>> 0);
-    engine.start();
-    recorded = [];
-    tickCount = 0;
-    pending.length = 0;
-    accMs = 0;
-    lastFrame = performance.now();
-    paused = false; finished = false; playing = true; starting = false;
-
-    syncHud();
-    overlay.classList.add("hidden");
-    drawNext();
-    draw();
-    cancelAnimationFrame(rafId);
-    rafId = requestAnimationFrame(frame);
-  }
-
-  async function finishGame() {
-    if (finished) return;
-    playing = false;
-    finished = true;
-    cancelAnimationFrame(rafId);
-    draw();
-
-    const localLine = `Score <b>${Number(engine.score).toLocaleString("de-DE")}</b> &middot; ${engine.lines} Lines &middot; Level ${engine.level}`;
-    showOverlay("GAME OVER", localLine, true);
-    startBtn.textContent = "Nochmal spielen";
-
-    try {
-      const res = await fetch("/api/game/finish", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ game_id: currentGameId, inputs: recorded }),
-      });
-      if (res.ok) {
-        const d = await res.json();
-        // The server's replay is the source of truth for the leaderboard.
-        showOverlay("GAME OVER",
-          `Score <b>${Number(d.score).toLocaleString("de-DE")}</b> &middot; ${d.lines} Lines &middot; Level ${d.level}`,
-          true);
-        startBtn.textContent = "Nochmal spielen";
-        if (d.score !== engine.score) {
-          console.warn("client/server score mismatch", { client: engine.score, server: d.score });
-        }
-      }
-    } catch (e) { /* offline — keep the local display */ }
-
-    loadLeaderboard();
-  }
-
-  function togglePause() {
-    if (!playing || finished || (engine && engine.gameOver)) return;
-    paused = !paused;
-    if (paused) {
-      showOverlay("PAUSE", 'Drücke <kbd>P</kbd> zum Weiterspielen', false);
-    } else {
-      overlay.classList.add("hidden");
-      lastFrame = performance.now();
+    if (engine.gameOver) {
+      syncHud();
+      arcade.over(local(), { reveal: fx.settled(REVEAL) });
     }
   }
-
-  // ---------- leaderboard ----------
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, (c) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  }
-
-  async function loadLeaderboard() {
-    const lbEl = document.getElementById("leaderboard");
-    const personalEl = document.getElementById("personal");
-    try {
-      const res = await fetch("/api/leaderboard?game=tetris");
-      const data = await res.json();
-      const rows = data.leaderboard || [];
-      const meName = data.me && data.me.username;
-
-      if (rows.length === 0) {
-        lbEl.innerHTML = '<li class="lb-empty">Noch keine Scores – sei der Erste!</li>';
-      } else {
-        lbEl.innerHTML = rows.map((r, i) => `
-          <li>
-            <span class="lb-rank">${i + 1}</span>
-            <span class="lb-name ${r.username === meName ? "is-me" : ""}">${escapeHtml(r.username)}</span>
-            <span class="lb-score">${Number(r.score).toLocaleString("de-DE")}</span>
-          </li>`).join("");
-      }
-
-      if (data.me && data.me.best > 0) {
-        personalEl.innerHTML =
-          `Dein Bestwert: <b>${Number(data.me.best).toLocaleString("de-DE")}</b>` +
-          (data.me.rank ? ` &middot; Platz ${data.me.rank}` : "");
-      } else {
-        personalEl.innerHTML = "";
-      }
-    } catch (e) {
-      lbEl.innerHTML = '<li class="lb-empty">Leaderboard nicht erreichbar</li>';
-    }
-  }
-
-  // ---------- input ----------
-  const KEY_ACTION = {
-    ArrowLeft: "L", ArrowRight: "R", ArrowUp: "ROT", ArrowDown: "SOFT", " ": "HARD",
-  };
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && (!playing || finished)) { startGame(); return; }
-    if (e.key === "p" || e.key === "P") { togglePause(); return; }
-    if (!playing || paused || (engine && engine.gameOver)) return;
-    const action = KEY_ACTION[e.key];
-    if (action) {
-      e.preventDefault();
-      pending.push(action);   // applied at the next tick (deterministic)
-    }
-  });
-  startBtn.addEventListener("click", startGame);
-
-  // ---------- init ----------
-  syncHud();
-  draw();
+  fx.update(dt);
   drawNext();
-  showOverlay("BEREIT?", 'Drücke <kbd>Enter</kbd> zum Start', true);
-  startBtn.textContent = "Spiel starten";
-  loadLeaderboard();
-})();
+  draw();
+  // Nach dem Game Over läuft das Bild weiter, bis die Effekte durch sind.
+  if (arcade.state === "playing" || fx.busy()) rafId = requestAnimationFrame(frame);
+}
+
+// ---------- input ----------
+const KEY_ACTION = {
+  ArrowLeft: "L", ArrowRight: "R", ArrowUp: "ROT", ArrowDown: "SOFT", " ": "HARD",
+};
+
+document.addEventListener("keydown", (e) => {
+  if (!arcade.running || e.altKey || e.ctrlKey || e.metaKey) return;
+  const action = KEY_ACTION[e.key];
+  if (action) {
+    e.preventDefault();
+    pending.push({ action, piece: null });   // applied at the next tick (deterministic)
+  }
+});
+
+// Touch: Tippen dreht, Ziehen bewegt, nach unten wischen legt ab (js/touch.js).
+let gesturePiece = null;
+bindTetris(canvas, {
+  cols: COLS,
+  onStart() { gesturePiece = engine && engine.current; },
+  onAction(action) {
+    if (arcade.running && gesturePiece) pending.push({ action, piece: gesturePiece });
+  },
+});
+
+// ---------- init ----------
+syncHud();
+draw();

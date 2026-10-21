@@ -1,168 +1,129 @@
 {% extends "base.html" %}
 {% block title %}Spiele · ABW Arcade{% endblock %}
-{% block content %}
-<div class="hub-shell">
-  <header class="topbar">
-    <span class="logo logo-sm">ABW Arcade</span>
-    <div class="topbar-right">
-      <span class="who">Hi, {{ username }}</span>
-      {% if is_admin %}
-      <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_dashboard') }}">Admin</a>
-      {% endif %}
-      <form method="post" action="{{ url_for('logout') }}" class="inline">
-        <button class="btn btn-ghost btn-sm">Logout</button>
-      </form>
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hub.css') }}">
+{% endblock %}
+
+{# Kapsel eines Spiels: Grafik, Titel, Ziel, dein Stand und die Zahlentaste. #}
+{% macro capsule(gm, wide=false) %}
+{% set nr = games.index(gm) + 1 %}
+{% set mine = standing.get(gm.slug) %}
+<a class="capsule{{ ' capsule-wide' if wide }}" href="{{ url_for(gm.endpoint) }}"
+   style="--game: var(--game-{{ gm.slug }})" data-key="{{ nr }}"{% if wide %} data-featured{% endif %}>
+  <div class="capsule-art">{% include "thumbs/" ~ gm.slug ~ ".html" %}</div>
+  <div class="capsule-body">
+    <div class="capsule-head">
+      <h3 class="capsule-title">{{ gm.title }}</h3>
+      {% if gm.board == 'elo' and chess.your_turn %}<span class="tag tag-accent">Du bist am Zug</span>{% endif %}
     </div>
-  </header>
-
-  <div class="hub-intro">
-    <h1 class="hub-title">Wähle dein Spiel</h1>
-    <p class="hub-sub">Ein Account, ein Leaderboard pro Spiel.</p>
-  </div>
-
-  <div class="game-grid">
-    {% for gm in games %}
-    {% set live = gm.status == 'live' %}
-    {% set tag = "a" if live else "div" %}
-    <{{ tag }} class="game-card accent-{{ gm.accent }}{{ ' is-soon' if not live }}"
-       {% if live %}href="{{ url_for(gm.endpoint) }}"{% else %}aria-disabled="true"{% endif %}>
-      <div class="card-screen">
-        {% if gm.slug == 'tetris' %}
-        <svg viewBox="0 0 120 120" class="mini" aria-hidden="true">
-          <g stroke="rgba(150,120,255,0.12)" stroke-width="1">
-            <path d="M20 0V120M40 0V120M60 0V120M80 0V120M100 0V120M0 20H120M0 40H120M0 60H120M0 80H120M0 100H120"/>
-          </g>
-          <rect x="41" y="1" width="18" height="18" rx="2" fill="#ff3df0"/>
-          <rect x="21" y="21" width="18" height="18" rx="2" fill="#ff3df0"/>
-          <rect x="41" y="21" width="18" height="18" rx="2" fill="#ff3df0"/>
-          <rect x="61" y="21" width="18" height="18" rx="2" fill="#ff3df0"/>
-          <rect x="1"  y="81" width="18" height="18" rx="2" fill="#00e5e5"/>
-          <rect x="21" y="81" width="18" height="18" rx="2" fill="#3d7bff"/>
-          <rect x="81" y="81" width="18" height="18" rx="2" fill="#ffd23f"/>
-          <rect x="1"  y="101" width="18" height="18" rx="2" fill="#00e5e5"/>
-          <rect x="21" y="101" width="18" height="18" rx="2" fill="#3cdc5a"/>
-          <rect x="41" y="101" width="18" height="18" rx="2" fill="#ff5277"/>
-          <rect x="61" y="101" width="18" height="18" rx="2" fill="#3d7bff"/>
-          <rect x="81" y="101" width="18" height="18" rx="2" fill="#ffd23f"/>
-          <rect x="101" y="101" width="18" height="18" rx="2" fill="#b249f8"/>
-        </svg>
-        {% elif gm.slug == 'snake' %}
-        <svg viewBox="0 0 120 120" class="mini" aria-hidden="true">
-          <g stroke="rgba(150,120,255,0.12)" stroke-width="1">
-            <path d="M20 0V120M40 0V120M60 0V120M80 0V120M100 0V120M0 20H120M0 40H120M0 60H120M0 80H120M0 100H120"/>
-          </g>
-          <rect x="21" y="61" width="18" height="18" rx="3" fill="#3cdc5a"/>
-          <rect x="41" y="61" width="18" height="18" rx="3" fill="#3cdc5a"/>
-          <rect x="61" y="61" width="18" height="18" rx="3" fill="#3cdc5a"/>
-          <rect x="61" y="41" width="18" height="18" rx="3" fill="#3cdc5a"/>
-          <rect x="61" y="21" width="18" height="18" rx="3" fill="#9bf6b0"/>
-          <circle cx="30" cy="92" r="8" fill="#ff3df0"/>
-        </svg>
-        {% elif gm.slug == 'breakout' %}
-        <svg viewBox="0 0 120 120" class="mini" aria-hidden="true">
-          <g stroke="rgba(150,120,255,0.10)" stroke-width="1">
-            <path d="M20 0V120M40 0V120M60 0V120M80 0V120M100 0V120M0 20H120M0 40H120M0 60H120M0 80H120M0 100H120"/>
-          </g>
-          <g>
-            <rect x="6"  y="10" width="24" height="9" rx="2" fill="#ff3df0"/>
-            <rect x="33" y="10" width="24" height="9" rx="2" fill="#ff3df0"/>
-            <rect x="60" y="10" width="24" height="9" rx="2" fill="#b249f8"/>
-            <rect x="87" y="10" width="24" height="9" rx="2" fill="#b249f8"/>
-            <rect x="6"  y="22" width="24" height="9" rx="2" fill="#3d7bff"/>
-            <rect x="33" y="22" width="24" height="9" rx="2" fill="#3d7bff"/>
-            <rect x="60" y="22" width="24" height="9" rx="2" fill="#00e5e5"/>
-          </g>
-          <rect x="44" y="104" width="32" height="7" rx="3" fill="#00e5e5"/>
-          <circle cx="62" cy="80" r="6" fill="#ece8ff"/>
-        </svg>
-        {% elif gm.slug == '2048' %}
-        <svg viewBox="0 0 120 120" class="mini" aria-hidden="true">
-          <rect x="2" y="2" width="116" height="116" rx="8" fill="#0b0420"/>
-          {% for r in range(4) %}{% for c in range(4) %}
-          <rect x="{{ 6 + c * 28 }}" y="{{ 6 + r * 28 }}" width="24" height="24" rx="4"
-                fill="rgba(255,255,255,0.05)"/>
-          {% endfor %}{% endfor %}
-          <g font-family="'JetBrains Mono', monospace" font-weight="700" font-size="11"
-             text-anchor="middle">
-            <rect x="6"  y="6"  width="24" height="24" rx="4" fill="#3a2f63"/>
-            <text x="18" y="22" fill="#d9d2ff">2</text>
-            <rect x="34" y="34" width="24" height="24" rx="4" fill="#6d49c8"/>
-            <text x="46" y="50" fill="#fff">8</text>
-            <rect x="62" y="34" width="24" height="24" rx="4" fill="#473a86"/>
-            <text x="74" y="50" fill="#e9e3ff">4</text>
-            <rect x="62" y="62" width="24" height="24" rx="4" fill="#8a3df0"/>
-            <text x="74" y="78" fill="#fff">16</text>
-            <rect x="90" y="90" width="24" height="24" rx="4" fill="#ff8c42"/>
-            <text x="102" y="106" fill="#1a1030" font-size="9">256</text>
-          </g>
-        </svg>
-        {% elif gm.slug == 'geometry-dash' %}
-        <svg viewBox="0 0 120 120" class="mini" aria-hidden="true">
-          <rect x="2" y="2" width="116" height="116" rx="8" fill="#08051c"/>
-          <g stroke="rgba(120,100,255,0.10)" stroke-width="1">
-            <line x1="2" y1="40" x2="118" y2="40"/>
-            <line x1="2" y1="64" x2="118" y2="64"/>
-            <line x1="40" y1="2" x2="40" y2="92"/>
-            <line x1="80" y1="2" x2="80" y2="92"/>
-          </g>
-          <!-- floor -->
-          <rect x="2" y="92" width="116" height="26" fill="#15102a"/>
-          <line x1="2" y1="92" x2="118" y2="92" stroke="#5b8cff" stroke-width="2"/>
-          <!-- spikes -->
-          <polygon points="56,92 72,92 64,72" fill="#ff4566"/>
-          <polygon points="78,92 94,92 86,72" fill="#ff4566"/>
-          <!-- jumping cube -->
-          <g transform="rotate(20 34 60)">
-            <rect x="22" y="48" width="24" height="24" rx="4" fill="#5b8cff"/>
-            <rect x="30" y="56" width="8" height="8" rx="2" fill="#cfe0ff"/>
-          </g>
-        </svg>
-        {% elif gm.slug == 'chess' %}
-        <svg viewBox="0 0 120 120" class="mini" aria-hidden="true">
-          <g>
-            {% for r in range(6) %}{% for c in range(8) %}
-            <rect x="{{ 4 + c * 14 }}" y="{{ 18 + r * 14 }}" width="14" height="14"
-                  fill="{{ '#efd9b4' if (r + c) % 2 == 0 else '#a97a52' }}"/>
-            {% endfor %}{% endfor %}
-          </g>
-          <text x="32" y="72" font-size="34" text-anchor="middle" fill="#2e2018">♞</text>
-          <text x="88" y="58" font-size="34" text-anchor="middle" fill="#f6efdd"
-                stroke="#6b4f33" stroke-width="1">♛</text>
-        </svg>
-        {% elif gm.slug == 'doom' %}
-        <svg viewBox="0 0 120 120" class="mini" aria-hidden="true">
-          <rect x="0" y="0" width="120" height="120" fill="#050208"/>
-          <polygon points="0,0 120,0 78,30 42,30" fill="#1c0f24"/>
-          <polygon points="0,120 120,120 78,90 42,90" fill="#241026"/>
-          <polygon points="0,0 42,30 42,90 0,120" fill="#170a1e"/>
-          <polygon points="120,0 78,30 78,90 120,120" fill="#170a1e"/>
-          <rect x="42" y="30" width="36" height="60" fill="#2a0608"/>
-          <rect x="50" y="42" width="20" height="48" fill="#5e0d0d"/>
-          <rect x="54" y="50" width="12" height="40" fill="#a31515"/>
-          <rect x="57" y="58" width="6" height="32" fill="#ff4242"/>
-          <g stroke="#3b1846" stroke-width="2">
-            <line x1="0" y1="34" x2="42" y2="44"/><line x1="0" y1="74" x2="42" y2="70"/>
-            <line x1="120" y1="34" x2="78" y2="44"/><line x1="120" y1="74" x2="78" y2="70"/>
-          </g>
-          <text x="60" y="113" font-size="11" text-anchor="middle" fill="#ff4242"
-                font-family="monospace" letter-spacing="2">E1M1</text>
-        </svg>
+    <p class="capsule-goal">{{ gm.goal }}</p>
+    <div class="capsule-foot">
+      <p class="capsule-stat">
+        {% if gm.board == 'score' and mine %}
+        <span class="stat-label">Highscore</span>
+        <span class="stat-value stat-gold">{{ mine.best|num }}</span>
+        <span class="stat-note">Platz {{ mine.rank }} von {{ mine.players }}</span>
+        {% elif gm.board == 'score' %}
+        <span class="stat-note">Noch kein Score</span>
+        {% elif gm.board == 'elo' and chess.rated %}
+        <span class="stat-label">Elo</span>
+        <span class="stat-value">{{ chess.rating|num }}</span>
+        {% elif gm.board == 'elo' %}
+        <span class="stat-note">Noch keine gewertete Partie</span>
         {% else %}
-        <svg viewBox="0 0 120 120" class="mini" aria-hidden="true">
-          <g stroke="rgba(150,120,255,0.10)" stroke-width="1">
-            <path d="M20 0V120M40 0V120M60 0V120M80 0V120M100 0V120M0 20H120M0 40H120M0 60H120M0 80H120M0 100H120"/>
-          </g>
-        </svg>
+        <span class="stat-note">Ohne Leaderboard</span>
         {% endif %}
-        {% if not live %}<span class="card-badge">Bald</span>{% endif %}
-      </div>
-      <div class="card-body">
-        <h2 class="card-title">{{ gm.title }}</h2>
-        <p class="card-tag">{{ gm.tagline }}</p>
-      </div>
-      <span class="card-cta">{{ 'Spielen &raquo;'|safe if live else 'In Arbeit' }}</span>
-    </{{ tag }}>
-    {% endfor %}
+      </p>
+      {% if wide %}<span class="btn capsule-cta">Spielen <span class="hint">Enter</span></span>{% endif %}
+      <kbd class="capsule-key"><span class="visually-hidden">Taste </span>{{ nr }}</kbd>
+    </div>
   </div>
+</a>
+{% endmacro %}
+
+{% block content %}
+<div class="page-head">
+  <h1 class="page-title">Spiele</h1>
+  <p class="page-sub">Ein Account, {{ games|length }} Spiele. Jeder Score wird vom Server nachgerechnet.</p>
+  <p class="hub-keys"><kbd>1</kbd>–<kbd>{{ games|length }}</kbd> startet ein Spiel direkt</p>
 </div>
+
+<div class="hub">
+  <div class="hub-library">
+    <section class="hub-section" aria-labelledby="featured-title">
+      <h2 class="section-title" id="featured-title">{{ 'Weiterspielen' if returning else 'Zum Einstieg' }}</h2>
+      {{ capsule(featured, wide=true) }}
+    </section>
+
+    <section class="hub-section" aria-labelledby="library-title">
+      <h2 class="section-title" id="library-title">Weitere Spiele</h2>
+      <ul class="capsule-grid">
+        {% for gm in games if gm.slug != featured.slug %}
+        <li>{{ capsule(gm) }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+
+  <aside class="hub-side" aria-label="Dein Stand">
+    <section class="panel hub-panel" aria-labelledby="chess-title">
+      <div class="hub-panel-head">
+        <h2 class="panel-title" id="chess-title">Schach</h2>
+        {% if chess.rated %}<p class="hub-elo">Elo <b>{{ chess.rating|num }}</b></p>{% endif %}
+      </div>
+      {% if chess.your_turn or chess.challenges or chess.their_turn or chess.own_challenge %}
+      <ul class="hub-list">
+        {% for game in chess.your_turn[:3] %}
+        <li class="hub-row">
+          <span class="hub-row-text"><b>gegen {{ game.opponent }}</b><span class="tag tag-accent">Du bist am Zug</span></span>
+          <a class="btn btn-secondary btn-sm" href="{{ url_for('chess_game_page', game_id=game.id) }}">Zum Brett</a>
+        </li>
+        {% endfor %}
+        {% for c in chess.challenges %}
+        <li class="hub-row">
+          <span class="hub-row-text"><b>{{ c.creator }}</b><span class="muted">sucht einen Gegner</span></span>
+          <a class="btn btn-secondary btn-sm" href="{{ url_for('chess_lobby_page') }}">Zur Lobby</a>
+        </li>
+        {% endfor %}
+        {% if chess.their_turn %}
+        <li class="hub-row muted">{{ 'Bei einer Partie' if chess.their_turn == 1 else 'Bei ' ~ chess.their_turn ~ ' Partien' }} ist dein Gegner am Zug.</li>
+        {% endif %}
+        {% if chess.own_challenge %}
+        <li class="hub-row muted">Deine offene Partie wartet auf einen Gegner.</li>
+        {% endif %}
+      </ul>
+      {% else %}
+      <p class="muted">Gerade läuft keine Partie. Fordere einen Kollegen heraus oder spiel gegen den Bot.</p>
+      <a class="btn btn-secondary btn-sm hub-panel-action" href="{{ url_for('chess_lobby_page') }}">Zur Lobby</a>
+      {% endif %}
+    </section>
+
+    <section class="panel hub-panel" aria-labelledby="recent-title">
+      <h2 class="panel-title" id="recent-title">Zuletzt gespielt</h2>
+      {% if recent %}
+      <ul class="hub-list">
+        {% for r in recent %}
+        <li class="hub-row">
+          <span class="hub-row-text">
+            <span class="hub-game" style="--game: var(--game-{{ r.game.slug }})">{{ r.game.title }}</span>
+            <time class="muted" datetime="{{ r.created_at|replace(' ', 'T') }}Z">{{ r.created_at|ago }}</time>
+          </span>
+          <span class="hub-score">
+            {% if r.is_best %}<span class="tag tag-gold">Highscore</span>{% endif %}
+            <b>{{ r.score|num }}</b>
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+      <p class="hint-text hub-panel-note"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg>Jeder Score ist vom Server nachgerechnet.</p>
+      {% else %}
+      <p class="muted">Noch nichts gespielt. Dein erster Score erscheint hier, sobald der Server ihn nachgerechnet hat.</p>
+      {% endif %}
+    </section>
+  </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="module" src="{{ url_for('static', filename='js/hub.js') }}"></script>
 {% endblock %}

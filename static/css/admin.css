@@ -1,0 +1,52 @@
+/*
+ * Adminbereich: Kennzahlen, Tabellen, Filter, Wartung. Werkzeug-Ansicht, also ruhig:
+ * keine Spielfarben, Akzent nur für Auswahl und Aktionen.
+ */
+
+.admin-head { align-items: center; }
+.subnav { display: flex; gap: var(--s-1); padding: var(--s-1); background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--r-md); }
+.subnav a {
+  padding: var(--s-2) var(--s-4); border-radius: var(--r-sm);
+  color: var(--text-muted); font-weight: 600; text-decoration: none;
+}
+.subnav a:hover { color: var(--text); background: var(--surface); }
+.subnav a[aria-current="page"] { color: var(--text); background: var(--surface-2); box-shadow: var(--shadow-1); }
+
+.admin { display: grid; gap: var(--s-6); }
+.admin .panel > .panel-title { margin-bottom: var(--s-4); }
+
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-4); margin: 0; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: var(--s-4) var(--s-5); }
+.kpi dt { color: var(--text-muted); font-size: var(--fs-sm); font-weight: 600; }
+.kpi dd { margin: var(--s-1) 0 0; font-size: var(--fs-2xl); font-weight: 800; line-height: 1.15; }
+.kpi-sub { font-size: var(--fs-sm); font-weight: 600; color: var(--text-muted); }
+
+.admin-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-6); align-items: start; }
+
+.chips { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-bottom: var(--s-4); }
+.chip {
+  display: inline-flex; align-items: center; min-height: 32px; padding: 0 var(--s-3);
+  border: 1px solid var(--line-strong); border-radius: var(--r-pill);
+  color: var(--text-muted); font-size: var(--fs-sm); font-weight: 600; text-decoration: none;
+}
+.chip:hover { color: var(--text); border-color: var(--line-hover); }
+.chip[aria-current="true"] { background: var(--accent-soft); border-color: rgb(44 207 227 / 0.5); color: var(--accent); }
+
+.table td.actions, .table th.actions-h { text-align: right; }
+.actions { white-space: nowrap; }
+.actions form { display: inline-block; margin: 0 0 0 var(--s-1); }
+
+.pager { display: flex; align-items: center; justify-content: center; gap: var(--s-4); margin-top: var(--s-4); }
+
+.maint { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-4); }
+.maint .panel-title { margin-bottom: var(--s-2); }
+.maint p { max-width: 70ch; }
+
+@media (max-width: 1000px) {
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .admin-cols { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 560px) {
+  .subnav { width: 100%; }
+  .subnav a { flex: 1; text-align: center; padding-inline: var(--s-2); }
+}

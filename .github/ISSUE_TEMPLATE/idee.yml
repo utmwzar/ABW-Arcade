@@ -1,0 +1,15 @@
+name: Idee vorschlagen
+description: Ein neues Spiel, eine Verbesserung oder ein Wunsch.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: idee
+    attributes:
+      label: Was wünschst du dir?
+    validations:
+      required: true
+  - type: textarea
+    id: wozu
+    attributes:
+      label: Wofür wäre das gut?
+      description: Welches Problem löst es, oder was macht es schöner?

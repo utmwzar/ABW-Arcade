@@ -1,0 +1,119 @@
+/*
+ * ABW Arcade – Design-Tokens (Richtung C: klassische Arcade, Messlatte Steam-Bibliothek).
+ *
+ * Einzige Quelle für Farben, Schrift, Abstände, Radien, Schatten und Bewegung.
+ * Beschrieben in DESIGN.md. Kontraste: Text und Nebentext liegen auf allen
+ * Flächen über 4,5:1.
+ */
+
+@font-face {
+  font-family: "Archivo";
+  src: url("../fonts/archivo.woff2") format("woff2");
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Press Start 2P";
+  src: url("../fonts/press-start-2p.woff2") format("woff2");
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+
+  /* Flächen: von hinten nach vorne */
+  --playfield: #0a0816;   /* Spielfeld und Kapselgrafik, eine Stufe unter dem Seitengrund */
+  --bg: #110d20;
+  --bg-raised: #181331;
+  --surface: #1e1838;
+  --surface-2: #261f45;
+  --surface-2-hover: #2f2754;
+  --line: #2e2752;
+  --line-strong: #43396f;
+  --line-hover: #5a4f8c;
+
+  /* Text */
+  --text: #eeeafe;
+  --text-muted: #a59dcb;
+
+  /* Akzent: Aktionen, Auswahl, Fokus */
+  --accent: #2ccfe3;
+  --accent-hover: #63e0ef;
+  --accent-ink: #06121a;
+  --accent-soft: rgb(44 207 227 / 0.14);
+
+  /* Zustände */
+  --ok: #4ad08a;
+  --ok-soft: rgb(74 208 138 / 0.14);
+  --gold: #f7c04a;   /* heißt Highscore und nichts anderes */
+  --gold-soft: rgb(247 192 74 / 0.14);
+  --danger: #f0606b;
+  --danger-hover: #f4848d;
+  --danger-ink: #1d0509;
+  --danger-text: #ff9aa2;   /* Fehler- und Niederlagentext auf dunklem Grund */
+  --danger-soft: rgb(240 96 107 / 0.14);
+
+  /* Spielfarben: nur in Kapsel, Spielmarke und Spielfeld des Spiels */
+  --game-tetris: #2ccfe3;
+  --game-snake: #4ad08a;
+  --game-breakout: #f06bb2;
+  --game-2048: #f7c04a;
+  --game-geometry-dash: #6c8cff;
+  --game-chess: #a98bfa;
+  --game-doom: #f0606b;
+
+  /* Schrift */
+  --font-ui: "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-pixel: "Press Start 2P", var(--font-ui);
+  --fs-xs: 0.8125rem;   /* 13 px */
+  --fs-sm: 0.875rem;    /* 14 px */
+  --fs-md: 1rem;        /* 16 px */
+  --fs-lg: 1.125rem;    /* 18 px */
+  --fs-xl: 1.375rem;    /* 22 px */
+  --fs-2xl: 1.75rem;    /* 28 px */
+  --fs-3xl: 2.5rem;     /* 40 px */
+  /* Press Start 2P nur auf ihrem 8-px-Raster und nie kleiner als 16 px */
+  --pixel-sm: 16px;
+  --pixel-md: 24px;
+  --pixel-lg: 32px;
+
+  /* Abstände (4-px-Raster) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+
+  /* Radien */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 12px;
+  --r-pill: 999px;
+
+  /* Schatten: immer versetzt und weich, nie als Leuchtrand */
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.35);
+  --shadow-2: 0 1px 2px rgb(0 0 0 / 0.4), 0 12px 28px -14px rgb(0 0 0 / 0.75);
+  --shadow-3: 0 2px 6px rgb(0 0 0 / 0.4), 0 28px 56px -22px rgb(0 0 0 / 0.9);
+
+  /* Bewegung (gleiche Werte wie fx.DUR in static/js/fx.js) */
+  --dur-short: 120ms;
+  --dur-base: 200ms;
+  --dur-long: 320ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Ebenen */
+  --z-overlay: 10;
+  --z-topbar: 20;
+  --z-toast: 40;
+
+  /* Seitenbreite */
+  --page-max: 1320px;
+  --gutter: max(clamp(16px, 3vw, 40px), env(safe-area-inset-left, 0px));   /* Handy 16 px, Laptop bis 40 px */
+}

@@ -1,0 +1,88 @@
+# Veroeffentlicht ein Release: Actions -> Release -> Run workflow auf main, Version
+# ohne "v" eingeben (z. B. 1.2). Voraussetzung: CHANGELOG.md hat einen Abschnitt
+# "## [1.2]" und die CI ist fuer diesen Commit gruen. Der Workflow setzt den Tag,
+# baut und prueft beide Pakete und legt das Release mit den Notizen aus dem
+# Changelog an. Bei jedem Pull Request laeuft derselbe Weg als Probe, ohne
+# etwas zu veroeffentlichen.
+name: Release
+run-name: >-
+  ${{ github.event_name == 'workflow_dispatch'
+      && format('Release v{0}', inputs.version)
+      || format('Release-Probe: {0}', github.event.pull_request.title) }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version ohne v, z. B. 1.2"
+        required: true
+        type: string
+  pull_request:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  probe:
+    name: Probe (oberste Version im Changelog)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0   # mit Tags, damit PAKET-INFO die Version zeigt
+      - name: Bauen und pruefen
+        run: |
+          set -euo pipefail
+          version=$(grep -m1 -oE '^## \[[0-9]+\.[0-9]+(\.[0-9]+)?\]' CHANGELOG.md | tr -d '#[] ')
+          .github/release-bauen.sh "$version" --probe
+
+  release:
+    name: Release veroeffentlichen
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: release
+      cancel-in-progress: false
+    permissions:
+      contents: write   # Tag und Release
+      actions: read     # CI-Ergebnis des Commits lesen
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      VERSION: ${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Nur von main, nur mit gruener CI, nur einmal
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "::error::Releases gehen nur von main aus (gestartet auf $GITHUB_REF)."
+            exit 1
+          fi
+          gruen=$(gh run list --workflow ci.yml --commit "$GITHUB_SHA" --json conclusion \
+            --jq '[.[] | select(.conclusion == "success")] | length')
+          if [ "$gruen" -eq 0 ]; then
+            echo "::error::Fuer $GITHUB_SHA gibt es noch keinen gruenen CI-Lauf."
+            exit 1
+          fi
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            echo "::error::Das Release v$VERSION gibt es schon."
+            exit 1
+          fi
+      - name: Bauen und pruefen
+        run: .github/release-bauen.sh "$VERSION"
+      - name: Tag pushen und Release anlegen
+        run: |
+          set -euo pipefail
+          git push origin "refs/tags/v$VERSION"
+          gh release create "v$VERSION" abw-arcade.tar.gz abw-arcade.zip \
+            --verify-tag --title "ABW Arcade v$VERSION" --notes-file "$RUNNER_TEMP/notes.md"

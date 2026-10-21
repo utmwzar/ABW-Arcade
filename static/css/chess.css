@@ -1,0 +1,210 @@
+/*
+ * Schach: Lobby und Partie.
+ * Brettfarben: Lavendel, damit schwarze Figuren auch auf dunklen Feldern klar lesbar sind
+ * (Kontrast Schwarz auf dunklem Feld 5,9 : 1, ähnlich dem braunen Brett von lichess).
+ */
+
+/* Brettfarben für die ganze Schachseite: auch der Dialog zur Umwandlung,
+   der außerhalb von .chess-page liegt, braucht sie (chess.css lädt nur hier). */
+:root {
+  --board-light: #c9bfe8;
+  --board-dark: #8b7fc0;
+  --board-ink: #1d1638;   /* Schrift auf hellem Lavendel */
+}
+
+/* ---------- Partie: Anordnung ---------- */
+.chess-page {
+  --board: clamp(280px, min(560px, calc(100dvh - 300px)), 560px);
+  width: fit-content; max-width: 100%; margin-inline: auto;   /* Titelzeile beginnt mit dem Brett */
+}
+.chess-sub { color: var(--text-muted); }
+.chess-layout {
+  display: grid; grid-template-columns: auto minmax(300px, 360px); gap: var(--s-6);
+  justify-content: center; align-items: start;
+}
+.chess-main { display: grid; gap: var(--s-2); }
+.chess-side { display: grid; gap: var(--s-4); align-content: start; }
+
+/* ---------- Brett ---------- */
+.board-frame { position: relative; }
+.board {
+  position: relative; width: var(--board); aspect-ratio: 1;
+  border-radius: var(--r-sm); box-shadow: var(--shadow-2);
+  touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.board-grid {
+  position: absolute; inset: 0; display: grid;
+  grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr);
+  border-radius: inherit; overflow: hidden;
+}
+.board-row { display: contents; }
+.sq { position: relative; }
+.sq.light { background: var(--board-light); }
+.sq.dark { background: var(--board-dark); }
+.sq:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; z-index: 1; }
+/* Koordinaten: eigene Ebene über den Feldern (chess-board.js), unter den Figuren */
+.board-coords { position: absolute; inset: 0; pointer-events: none; }
+.board-coords .coord { position: absolute; font: 700 11px/1 var(--font-ui); }
+.coord.rank { left: 4px; top: calc(var(--i) * 12.5% + 3px); }
+.coord.file { right: calc((7 - var(--i)) * 12.5% + 4px); bottom: 3px; }
+/* Kleines Brett: Koordinaten in die Ecken, Figuren etwas kleiner, damit sie sich nicht berühren */
+@media (max-width: 900px) {
+  .board-coords .coord { font-size: 9px; }
+  .coord.rank { left: 2px; top: calc(var(--i) * 12.5% + 2px); }
+  .coord.file { right: calc((7 - var(--i)) * 12.5% + 2px); bottom: 1px; }
+  .pc { padding: 1.1%; }
+}
+/* Tinte aus dem Nachtviolett: auf hellen Feldern 5,9 : 1, auf dunklen 5,0 : 1
+   (helle Schrift erreicht auf dem mittleren Lavendel höchstens 3,6 : 1) */
+.coord.on-light { color: var(--line-strong); }
+.coord.on-dark { color: var(--bg-raised); }
+.board.no-coords .coord { display: none; }
+
+.sq.last { box-shadow: inset 0 0 0 100vmax rgb(44 207 227 / 0.3); }
+/* Schach ist ein Hinweis: ein roter Ring ums Königsfeld. Gefüllt rot wird nur das Matt. */
+.sq.check { box-shadow: inset 0 0 0 3px var(--danger); }
+.sq.mate { box-shadow: inset 0 0 0 100vmax rgb(240 96 107 / 0.7); }
+.sq.sel { box-shadow: inset 0 0 0 3px var(--accent), inset 0 0 0 100vmax rgb(44 207 227 / 0.35); }
+.sq.over { box-shadow: inset 0 0 0 3px #fff; }
+.sq.target::after {
+  content: ""; position: absolute; left: 50%; top: 50%; width: 26%; height: 26%;
+  translate: -50% -50%; border-radius: 50%; background: rgb(17 13 32 / 0.38);
+}
+.sq.target.capture::after {
+  width: 88%; height: 88%; background: transparent; border: 5px solid rgb(17 13 32 / 0.38);
+}
+.board.no-hints .sq.target::after { display: none; }
+.board.can-move .sq.movable { cursor: grab; }
+.board.can-move .sq.target { cursor: pointer; }
+
+.board-pieces { position: absolute; inset: 0; pointer-events: none; }
+.pc {
+  position: absolute; left: 0; top: 0; width: 12.5%; height: 12.5%; padding: 0.5%;
+  transform: translate(calc(var(--x) * 100%), calc(var(--y) * 100%));
+  transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out);
+}
+.pc.moving { z-index: 2; }
+.pc.dragging {
+  z-index: 3; transition: none;
+  filter: drop-shadow(0 6px 8px rgb(0 0 0 / 0.45));
+}
+.pc.gone { opacity: 0; }
+.pc.appear { animation: piece-in var(--dur-base) var(--ease-out); }
+@keyframes piece-in { from { opacity: 0; scale: 0.85; } }
+.board.no-anim .pc { transition: none; }
+
+/* ---------- Spieler ---------- */
+.player-bar { display: flex; align-items: center; gap: var(--s-2); min-height: 40px; }
+.player-name { font-weight: 700; }
+.player-rating { color: var(--text-muted); font-weight: 700; font-size: var(--fs-sm); }
+.player-captured {
+  margin-left: auto; display: flex; align-items: center; padding: 2px 8px 2px 10px;
+  border-radius: var(--r-pill); background: rgb(201 191 232 / 0.9);
+}
+.player-captured:empty { display: none; }
+.player-captured .cap { width: 20px; height: 20px; margin-left: -5px; }
+.player-captured .lead { margin-left: var(--s-1); font-weight: 800; font-size: var(--fs-xs); color: var(--board-ink); }
+.dot { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+.dot-w { background: #fff; box-shadow: inset 0 0 0 1.5px #000; }
+.dot-b { background: #000; box-shadow: 0 0 0 1.5px var(--line-strong); }
+
+/* ---------- Stand, Remis, Aktionen ---------- */
+.chess-status { font-size: var(--fs-lg); font-weight: 700; line-height: 1.35; min-height: 1.35em; }
+.chess-status[data-tone="turn"] { color: var(--accent); }
+.chess-status[data-tone="win"] { color: var(--ok); }
+.chess-status[data-tone="loss"] { color: var(--danger-text); }
+.chess-status[data-tone="draw"] { color: var(--text-muted); }
+.draw-offer {
+  display: grid; gap: var(--s-2); padding: var(--s-3) var(--s-4); border-radius: var(--r-md);
+  background: var(--accent-soft); border: 1px solid rgb(44 207 227 / 0.45);   /* ein Angebot an dich */
+}
+.draw-offer-actions { display: flex; gap: var(--s-2); }
+.chess-actions { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.chess-actions .btn { flex: 1 1 auto; white-space: nowrap; }
+
+/* ---------- Zugliste und Nachspielen ---------- */
+.chess-moves .panel-head { margin-bottom: var(--s-3); }
+.replay-nav { display: flex; gap: 2px; }
+.icon-btn { width: 34px; padding: 0; }
+.icon-flip { transform: rotate(180deg); }
+.replay-note {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-2);
+  margin-bottom: var(--s-3); padding: var(--s-2) var(--s-3); border-radius: var(--r-md);
+  background: var(--accent-soft); font-size: var(--fs-sm);
+}
+.movelist { display: grid; gap: 2px; max-height: 300px; overflow-y: auto; font-size: var(--fs-sm); }
+.movelist li { display: grid; grid-template-columns: 34px 1fr 1fr; align-items: center; }
+.movelist .mvno { color: var(--text-muted); }
+.movelist .mv {
+  text-align: left; background: none; border: 0; padding: 4px 6px; border-radius: var(--r-sm);
+  color: var(--text); cursor: pointer; font-variant-numeric: tabular-nums;
+}
+.movelist .mv:hover { background: var(--surface-2); }
+.movelist .mv[aria-current] { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+.moves-empty { color: var(--text-muted); }
+.replay-keys { display: flex; align-items: center; gap: var(--s-1); margin-top: var(--s-3); }
+@media (hover: none) { .replay-keys { display: none; } }
+
+/* ---------- Spielende ---------- */
+.chess-end {
+  position: absolute; inset: 0; z-index: var(--z-overlay);
+  display: grid; place-items: center; padding: var(--s-4);
+  background: rgb(8 6 18 / 0.66); border-radius: var(--r-sm);
+}
+.chess-end-reason { color: var(--text-muted); }
+.chess-end-elo { display: flex; align-items: baseline; gap: var(--s-2); }
+.chess-end-elo b { font-size: 2.5rem; font-weight: 800; line-height: 1; color: var(--text); }
+.chess-end-elo .delta { font-size: var(--fs-lg); font-weight: 800; }
+.chess-end-elo .delta.up { color: var(--ok); }
+.chess-end-elo .delta.down { color: var(--danger-text); }
+.chess-end-elo:empty { display: none; }
+
+/* ---------- Umwandlung ---------- */
+.promo-choices { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-2); }
+.promo-choices button {
+  display: grid; justify-items: center; gap: var(--s-1); padding: var(--s-2);
+  background: var(--board-light); color: var(--board-ink); border: 2px solid transparent; border-radius: var(--r-md);
+  font-size: var(--fs-xs); font-weight: 700; cursor: pointer;
+}
+.promo-choices button:hover, .promo-choices button:focus-visible { border-color: var(--accent); outline: none; }
+.promo-choices img { width: 52px; height: 52px; }
+
+/* ---------- Lobby ---------- */
+.lobby { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: var(--s-6); align-items: start; }
+.lobby-col { display: grid; gap: var(--s-5); align-content: start; }
+.lobby-list { display: grid; }
+.lobby-row {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-3);
+  padding: var(--s-3) 0; border-top: 1px solid var(--line);
+}
+.lobby-row:first-child { border-top: 0; padding-top: 0; }
+.lobby-row:last-child { padding-bottom: 0; }
+.lobby-row-text { display: grid; gap: 2px; min-width: 0; }
+.lobby-row-text .muted { font-size: var(--fs-sm); }
+.lobby-row-actions { display: flex; align-items: center; gap: var(--s-3); flex: none; }
+.lobby-empty { color: var(--text-muted); }
+.lobby-msg { font-size: var(--fs-sm); color: var(--danger-text); }
+.lobby-msg:empty { display: none; }
+.bot-form { display: grid; gap: var(--s-3); }
+.bot-form .segmented { max-width: 100%; }
+.outcome { font-weight: 700; white-space: nowrap; }
+.outcome-win { color: var(--ok); }
+.outcome-loss { color: var(--danger-text); }
+.outcome-draw { color: var(--text-muted); }
+.my-elo { display: flex; align-items: baseline; gap: var(--s-3); flex-wrap: wrap; }
+.my-elo b { font-size: var(--fs-3xl); font-weight: 800; line-height: 1; color: var(--text); }
+.my-elo .elo-label { color: var(--text-muted); font-weight: 700; }
+.ranking tr.is-me td { color: var(--accent); font-weight: 700; background: var(--accent-soft); }
+.ranking .elo { font-weight: 700; }
+
+/* ---------- Breiten ---------- */
+@media (max-width: 900px) {
+  .chess-page { --board: min(560px, calc(100vw - 2 * var(--gutter))); }
+  .chess-layout { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+  .chess-layout > * { width: min(100%, var(--board)); }
+  /* Auf dem Handy steht der Stand über dem Brett. */
+  .chess-side { display: contents; }
+  .chess-status, .draw-offer { order: -1; width: min(100%, var(--board)); }
+  .chess-moves, .chess-actions { width: min(100%, var(--board)); }
+  .lobby { grid-template-columns: minmax(0, 1fr); }
+}

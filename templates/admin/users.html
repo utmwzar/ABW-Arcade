@@ -1,42 +1,41 @@
 {% extends "admin/layout.html" %}
 {% block admin %}
-<section class="panel">
-  <h2 class="panel-title">Spieler ({{ users|length }})</h2>
-  <div class="table-wrap">
+<section class="panel" aria-labelledby="users-title">
+  <h2 class="panel-title" id="users-title">Spieler <span class="muted">({{ users|length }})</span></h2>
+  <div class="table-wrap" tabindex="0" role="group" aria-labelledby="users-title">
     <table class="table">
       <thead>
         <tr>
-          <th>ID</th><th>Username</th><th>Registriert (UTC)</th>
-          <th class="num">Runs</th><th class="num">Best</th><th>Rolle</th><th class="actions-h">Aktionen</th>
+          <th>Benutzername</th><th>Registriert</th>
+          <th class="num">Scores</th><th>Rolle</th><th class="actions-h">Aktionen</th>
         </tr>
       </thead>
       <tbody>
         {% for u in users %}
         <tr>
-          <td class="dim">{{ u.id }}</td>
-          <td>{{ u.username }}{% if u.id == admin.id %} <span class="you">(du)</span>{% endif %}</td>
-          <td class="dim">{{ u.created_at }}</td>
-          <td class="num">{{ u.runs }}</td>
-          <td class="num">{{ "{:,}".format(u.best).replace(",", ".") }}</td>
-          <td>{% if u.is_admin %}<span class="badge badge-admin">Admin</span>{% else %}<span class="badge">Spieler</span>{% endif %}</td>
-          <td class="actions-cell">
-            <a class="btn btn-ghost btn-xs" href="{{ url_for('admin_scores', user_id=u.id) }}">Scores</a>
+          <td>{{ u.username }}{% if u.id == admin.id %} <span class="tag tag-muted">du</span>{% endif %}</td>
+          <td class="muted"><time datetime="{{ u.created_at|replace(' ', 'T') }}Z" title="{{ u.created_at }} UTC">{{ u.created_at[:10] }}</time></td>
+          <td class="num"><a href="{{ url_for('admin_scores', user_id=u.id) }}">{{ u.runs|num }}</a></td>
+          <td>{% if u.is_admin %}<span class="tag tag-accent">Admin</span>{% else %}<span class="tag tag-muted">Spieler</span>{% endif %}</td>
+          <td class="actions">
             {% if u.id != admin.id %}
             <form method="post" action="{{ url_for('admin_toggle_admin', user_id=u.id) }}">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button class="btn btn-ghost btn-xs">{{ 'Admin entziehen' if u.is_admin else 'Zum Admin machen' }}</button>
+              <button class="btn btn-ghost btn-sm">{{ 'Adminrechte entziehen' if u.is_admin else 'Zum Admin machen' }}</button>
             </form>
             {% endif %}
             <form method="post" action="{{ url_for('admin_reset_password', user_id=u.id) }}"
-                  onsubmit="return confirm('Passwort von {{ u.username }} zurücksetzen? Das alte Passwort wird ungültig.')">
+                  data-confirm="Das Passwort von {{ u.username }} wird ersetzt; das alte gilt danach nicht mehr."
+                  data-confirm-action="Passwort zurücksetzen">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button class="btn btn-ghost btn-xs">PW-Reset</button>
+              <button class="btn btn-ghost btn-sm">Passwort zurücksetzen</button>
             </form>
             {% if u.id != admin.id %}
             <form method="post" action="{{ url_for('admin_delete_user', user_id=u.id) }}"
-                  onsubmit="return confirm('{{ u.username }} endgültig löschen? Alle Scores und Spiele werden mit entfernt.')">
+                  data-confirm="{{ u.username }} wird mit allen Scores, Spielen und Schachpartien gelöscht. Das lässt sich nicht rückgängig machen."
+                  data-confirm-action="Endgültig löschen">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button class="btn btn-danger btn-xs">Löschen</button>
+              <button class="btn btn-danger btn-sm">Löschen</button>
             </form>
             {% endif %}
           </td>
@@ -47,10 +46,9 @@
   </div>
 </section>
 
-<section class="panel">
-  <h2 class="panel-title">Hinweis</h2>
-  <p class="maint-text">Den allerersten Admin legst du einmalig per CLI im Container an:
-    <code>cd /opt/tetris && sudo -u tetris .venv/bin/flask --app app make-admin USERNAME</code>
-    – danach lassen sich Rollen hier verwalten.</p>
+<section class="panel" aria-labelledby="first-admin-title">
+  <h2 class="panel-title" id="first-admin-title">Ersten Admin anlegen</h2>
+  <p class="muted">Den allerersten Admin legst du einmalig auf dem Server per Befehl an; wie das auf Linux,
+    macOS und Windows geht, steht in der README im Abschnitt „Ersten Admin ernennen“. Danach verwaltest du die Rollen hier.</p>
 </section>
 {% endblock %}

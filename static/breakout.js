@@ -4,270 +4,241 @@
  * does rendering, input and the fixed-timestep loop, and RECORDS every paddle
  * direction change as { tick, dir }. On game over it posts the recorded log to
  * the server, which replays it and computes the authoritative score. The
- * client never sends a score.
+ * client never sends a score. Start, pause and the result screen: js/arcade.js.
+ * Effects only read the engine (js/observe/breakout.js) and keep their own clock.
  */
-(() => {
-  "use strict";
+import { createArcade, fmt } from "./js/arcade.js";
+import { crisp } from "./js/canvas.js";
+import { createCanvasFx } from "./js/fx-canvas.js";
+import { motion } from "./js/fx.js";
+import { bindFollow, followDir } from "./js/touch.js";
+import * as observe from "./js/observe/breakout.js";
 
-  const BE = window.BreakoutEngine;
-  const canvas = document.getElementById("board");
-  const ctx = canvas.getContext("2d");
+const BE = window.BreakoutEngine;
+const W = BE.W, H = BE.H;    // 440 x 520 game units
+const canvas = document.getElementById("board");
+const ctx = crisp(canvas, { width: W, height: H, onResize: () => draw() });
+const fx = createCanvasFx({ width: W, height: H, motion });
 
-  const scoreEl = document.getElementById("score");
-  const livesEl = document.getElementById("lives");
-  const overlay = document.getElementById("overlay");
-  const overlayTitle = document.getElementById("overlay-title");
-  const overlayText = document.getElementById("overlay-text");
-  const startBtn = document.getElementById("startBtn");
+const scoreEl = document.getElementById("score");
+const livesEl = document.getElementById("lives");
 
-  const COL_BG = "#07021a";
-  const COL_GRID = "rgba(150,120,255,0.05)";
-  const COL_PADDLE = "#00e5e5";
-  const COL_BALL = "#ece8ff";
-  // brick colour per row (top → bottom), from the arcade palette
-  const ROW_COLORS = ["#ff3df0", "#b249f8", "#3d7bff", "#00e5e5", "#3cdc5a"];
+// Farben aus static/css/tokens.css; Steinreihen von oben nach unten
+const COL_PADDLE = "#eeeafe";
+const COL_BALL = "#eeeafe";
+const COL_DANGER = "#f0606b";
+const ROW_COLORS = ["#f06bb2", "#a98bfa", "#6c8cff", "#2ccfe3", "#4ad08a"];
 
-  const TICK_MS = 16;          // ~60 ticks/s; server replays ticks regardless
-  const MAX_CATCHUP = 5;
+const TICK_MS = 16;          // ~60 ticks/s; server replays ticks regardless
+const MAX_CATCHUP = 5;
+const REVEAL = { min: 350, max: 1000 };
+const TRAIL = 5;             // Ballspur: so viele frühere Positionen
 
-  let engine = null;
-  let recorded = [];
-  let tickCount = 0;
-  let pendingDir = null;       // latest paddle dir not yet committed to a tick
-  let lastDir = "S";
-  let accMs = 0;
-  let lastFrame = 0;
-  let playing = false, paused = false, finished = false, starting = false;
-  let currentGameId = null;
-  let rafId = null;
-  const held = { left: false, right: false };
+let engine = null;
+let recorded = [];
+let tickCount = 0;
+let pendingDir = null;       // latest paddle dir not yet committed to a tick
+let lastDir = "S";
+let accMs = 0;
+let lastFrame = 0;
+let rafId = null;
+const held = { left: false, right: false };
+let follow = null;           // Finger: Ziel-x in Spielkoordinaten, sonst null
+let seen = null;             // für observe.diff: schon gemeldete Steine
+let trail = [];              // nur Darstellung
+let squash = 0;              // Paddle-Stauchen nach einem Treffer, 1 → 0
 
-  // ---------- rendering ----------
-  function draw() {
-    ctx.fillStyle = COL_BG;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+const detail = (bricks) => `${fmt(bricks)} ${bricks === 1 ? "Stein" : "Steine"} abgeräumt`;
+const local = () => ({ score: engine.score, won: engine.won, detail: detail(engine.bricksBroken) });
 
-    if (!engine) return;
-
-    for (let i = 0; i < engine.bricks.length; i++) {
-      const b = engine.bricks[i];
-      if (!b.alive) continue;
-      ctx.fillStyle = ROW_COLORS[b.row % ROW_COLORS.length];
-      ctx.fillRect(b.x, b.y, b.w, b.h);
-      ctx.fillStyle = "rgba(255,255,255,0.18)";
-      ctx.fillRect(b.x, b.y, b.w, 3);
-    }
-
-    // paddle
-    ctx.fillStyle = COL_PADDLE;
-    ctx.fillRect(engine.paddleX, engine.paddleY, engine.paddleW, engine.paddleH);
-
-    // ball
-    ctx.save();
-    ctx.shadowColor = COL_BALL;
-    ctx.shadowBlur = 10;
-    ctx.fillStyle = COL_BALL;
-    ctx.beginPath();
-    ctx.arc(engine.bx, engine.by, engine.ballR, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-
-  function syncHud() {
-    scoreEl.textContent = engine ? engine.score : 0;
-    livesEl.textContent = engine ? engine.lives : 3;
-  }
-
-  function showOverlay(title, html, showButton) {
-    overlayTitle.textContent = title;
-    overlayText.innerHTML = html;
-    startBtn.style.display = showButton ? "" : "none";
-    overlay.classList.remove("hidden");
-  }
-
-  // ---------- loop (mirrors breakout_engine.simulate tick order) ----------
-  function stepTick() {
-    let dirs = null;
-    if (pendingDir !== null) {
-      dirs = [pendingDir];
-      recorded.push({ tick: tickCount, dir: pendingDir });
-      pendingDir = null;
-    }
-    engine.tick(dirs);
-    tickCount++;
-    syncHud();
-  }
-
-  function frame(now) {
-    if (!playing) return;
-    if (paused) { lastFrame = now; rafId = requestAnimationFrame(frame); return; }
-
-    let dt = now - lastFrame;
-    lastFrame = now;
-    if (dt > 250) dt = 250;
-    accMs += dt;
-
-    let steps = 0;
-    while (accMs >= TICK_MS && steps < MAX_CATCHUP && !engine.gameOver) {
-      stepTick();
-      accMs -= TICK_MS;
-      steps++;
-    }
-    draw();
-    if (engine.gameOver) { finishGame(); return; }
-    rafId = requestAnimationFrame(frame);
-  }
-
-  // turn the held keys into a paddle direction, queue it if it changed
-  function updateDir() {
-    let dir = "S";
-    if (held.left && !held.right) dir = "L";
-    else if (held.right && !held.left) dir = "R";
-    if (dir !== lastDir) { pendingDir = dir; lastDir = dir; }
-  }
-
-  // ---------- start / finish ----------
-  async function startGame() {
-    if (starting || playing) return;
-    if (!BE || !BE.Engine) { showOverlay("FEHLER", "Engine nicht geladen", true); return; }
-    starting = true;
-    showOverlay("LÄDT …", "Starte Spiel", false);
-
-    let data;
-    try {
-      const res = await fetch("/api/breakout/start", { method: "POST" });
-      if (res.status === 401) { window.location.href = "/login"; return; }
-      if (res.status === 429) {
-        starting = false;
-        showOverlay("LANGSAM", "Zu viele Spiele in kurzer Zeit – kurz warten", true);
-        startBtn.textContent = "Spiel starten";
-        return;
-      }
-      if (!res.ok) throw new Error("start failed");
-      data = await res.json();
-    } catch (e) {
-      starting = false;
-      showOverlay("FEHLER", "Server nicht erreichbar", true);
-      startBtn.textContent = "Erneut versuchen";
-      return;
-    }
-
-    currentGameId = data.game_id;
+const arcade = createArcade({
+  slug: "breakout",
+  startUrl: "/api/breakout/start",
+  finishUrl: "/api/breakout/finish",
+  canPause: true,
+  begin(data) {
     engine = new BE.Engine(data.seed >>> 0);
     recorded = [];
     tickCount = 0;
     pendingDir = null;
     lastDir = "S";
     held.left = held.right = false;
+    seen = observe.newSeen(engine);
+    trail = [];
+    squash = 0;
     accMs = 0;
     lastFrame = performance.now();
-    paused = false; finished = false; playing = true; starting = false;
-
+    fx.reset();
     syncHud();
-    overlay.classList.add("hidden");
     draw();
     cancelAnimationFrame(rafId);
     rafId = requestAnimationFrame(frame);
+  },
+  resume() { lastFrame = performance.now(); },
+  inputs: () => recorded,
+  snapshot: local,
+  detail: (d) => detail(d.bricks),
+  sync(d) { scoreEl.textContent = fmt(d.score); },
+});
+
+// ---------- rendering ----------
+function draw() {
+  ctx.clearRect(0, 0, W, H);   // den Grund malt .board-wrap (--playfield)
+  ctx.save();
+  fx.applyShake(ctx);
+
+  if (engine) {
+    for (let i = 0; i < engine.bricks.length; i++) {
+      const b = engine.bricks[i];
+      if (!b.alive) continue;
+      ctx.fillStyle = ROW_COLORS[b.row % ROW_COLORS.length];
+      ctx.fillRect(b.x, b.y, b.w, b.h);
+      ctx.fillStyle = "rgba(255,255,255,0.22)";
+      ctx.fillRect(b.x, b.y, b.w, 3);
+    }
+
+    // Paddle; nach einem Treffer kurz gestaucht (nur Darstellung, die Engine
+    // rechnet weiter mit ihrem Rechteck).
+    const k = motion() === "full" ? squash : 0;
+    const pw = engine.paddleW * (1 + 0.08 * k);
+    const ph = engine.paddleH * (1 - 0.3 * k);
+    ctx.fillStyle = COL_PADDLE;
+    ctx.fillRect(engine.paddleX - (pw - engine.paddleW) / 2, engine.paddleY + (engine.paddleH - ph), pw, ph);
+
+    if (!engine.gameOver || engine.won) {
+      ctx.fillStyle = COL_BALL;
+      for (let i = 0; i < trail.length; i++) {
+        ctx.globalAlpha = 0.07 + 0.05 * i;
+        ctx.beginPath();
+        ctx.arc(trail[i][0], trail[i][1], engine.ballR, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      ctx.beginPath();
+      ctx.arc(engine.bx, engine.by, engine.ballR, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
+  fx.draw(ctx);
+  ctx.restore();
+}
 
-  async function finishGame() {
-    if (finished) return;
-    playing = false;
-    finished = true;
-    cancelAnimationFrame(rafId);
-    draw();
+function syncHud() {
+  scoreEl.textContent = fmt(engine ? engine.score : 0);
+  livesEl.textContent = engine ? engine.lives : 3;
+}
 
-    showOverlay(engine.won ? "GESCHAFFT!" : "GAME OVER",
-      `Score <b>${engine.score}</b> &middot; ${engine.bricksBroken} Steine`, true);
-    startBtn.textContent = "Nochmal spielen";
-
-    try {
-      const res = await fetch("/api/breakout/finish", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ game_id: currentGameId, inputs: recorded }),
+// ---------- effects (read-only, from js/observe/breakout.js) ----------
+function react(events) {
+  for (const ev of events) {
+    if (ev.type === "brick") {
+      fx.burst(ev.x + ev.w / 2, ev.y + ev.h / 2, {
+        count: 12, color: ROW_COLORS[ev.row % ROW_COLORS.length],
+        speed: [70, 220], gravity: 520, life: [350, 650], size: [2, 4],
       });
-      if (res.ok) {
-        const d = await res.json();
-        showOverlay(d.won ? "GESCHAFFT!" : "GAME OVER",
-          `Score <b>${d.score}</b> &middot; ${d.bricks} Steine`, true);
-        startBtn.textContent = "Nochmal spielen";
-        if (d.score !== engine.score) {
-          console.warn("client/server score mismatch", { client: engine.score, server: d.score });
-        }
-      }
-    } catch (e) { /* offline — keep local display */ }
-
-    loadLeaderboard();
-  }
-
-  function togglePause() {
-    if (!playing || finished || (engine && engine.gameOver)) return;
-    paused = !paused;
-    if (paused) {
-      showOverlay("PAUSE", 'Drücke <kbd>P</kbd> zum Weiterspielen', false);
-    } else {
-      overlay.classList.add("hidden");
-      lastFrame = performance.now();
+    } else if (ev.type === "paddle") {
+      squash = 1;
+    } else if (ev.type === "life" || ev.type === "over") {
+      trail = [];
+      fx.shake(ev.type === "over" ? 6 : 4, ev.type === "over" ? 380 : 280);
+      fx.flash({ color: COL_DANGER, alpha: ev.type === "over" ? 0.26 : 0.18, ms: 300 });
+      fx.burst(Math.min(W - 8, Math.max(8, ev.x)), H - 4, {
+        count: 10, color: [COL_DANGER, COL_BALL], angle: -Math.PI / 2, spread: 1.4,
+        speed: [80, 220], gravity: 500, life: [300, 550], size: [2, 4],
+      });
+    } else if (ev.type === "won") {
+      fx.confetti(ROW_COLORS);
     }
   }
+}
 
-  // ---------- leaderboard ----------
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, (c) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+// ---------- loop (mirrors breakout_engine.simulate tick order) ----------
+function stepTick() {
+  // Folgt das Paddle einem Finger, wird die Richtung hier entschieden, nach
+  // derselben Regel wie bei den Tasten: nur Änderungen gehen in die Aufzeichnung.
+  if (follow !== null) {
+    const want = followDir(follow, engine.paddleX, engine.paddleW);
+    if (want !== lastDir) { pendingDir = want; lastDir = want; }
   }
-
-  async function loadLeaderboard() {
-    const lbEl = document.getElementById("leaderboard");
-    const personalEl = document.getElementById("personal");
-    try {
-      const res = await fetch("/api/leaderboard?game=breakout");
-      const data = await res.json();
-      const rows = data.leaderboard || [];
-      const meName = data.me && data.me.username;
-
-      if (rows.length === 0) {
-        lbEl.innerHTML = '<li class="lb-empty">Noch keine Scores – sei der Erste!</li>';
-      } else {
-        lbEl.innerHTML = rows.map((r, i) => `
-          <li>
-            <span class="lb-rank">${i + 1}</span>
-            <span class="lb-name ${r.username === meName ? "is-me" : ""}">${escapeHtml(r.username)}</span>
-            <span class="lb-score">${Number(r.score).toLocaleString("de-DE")}</span>
-          </li>`).join("");
-      }
-
-      if (data.me && data.me.best > 0) {
-        personalEl.innerHTML =
-          `Dein Bestwert: <b>${Number(data.me.best).toLocaleString("de-DE")}</b>` +
-          (data.me.rank ? ` &middot; Platz ${data.me.rank}` : "");
-      } else {
-        personalEl.innerHTML = "";
-      }
-    } catch (e) {
-      lbEl.innerHTML = '<li class="lb-empty">Leaderboard nicht erreichbar</li>';
-    }
+  let dirs = null;
+  if (pendingDir !== null) {
+    dirs = [pendingDir];
+    recorded.push({ tick: tickCount, dir: pendingDir });
+    pendingDir = null;
   }
-
-  // ---------- input ----------
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && (!playing || finished)) { startGame(); return; }
-    if (e.key === "p" || e.key === "P") { togglePause(); return; }
-    if (!playing || paused || (engine && engine.gameOver)) return;
-    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") { e.preventDefault(); held.left = true; updateDir(); }
-    else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") { e.preventDefault(); held.right = true; updateDir(); }
-  });
-  document.addEventListener("keyup", (e) => {
-    if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") { held.left = false; updateDir(); }
-    else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") { held.right = false; updateDir(); }
-  });
-  startBtn.addEventListener("click", startGame);
-
-  // ---------- init ----------
+  const before = observe.snap(engine);
+  engine.tick(dirs);
+  react(observe.diff(before, engine, seen));
+  tickCount++;
+  trail.push([engine.bx, engine.by]);
+  if (trail.length > TRAIL) trail.shift();
   syncHud();
+}
+
+function frame(now) {
+  rafId = null;
+  let dt = now - lastFrame;
+  lastFrame = now;
+  if (dt > 250) dt = 250;
+  const state = arcade.state;
+  if (state === "paused" || state === "confirm") { rafId = requestAnimationFrame(frame); return; }
+
+  if (state === "playing") {
+    accMs += dt;
+    let steps = 0;
+    while (accMs >= TICK_MS && steps < MAX_CATCHUP && !engine.gameOver) {
+      stepTick();
+      accMs -= TICK_MS;
+      steps++;
+    }
+    if (engine.gameOver) arcade.over(local(), { reveal: fx.settled(REVEAL) });
+  }
+  squash = Math.max(0, squash - dt / 140);
+  fx.update(dt);
   draw();
-  showOverlay("BEREIT?", 'Drücke <kbd>Enter</kbd> zum Start', true);
-  startBtn.textContent = "Spiel starten";
-  loadLeaderboard();
-})();
+  if (arcade.state === "playing" || fx.busy()) rafId = requestAnimationFrame(frame);
+}
+
+// turn the held keys into a paddle direction, queue it if it changed
+function updateDir() {
+  let dir = "S";
+  if (held.left && !held.right) dir = "L";
+  else if (held.right && !held.left) dir = "R";
+  if (dir !== lastDir) { pendingDir = dir; lastDir = dir; }
+}
+
+// Wer das Fenster wechselt, lässt die Tasten los, ohne dass hier ein keyup ankommt.
+function releaseAll() {
+  if (!held.left && !held.right) return;
+  held.left = held.right = false;
+  if (engine && !engine.gameOver) updateDir();
+}
+
+// ---------- input ----------
+const isLeft = (k) => k === "ArrowLeft" || k === "a" || k === "A";
+const isRight = (k) => k === "ArrowRight" || k === "d" || k === "D";
+
+document.addEventListener("keydown", (e) => {
+  if (!arcade.running || e.altKey || e.ctrlKey || e.metaKey) return;
+  if (isLeft(e.key)) { e.preventDefault(); held.left = true; updateDir(); }
+  else if (isRight(e.key)) { e.preventDefault(); held.right = true; updateDir(); }
+});
+document.addEventListener("keyup", (e) => {
+  if (!engine || engine.gameOver) return;
+  if (isLeft(e.key)) { held.left = false; updateDir(); }
+  else if (isRight(e.key)) { held.right = false; updateDir(); }
+});
+window.addEventListener("blur", releaseAll);
+document.addEventListener("visibilitychange", () => { if (document.hidden) releaseAll(); });
+
+// Touch: Das Paddle folgt dem Finger; loslassen hält es an (bzw. gilt wieder die Tastatur).
+bindFollow(canvas, {
+  onMove(x) {
+    follow = x === null ? null : x * W;
+    if (x === null && engine && !engine.gameOver) updateDir();
+  },
+});
+
+// ---------- init ----------
+syncHud();
+draw();

@@ -1,0 +1,137 @@
+/*
+ * Spieleübersicht: Kapseln wie in einer Spielebibliothek, rechts der eigene Stand.
+ * Richtungsvertrag: .impeccable/surfaces/templates-hub-html.md
+ */
+
+.hub-keys {
+  margin-left: auto; display: flex; align-items: center; gap: var(--s-1);
+  color: var(--text-muted); font-size: var(--fs-sm);
+}
+.hub-keys kbd { margin-right: 2px; }
+
+.hub { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--s-8); align-items: start; }
+.hub-library { display: grid; gap: var(--s-8); min-width: 0; }
+.hub-section { display: grid; gap: var(--s-4); }
+.hub-side { display: grid; gap: var(--s-5); position: sticky; top: var(--s-6); }
+
+/* ---------- Kapsel ---------- */
+.capsule {
+  --game: var(--accent);
+  display: flex; flex-direction: column; width: 100%; height: 100%;
+  color: var(--text); text-decoration: none;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
+  overflow: hidden; box-shadow: var(--shadow-1);
+  transition: transform var(--dur-base) var(--ease-out), border-color var(--dur-short) var(--ease-out),
+              box-shadow var(--dur-base) var(--ease-out);
+}
+.capsule:hover { color: var(--text); }   /* gegen die allgemeine Linkfarbe, auch nach einem Tipp */
+/* Anheben und Rahmen nur mit Maus: Auf Touchgeräten bliebe der Hover nach dem Tippen hängen. */
+@media (hover: hover) {
+  .capsule:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--game) 55%, var(--line)); box-shadow: var(--shadow-2);
+  }
+  .capsule:hover .capsule-cta { background: var(--accent-hover); }
+}
+.capsule:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.capsule:active, .capsule.is-pressed { transform: none; border-color: var(--accent); }
+
+.capsule-art {
+  aspect-ratio: 16 / 9; overflow: hidden;
+  background: color-mix(in oklab, var(--game) 13%, var(--playfield));
+  border-bottom: 3px solid var(--game);
+}
+.capsule-svg { width: 100%; height: 100%; }
+
+.capsule-body {
+  flex: 1; display: grid; grid-template-rows: auto auto 1fr; gap: var(--s-1);
+  padding: var(--s-4);
+}
+.capsule-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-1) var(--s-2); }
+.capsule-title { font-size: var(--fs-lg); font-weight: 700; line-height: 1.25; }
+.capsule-goal { color: var(--text-muted); font-size: var(--fs-sm); line-height: 1.4; }
+.capsule-foot {
+  align-self: end; display: flex; align-items: flex-end; justify-content: space-between;
+  gap: var(--s-3); margin-top: var(--s-3);
+}
+.capsule-stat { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: var(--s-2); min-width: 0; }
+.stat-label { flex-basis: 100%; font-size: var(--fs-xs); font-weight: 600; color: var(--text-muted); }
+.stat-value { font-size: var(--fs-xl); font-weight: 800; line-height: 1.15; }
+.stat-note { font-size: var(--fs-xs); color: var(--text-muted); }
+.capsule-key { flex: none; color: var(--text-muted); }
+
+/* „Weiterspielen“: doppelt breit, Grafik links */
+.capsule-wide { flex-direction: row; }
+.capsule-wide .capsule-art { flex: 0 0 56%; border-bottom: 0; border-right: 1px solid var(--line); }
+.capsule-wide .capsule-body { padding: var(--s-6); grid-template-rows: auto auto 1fr; gap: var(--s-2); }
+.capsule-wide .capsule-title { font-size: var(--fs-2xl); line-height: 1.15; }
+.capsule-wide .capsule-goal { font-size: var(--fs-md); max-width: 40ch; }
+.capsule-wide .stat-value { font-size: var(--fs-3xl); line-height: 1; }
+.capsule-wide .capsule-foot { flex-wrap: wrap; align-items: center; }
+.capsule-wide .capsule-stat { flex-basis: 100%; margin-bottom: var(--s-2); }
+.capsule-cta { margin-right: auto; }
+
+.capsule-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-5); }
+.capsule-grid > li { display: flex; }
+
+/* ---------- Eigener Stand ---------- */
+.hub-panel { display: grid; gap: var(--s-3); }
+.hub-panel .panel-title { margin-bottom: 0; }
+.hub-panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3); }
+.hub-elo { color: var(--text-muted); font-size: var(--fs-sm); }
+.hub-elo b { color: var(--text); font-size: var(--fs-lg); font-weight: 800; }
+.hub-list { display: grid; }
+.hub-row {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--s-3);
+  padding: var(--s-3) 0; border-top: 1px solid var(--line);
+}
+.hub-row:first-child { border-top: 0; padding-top: 0; }
+.hub-row:last-child { padding-bottom: 0; }
+.hub-row.muted { font-size: var(--fs-sm); }
+.hub-row-text { display: grid; gap: 2px; min-width: 0; }
+.hub-row-text .muted { font-size: var(--fs-sm); }
+.hub-row-text .tag { justify-self: start; }
+.hub-game { display: inline-flex; align-items: center; gap: var(--s-2); font-weight: 600; }
+.hub-game::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--game); }
+.hub-score { display: flex; align-items: center; gap: var(--s-2); }
+.hub-score b { font-weight: 700; }
+.hub-panel-note { display: flex; align-items: center; gap: var(--s-2); }
+.hub-panel-note .icon { width: 16px; height: 16px; color: var(--ok); }
+.hub-panel-action { justify-self: start; }
+
+/* ---------- Bewegung ---------- */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion="full"]) .capsule:hover { transform: none; }
+}
+:root[data-motion="reduced"] .capsule:hover, :root[data-motion="off"] .capsule:hover { transform: none; }
+
+/* ---------- Breiten ---------- */
+@media (max-width: 1100px) {
+  .hub { grid-template-columns: minmax(0, 1fr) 280px; gap: var(--s-6); }
+  .capsule-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .hub { grid-template-columns: minmax(0, 1fr); }
+  .hub-side { position: static; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+}
+@media (max-width: 720px) {
+  .capsule-wide { flex-direction: column; }
+  .capsule-wide .capsule-art { flex: none; border-right: 0; border-bottom: 3px solid var(--game); }
+  .capsule-wide .capsule-body { padding: var(--s-4); }
+  .capsule-wide .capsule-title { font-size: var(--fs-xl); }
+  .capsule-wide .stat-value { font-size: var(--fs-2xl); }
+  .hub-side { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 520px) {
+  .hub-library { gap: var(--s-6); }
+  .capsule-grid { gap: var(--s-3); }
+  .capsule-grid .capsule-goal { display: none; }
+  .capsule-grid .capsule-body { padding: var(--s-3); }
+  .capsule-grid .capsule-title { font-size: var(--fs-md); }
+  .capsule-grid .stat-value { font-size: var(--fs-lg); }
+  .capsule-grid .capsule-key { display: none; }
+}
+/* Ohne Tastatur sind die Tastenhinweise nur Ballast. */
+@media (hover: none) {
+  .hub-keys, .capsule-key, .capsule-cta .hint { display: none; }
+}

@@ -1,0 +1,15 @@
+Schriften von ABW Arcade (lokal ausgeliefert, kein CDN)
+
+archivo.woff2
+  Archivo, variabel (Achsen wght 100-900 und wdth 62-125 %), Teilmenge latin.
+  Gestaltung: Omnibus-Type. Lizenz: SIL Open Font License 1.1, siehe OFL-Archivo.txt.
+  Datei: files/archivo-latin-wdth-normal.woff2 aus dem npm-Paket
+  @fontsource-variable/archivo 5.3.0, unverändert, nur umbenannt.
+
+press-start-2p.woff2
+  Press Start 2P, Teilmenge latin.
+  Gestaltung: CodeMan38. Lizenz: SIL Open Font License 1.1, siehe OFL-PressStart2P.txt.
+  Datei: files/press-start-2p-latin-400-normal.woff2 aus dem npm-Paket
+  @fontsource/press-start-2p 5.3.0, unverändert, nur umbenannt.
+
+Bezogen am 20.10.2026 über die npm-Registry (registry.npmjs.org).

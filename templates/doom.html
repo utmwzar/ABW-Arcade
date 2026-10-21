@@ -1,63 +1,65 @@
 {% extends "base.html" %}
+{% from "_macros.html" import controls %}
 {% block title %}DOOM · ABW Arcade{% endblock %}
-{% block content %}
-<div class="game-shell doom-shell">
-  <header class="topbar">
-    <span class="logo logo-sm">DOOM</span>
-    <div class="topbar-right">
-      <span class="who">Hi, {{ username }}</span>
-      <a class="btn btn-ghost btn-sm" href="{{ url_for('index') }}">Spiele</a>
-      {% if is_admin %}
-      <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_dashboard') }}">Admin</a>
-      {% endif %}
-      <form method="post" action="{{ url_for('logout') }}" class="inline">
-        <button class="btn btn-ghost btn-sm">Logout</button>
-      </form>
-    </div>
-  </header>
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/games.css') }}">
+{% endblock %}
+{% block main_class %}page game-page{% endblock %}
 
-  <div class="doom-cols">
-    <section class="doom-screen-wrap">
-      <canvas id="canvas" class="doom-canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
-      <div id="doomOverlay" class="overlay">
-        <div class="overlay-inner">
-          <h2 id="doomTitle">DOOM</h2>
-          <p id="doomText">Läuft komplett in deinem Browser (WebAssembly).<br>Erster Start lädt ca. 35&nbsp;MB.</p>
-          <div id="wadButtons">
-            <button class="btn" data-wad="freedoom1.wad">Starten (FreeDoom)</button>
-          </div>
-          <div id="doomProgressWrap" class="doom-progress-wrap" style="display:none">
-            <div id="doomProgress" class="doom-progress"></div>
-          </div>
+{% block content %}
+<div class="game-head">
+  <a class="back-link" href="{{ url_for('index') }}"><svg class="icon icon-back" aria-hidden="true"><use href="#i-chevron"/></svg>Alle Spiele</a>
+  <h1 class="page-title">DOOM</h1>
+</div>
+
+<div class="doom-layout" style="--game: var(--game-doom)">
+  <section class="board-wrap doom-screen" aria-label="Spielfeld">
+    <canvas id="canvas" class="doom-canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+    <div id="doomOverlay" class="overlay">
+      <div class="overlay-card">
+        <h2 id="doomTitle" class="overlay-title">DOOM</h2>
+        <p id="doomText" class="overlay-text">Läuft komplett in deinem Browser. Beim ersten Start lädt er etwa 36&nbsp;MB.</p>
+        <div id="wadButtons" class="doom-wads">
+          <button class="btn btn-lg" type="button" data-wad="freedoom1.wad">Starten mit FreeDoom</button>
+          {% for w in wads %}
+          <button class="btn btn-secondary btn-lg" type="button" data-wad="{{ w.wad }}" data-file="{{ w.file }}">Starten mit {{ w.title }}</button>
+          {% endfor %}
+        </div>
+        <div id="doomProgressWrap" class="doom-progress-wrap" style="display:none">
+          <div id="doomProgress" class="doom-progress"></div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <aside class="sidebar">
-      <div class="panel controls">
-        <span class="panel-title">Steuerung</span>
-        <ul>
-          <li><kbd>W</kbd><kbd>S</kbd> vor / zurück</li>
-          <li><kbd>A</kbd><kbd>D</kbd> seitwärts</li>
-          <li>Maus drehen + feuern <span class="dim-note">(ins Bild klicken)</span></li>
-          <li><kbd>Space</kbd> feuern · <kbd>E</kbd> benutzen</li>
-          <li><kbd>Shift</kbd> rennen · <kbd>Esc</kbd> Menü</li>
-        </ul>
+  <aside class="doom-side">
+    <section class="panel controls-panel" aria-labelledby="controls-title">
+      <h2 class="panel-title" id="controls-title">Steuerung</h2>
+      {{ controls(game) }}
+    </section>
+    <section class="panel" aria-labelledby="display-title">
+      <h2 class="panel-title" id="display-title">Anzeige und Ton</h2>
+      <div class="doom-actions">
+        <button id="fsBtn" class="btn btn-secondary btn-sm" type="button" disabled>
+          <svg class="icon" aria-hidden="true"><use href="#i-expand"/></svg>Vollbild
+        </button>
+        <button class="btn btn-ghost btn-sm" type="button" data-settings-open>
+          <svg class="icon" aria-hidden="true"><use href="#i-gear"/></svg>Ton einstellen
+        </button>
       </div>
-      <div class="panel">
-        <span class="panel-title">Anzeige</span>
-        <button id="fsBtn" class="btn btn-sm" style="width:100%" disabled>Vollbild</button>
-        <p class="doom-note">Spielstände leben nur im Tab — nach einem Reload ist die Kampagne wieder am Anfang.</p>
-      </div>
-      <div class="panel">
-        <span class="panel-title">Info</span>
-        <p class="doom-note">Engine: Chocolate&nbsp;Doom als WASM (GPL). Spieldaten: FreeDoom&nbsp;Phase&nbsp;1 (BSD) — frei und mitgeliefert.
-        Eigene <code>doom1.wad</code>/<code>doom2.wad</code> in <code>static/doom/</code> ablegen, dann erscheint sie hier als Option.</p>
-      </div>
-    </aside>
-  </div>
+      <p class="hint-text">Spielstände gibt es nur in diesem Tab. Nach dem Neuladen beginnt die Kampagne von vorn.</p>
+    </section>
+    <section class="panel" aria-labelledby="about-title">
+      <h2 class="panel-title" id="about-title">Über dieses DOOM</h2>
+      <p class="hint-text">Engine: Chocolate Doom als WebAssembly (GPL). Spieldaten: FreeDoom Phase&nbsp;1 (BSD), frei und mitgeliefert.</p>
+      {% if is_admin %}
+      <p class="hint-text">Für Admins: Liegen die Original-Dateien <code>doom1.wad</code> oder <code>doom2.wad</code> auf dem Server, erscheinen sie hier als weitere Startknöpfe (README, Abschnitt „DOOM“).</p>
+      {% endif %}
+    </section>
+  </aside>
 </div>
 {% endblock %}
+
 {% block scripts %}
-<script src="{{ url_for('static', filename='doom.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='doom.js') }}"></script>
 {% endblock %}

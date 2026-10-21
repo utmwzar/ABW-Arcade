@@ -1,0 +1,192 @@
+/*
+ * Spielseiten: Spielfeld mit Overlay, Werte, Steuerung, Leaderboard.
+ * Vorlage: templates/game_base.html. Die Spielfarbe kommt als --game aus der Registry.
+ */
+
+.game-page { padding-top: var(--s-6); padding-bottom: var(--s-8); }
+.game-shell { width: fit-content; max-width: 100%; margin-inline: auto; }
+
+/* ---------- Anordnung ---------- */
+.game-layout {
+  --game: var(--accent);
+  display: grid; justify-content: center; align-items: start; gap: var(--s-5) var(--s-6);
+  grid-template-columns: minmax(200px, 260px) auto minmax(240px, 300px);
+  grid-template-rows: auto auto auto 1fr;
+  grid-template-areas:
+    "stats    board lb"
+    "extra    board lb"
+    "controls board lb"
+    ".        board lb";
+}
+.game-layout > .stats { grid-area: stats; }
+.game-layout > .board-wrap { grid-area: board; }
+.game-layout > .next-panel { grid-area: extra; }
+.game-layout > .controls-panel { grid-area: controls; }
+.game-layout > .leaderboard { grid-area: lb; }
+
+/* Breites Spielfeld (Geometry Dash): Feld oben, darunter drei Spalten */
+.game-layout-wide {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "board board    board"
+    "stats controls lb";
+}
+/* Die Hülle ist so breit wie das Feld, damit die Titelzeile mit ihm beginnt. */
+.game-shell.is-wide { width: min(1140px, 100%); }
+.game-layout-wide > .board-wrap { justify-self: stretch; }
+.game-layout-wide .game-canvas { width: 100%; }
+
+/* ---------- Spielfeld ---------- */
+.board-wrap {
+  position: relative; justify-self: center; max-width: 100%;
+  background: var(--playfield); border: 1px solid var(--line); border-radius: var(--r-lg);
+  overflow: hidden; box-shadow: var(--shadow-2);
+}
+.board-wrap canvas { display: block; max-width: 100%; height: auto; }
+/* Spielfeld (Makro game_canvas): füllt die Fensterhöhe, wächst aber höchstens
+   auf das 1,75-Fache und wird nie breiter als seine Spalte. --board-reserve
+   ist alles über und unter dem Feld: Kopfleiste 65, Ränder der Seite 24 + 32,
+   Titelzeile 56, Rahmen 2, dazu etwa 10 px Luft, damit die Seite nie scrollt.
+   Die Bildpunkte setzt static/js/canvas.js. */
+.game-layout { --board-reserve: 190px; --board-min: 220px; }
+.game-canvas {
+  aspect-ratio: var(--bw) / var(--bh);
+  width: max(var(--board-min), min(calc(var(--bw) * 1.75px), calc((100dvh - var(--board-reserve)) * var(--bw) / var(--bh))));
+  -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
+}
+
+.overlay {
+  position: absolute; inset: 0; z-index: var(--z-overlay);
+  display: grid; place-items: center; padding: var(--s-4);
+  background: rgb(8 6 18 / 0.72);
+}
+.overlay.is-leaving { pointer-events: none; }   /* beim Ausblenden gehört der Finger schon dem Feld */
+/* Schmales Feld (Tetris im kleinen Fenster): weniger Rand, kleinere Knöpfe.
+   Das Overlay ist so breit wie das Feld, nie wie sein Inhalt, und taugt darum als Container. */
+.overlay { container-type: inline-size; }
+@container (max-width: 300px) {
+  .overlay-card { padding: var(--s-4); }
+  .overlay-actions .btn-lg { padding-inline: var(--s-3); font-size: var(--fs-md); }
+}
+/* Steht die Steuerung neben oder unter dem Feld im Panel, zeigt die Startkarte
+   nur Ziel und Knopf. Erst auf dem Handy rückt das Panel unter das Leaderboard. */
+@media (min-width: 761px) { .overlay-controls { display: none; } }
+.overlay-text { display: grid; gap: var(--s-3); color: var(--text-muted); }
+.overlay-text b { color: var(--text); }
+.overlay-text .controls { color: var(--text); font-size: var(--fs-sm); }
+.overlay-text .controls-hint { margin-top: 0; }
+
+/* Ergebnis am Spielende: der laute Moment */
+.result-score { font-size: 3.5rem; font-weight: 800; line-height: 1; color: var(--text); letter-spacing: -0.01em; }
+.result-score.is-best { color: var(--gold); }
+.result-best { display: flex; align-items: center; gap: var(--s-2); color: var(--gold); font-weight: 700; }
+.result-best .icon { width: 18px; height: 18px; flex: none; }
+.result-detail { color: var(--text-muted); font-size: var(--fs-sm); }
+.result-status { display: grid; gap: var(--s-1); padding-top: var(--s-3); border-top: 1px solid var(--line); }
+.status-line { display: flex; align-items: center; gap: var(--s-2); font-weight: 700; font-size: var(--fs-sm); color: var(--text-muted); }
+.status-line .icon { width: 18px; height: 18px; flex: none; }
+.status-ok { color: var(--ok); }
+.status-error { color: var(--danger-text); align-items: flex-start; }
+.status-error .icon { margin-top: 1px; }
+.status-note { font-size: var(--fs-sm); color: var(--text-muted); }
+.status-note a { font-weight: 600; }
+.spinner {
+  width: 16px; height: 16px; flex: none; border-radius: 50%;
+  border: 2px solid var(--line-strong); border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.stats-pause { grid-column: 1 / -1; justify-self: start; }
+
+/* Flaches Spielfeld (Geometry Dash): Karte zweispaltig, damit sie in 280 px passt */
+.game-layout-wide .overlay { padding: var(--s-3); }
+.game-layout-wide .overlay-card {
+  width: min(100%, 660px); padding: var(--s-5);
+  grid-template-columns: minmax(0, 1fr) 220px; align-items: start; gap: var(--s-3) var(--s-6);
+  grid-template-areas: "title actions" "body actions";
+}
+.game-layout-wide .overlay-title { grid-area: title; }
+.game-layout-wide .overlay-text { grid-area: body; }
+.game-layout-wide .overlay-actions { grid-area: actions; align-self: end; }
+.game-layout-wide .result-score { font-size: 2.75rem; }
+
+/* ---------- Werte ---------- */
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4) var(--s-3); }
+.stat { display: grid; gap: 2px; }
+.stat-main { grid-column: 1 / -1; }
+.stat-label { font-size: var(--fs-xs); font-weight: 600; color: var(--text-muted); }
+.stat-value { font-size: var(--fs-xl); font-weight: 800; line-height: 1.1; }
+.stat-main .stat-value { font-size: var(--fs-3xl); line-height: 1; }
+
+.next-panel canvas { width: 120px; height: 120px; }
+.controls-panel .controls { font-size: var(--fs-sm); }
+
+/* ---------- Leaderboard ---------- */
+.lb-list { display: grid; counter-reset: none; }
+.lb-list li {
+  display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: var(--s-2);
+  min-height: 36px; padding: var(--s-1) var(--s-2); border-radius: var(--r-sm);
+}
+.lb-rank { color: var(--text-muted); font-weight: 700; text-align: right; }
+.lb-list li:first-child .lb-rank { color: var(--gold); }
+.lb-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb-list li.is-me { background: var(--accent-soft); }
+.lb-list li.is-me .lb-name { color: var(--accent); font-weight: 700; }
+.lb-score { font-weight: 700; }
+.lb-list .lb-empty { display: block; color: var(--text-muted); padding: var(--s-2) 0; }
+.personal { margin-top: var(--s-3); padding-top: var(--s-3); border-top: 1px solid var(--line); color: var(--text-muted); font-size: var(--fs-sm); }
+.personal:empty { display: none; }
+.personal b { color: var(--gold); }
+
+/* ---------- DOOM ---------- */
+.doom-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--s-6); align-items: start; }
+.doom-screen { justify-self: stretch; background: #000; }
+.doom-canvas {
+  display: block; width: 100%; aspect-ratio: 8 / 5;  /* 640 x 400 */
+  background: #000; image-rendering: pixelated; outline: none;
+}
+.doom-side { display: grid; gap: var(--s-5); }
+.doom-side .panel { display: grid; gap: var(--s-3); }
+.doom-side .panel-title { margin-bottom: 0; }
+.doom-actions { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.doom-wads { display: grid; gap: var(--s-2); justify-self: stretch; }
+.doom-progress-wrap {
+  justify-self: stretch; height: 8px; border-radius: var(--r-pill);
+  background: var(--bg); border: 1px solid var(--line-strong); overflow: hidden;
+}
+.doom-progress { height: 100%; width: 0%; background: var(--game); transition: width var(--dur-short) linear; }
+
+/* ---------- Breiten ---------- */
+@media (max-width: 1100px) {
+  .doom-layout { grid-template-columns: minmax(0, 1fr); }
+  .doom-side { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); align-items: start; }
+}
+@media (max-width: 1100px) {
+  .game-layout:not(.game-layout-wide) {
+    grid-template-columns: auto minmax(240px, 300px);
+    grid-template-areas:
+      "board stats"
+      "board extra"
+      "board controls"
+      "board lb";
+    grid-template-rows: auto auto auto 1fr;
+  }
+}
+@media (max-width: 760px) {
+  /* Über dem Feld stehen hier auch die Werte. */
+  .game-layout { --board-reserve: 272px; }
+  /* Auf dem Handy ist das flache Feld zu niedrig: die Karte steht darunter. */
+  .game-layout-wide .overlay { position: static; background: var(--bg-raised); }
+  .game-layout-wide .overlay-card { grid-template-columns: minmax(0, 1fr); grid-template-areas: "title" "body" "actions"; }
+  .game-layout, .game-layout:not(.game-layout-wide) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-template-areas: "stats" "board" "extra" "lb" "controls";
+  }
+  .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .stat-main { grid-column: auto; }
+  .stat-main .stat-value { font-size: var(--fs-2xl); }
+  .overlay-card { padding: var(--s-4); }
+}

@@ -1,0 +1,15 @@
+{# Rückfrage vor Aktionen, die sich nicht rückgängig machen lassen.
+   Ein Formular mit data-confirm="Frage" (und optional data-confirm-action="Löschen")
+   öffnet diesen Dialog statt sofort abzuschicken; shell.js verbindet beides. #}
+<dialog class="dialog dialog-sm" id="confirm" aria-labelledby="confirm-title" aria-describedby="confirm-text">
+  <form method="dialog">
+    <div class="dialog-body">
+      <h2 class="dialog-title" id="confirm-title">Wirklich?</h2>
+      <p id="confirm-text" data-confirm-text></p>
+    </div>
+    <div class="dialog-foot">
+      <button class="btn btn-secondary" value="cancel">Abbrechen</button>
+      <button class="btn btn-danger-solid" value="ok" data-confirm-ok>Bestätigen</button>
+    </div>
+  </form>
+</dialog>
