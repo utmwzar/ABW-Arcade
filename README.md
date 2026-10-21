@@ -610,7 +610,7 @@ abw-arcade/
     ├── chess/pieces/       Schachfiguren "Chessnut" (Apache 2.0)
     ├── *_engine.js         die JS-Gegenstuecke zu den .py-Engines
     ├── tetris.js, snake.js, breakout.js, g2048.js, gd.js, doom.js
-    └── doom/               websockets-doom.js/.wasm, freedoom1.wad, Lizenzen
+    └── doom/               websockets-doom.js/.wasm, freedoom1.wad, Lizenzen und Mitwirkende
 ```
 
 Zur Laufzeit kommen `arcade.db`, `secret_key`, `arcade.conf` und `.venv/`
@@ -632,4 +632,4 @@ außerdem:
 | Schriften Archivo und Press Start 2P | SIL Open Font License 1.1 | `static/fonts/OFL-*.txt` |
 | Schachfiguren „Chessnut“ | Apache 2.0 | `static/chess/pieces/LICENSE.txt` |
 | Chocolate Doom als WebAssembly | GPL v2 | `static/doom/LICENSE-doom-wasm.md` |
-| FreeDoom Phase 1 | BSD | `static/doom/LICENSE-freedoom.txt` |
+| FreeDoom Phase 1 (0.13.0) | BSD | `static/doom/LICENSE-freedoom.txt`, Mitwirkende in `static/doom/CREDITS-freedoom.txt` und `static/doom/CREDITS-MUSIC-freedoom.txt` |
