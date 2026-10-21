@@ -52,7 +52,7 @@
             <label><input type="radio" name="botColor" value="b"><span>Schwarz</span></label>
           </div>
         </fieldset>
-        <button class="btn" type="button" data-bot>Bot-Partie starten</button>
+        <button class="btn{% if waiting %} btn-secondary{% endif %}" type="button" data-bot>Bot-Partie starten</button>
         <p class="lobby-msg" role="status" data-msg="bot"></p>
       </div>
     </section>

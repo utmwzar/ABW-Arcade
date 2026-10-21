@@ -1375,7 +1375,16 @@ def _chess_state_payload(db, game, uid):
 @app.route("/games/chess")
 @login_required
 def chess_lobby_page():
-    return render_template("chess_lobby.html")
+    # Ein gefüllter Knopf je Ansicht: Wartet eine Partie auf deinen Zug, ist schon
+    # beim Laden ihr „Zum Brett“ der Hauptknopf und „Bot-Partie starten“ sekundär.
+    uid = current_user()["id"]
+    rows = get_db().execute(
+        "SELECT white_id, black_id, state FROM chess_games "
+        "WHERE status = 'active' AND (white_id = ? OR black_id = ?)",
+        (uid, uid),
+    ).fetchall()
+    waiting = any(json.loads(r["state"])["turn"] == _chess_color_of(r, uid) for r in rows)
+    return render_template("chess_lobby.html", waiting=waiting)
 
 
 @app.route("/games/chess/<game_id>")

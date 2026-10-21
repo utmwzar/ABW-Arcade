@@ -55,6 +55,19 @@ class VersionTest(unittest.TestCase):
         self.assertEqual(body["state"]["history"], [])
 
 
+class LobbyPageTest(unittest.TestCase):
+    BOT_FILLED = 'class="btn" type="button" data-bot'
+    BOT_SECONDARY = 'class="btn btn-secondary" type="button" data-bot'
+
+    def test_bot_button_yields_to_a_waiting_game(self):
+        a, b, *_ = _register_pair()
+        self.assertIn(self.BOT_FILLED, a.get("/games/chess").get_data(as_text=True))
+        _gid, white, black = _pvp_game(a, b)
+        # Weiß ist am Zug: dort ist „Zum Brett“ der Hauptknopf, bei Schwarz der Bot-Knopf
+        self.assertIn(self.BOT_SECONDARY, white.get("/games/chess").get_data(as_text=True))
+        self.assertIn(self.BOT_FILLED, black.get("/games/chess").get_data(as_text=True))
+
+
 class BotTest(unittest.TestCase):
     def setUp(self):
         self.c = support.client()

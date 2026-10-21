@@ -299,7 +299,7 @@ Ein Nachtviolett in vier Stufen trägt die Oberfläche, Cyan ist der einzige Akz
 ### Game Colors
 Jedes Spiel behält die Farbe seiner Vorschau-Grafik: **Tetris-Cyan** (#2ccfe3), **Snake-Grün** (#4ad08a), **Breakout-Pink** (#f06bb2), **2048-Gold** (#f7c04a), **Geometry-Dash-Blau** (#6c8cff), **Schach-Violett** (#a98bfa), **DOOM-Rot** (#f0606b).
 - **Wo sie stehen:** in der Kapsel (Grafik auf 13 % Spielfarbe über Spielfeld-Schwarz, 3-px-Kante unter der Grafik, beim Zeigen ein Rahmen aus 55 % Spielfarbe), als 8-px-Quadrat vor dem Spielnamen in „Zuletzt gespielt“ und im Spielfeld. Auf der eigenen Seite zeigt nur DOOM seine Farbe, im Ladebalken. Der Richtungsvertrag sah die Spielfarbe als Akzent der ganzen Spielseite vor; gebaut bleibt dort alles Bedienbare cyan.
-- **Gleiche Werte:** Tetris, Snake, 2048 und DOOM teilen ihren Wert mit dem Akzent oder einer Zustandsfarbe. Sie geraten nicht aneinander, weil eine Spielfarbe nie Text, Wert oder Bedienelement färbt.
+- **Gleiche Werte:** Tetris, Snake, 2048 und DOOM teilen ihren Wert mit dem Akzent oder einer Zustandsfarbe. Sie geraten nicht aneinander, weil eine Spielfarbe in der Hülle nie Text, Wert oder Bedienelement färbt; im Spielfeld gelten die Farben des Spiels.
 - **Gold als Spielfarbe:** 2048 hat denselben Wert wie das Highscore-Gold, ebenso der O-Stein und die 1024-Kachel, und im Konfetti mischt Gold mit. Das sind Spielfarben in Kapsel, Spielmarke und Spielfeld; die Gold-Regel gilt für die Hülle.
 - **Lavendelbrett** (hell #c9bfe8, dunkel #8b7fc0): die Felder des Schachbretts. Schwarze Figuren stehen auf dunklen Feldern mit 5,9 : 1. Schrift auf hellem Lavendel steht in **Brett-Tinte** (#1d1638).
 
@@ -314,14 +314,14 @@ Jedes Spiel behält die Farbe seiner Vorschau-Grafik: **Tetris-Cyan** (#2ccfe3),
 - **Nebel-Lavendel** (#a59dcb): Nebentext, Labels, inaktive Navigation, Platzhalter; auf jeder Fläche mindestens 6 : 1.
 - **Spielfeld-Schwarz** (#0a0816): Grund jedes Spielfelds und jeder Kapselgrafik, eine Stufe unter dem Seitengrund. Die Spiele lassen ihren Canvas leer; man sieht den Grund des Spielfeld-Rahmens.
 - **Hover-Töne:** **Tastenviolett hell** (#2f2754) für sekundäre Knöpfe, **Kante hell** (#5a4f8c) für Eingabefelder und Filter-Chips.
-- **Einzelwerte ohne Token:** aufgehellte Texte in Meldungen (#ffd9dc auf Rot-Schleier, #d3f7e2 auf Grün-Schleier), reines Weiß und Schwarz für die Farbpunkte der Spieler und den Zielring beim Ziehen, Schwarz hinter DOOM.
+- **Einzelwerte ohne Token:** aufgehellte Texte in Meldungen (#ffd9dc auf Rot-Schleier, #d3f7e2 auf Grün-Schleier), reines Weiß und Schwarz für die Farbpunkte der Spieler und den Zielring beim Ziehen, Schwarz hinter DOOM und der Schleier hinter Overlays und Dialogen (rgb(8 6 18), 72 % über dem Spielfeld, 66 % hinter Dialogen und über dem Schachbrett).
 
 ### Named Rules
 **The One-Accent Rule.** Cyan ist der einzige Akzent der Hülle: Aktion, Auswahl, Fokus und alles, was dich meint (deine Zeile, dein Zug, dein Initial). Auch auf einer Spielseite sind Knöpfe, Links und Fokusringe cyan, nie in der Spielfarbe.
 
 **The Gold-Is-Highscore Rule.** Gold heißt Highscore und nichts anderes. Golden sind dein Highscore in Kapsel und Werte-Panel, unter dem Leaderboard und als Tag in „Zuletzt gespielt“, die Rangziffer von Platz 1 und die Ergebniszahl, diese erst, wenn der Server den neuen Highscore bestätigt hat. Elo, Lines, Level und alle anderen Werte stehen in Textfarbe. Siege, Angebote und Fehlercodes tragen ihre eigene Farbe. Ausgenommen sind Spielfarben: 2048 ist golden, der O-Stein und die 1024-Kachel auch, und im Konfetti mischt Gold mit. Das gehört zum Spiel, nicht zur Hülle.
 
-**The Games-Are-The-Light Rule.** Kräftige Farbe kommt aus den Spielen: Kapselgrafik, Kapselkante, Spielmarke und Spielfeld. Die Hülle bleibt in den Neutralen; eine Spielfarbe färbt nie Text, Wert oder Bedienelement.
+**The Games-Are-The-Light Rule.** Kräftige Farbe kommt aus den Spielen: Kapselgrafik, Kapselkante, Spielmarke und Spielfeld. Die Hülle bleibt in den Neutralen; dort färbt eine Spielfarbe nie Text, Wert oder Bedienelement. Im Spielfeld gelten die Farben des Spiels, auch für Texte wie „TETRIS“.
 
 ## Typography
 
@@ -397,7 +397,7 @@ Fest und flach, mit einem klaren Hauptknopf.
 - **Shape:** sanft gerundet (10 px), 42 px hoch, 16 px Innenabstand; klein 34 px mit 12 px Innenabstand und 6 px Rundung, groß 50 px mit 24 px.
 - **Primary:** Arcade-Cyan mit Cyan-Tinte, Archivo 700. „Spiel starten“, „Nochmal“, „Spielen“, „Anmelden“; in der Lobby „Bot-Partie starten“ oder „Zum Brett“, je nach Zustand (siehe The One-Filled-Button Rule).
 - **Hover / Focus:** Hover hellt in 120 ms zu Hellem Cyan auf; Fokus ist ein 2-px-Ring in Cyan mit 2 px Abstand; gedrückt sitzt der Knopf 1 px tiefer; deaktiviert 45 % Deckkraft.
-- **Secondary:** Tastenviolett mit Kante in Kantenviolett und Textfarbe, Hover Tastenviolett hell. Für jede Nebenaktion: „Alle Spiele“, „Pause“, „Abbrechen“, „Zur aktuellen Stellung“, „Zum Brett“ bei Partien, die nicht auf dich warten.
+- **Secondary:** Tastenviolett mit Kante in Kantenviolett und Textfarbe, Hover Tastenviolett hell. Für jede Nebenaktion: „Alle Spiele“, „Pause“, „Abbrechen“, „Zur aktuellen Stellung“ und jedes „Zum Brett“ außer dem der ersten Partie, die auf dich wartet.
 - **Ghost:** transparent mit Nebentext, Hover Kapselviolett und Textfarbe: Kopfleiste, „Menü“, Nachspielen im Schach, „Ansehen“.
 - **Danger:** roter Umriss (50 %) mit rotem Text, Hover Rot-Schleier: „Aufgeben“, Löschen und Leeren im Admin. Gefülltes Rot (Signalrot mit Rot-Tinte, Hover Helles Signalrot) gibt es nur als „Bestätigen“ im Rückfrage-Dialog.
 - **Tastenhinweis:** Die passende Taste steht rechts im Knopf („Enter“, „P“, „R“) als kleine Kappe in Label Strong mit 4 px Rundung, auf Cyan in 16 % Schwarz, auf sekundären Knöpfen in Nachtviolett mit Nebentext. Ohne Hover entfällt sie.
@@ -467,7 +467,7 @@ Tasten sehen aus wie Tasten, Gesten wie Gesten.
 - **Reduziert / Aus:** Bei reduzierter Bewegung gibt es kein Wackeln und keine Spuren, ein Drittel der Partikel und Texte, die stehen bleiben; bei „Aus“ keine Effekte.
 
 ### Named Rules
-**The One-Filled-Button Rule.** Höchstens ein gefüllter Knopf pro Ansicht; alles daneben ist sekundär oder ghost. Welcher es ist, entscheidet der Zustand: In der Schach-Lobby ist es das „Zum Brett“ der Partie, die auf dich wartet, sonst „Bot-Partie starten“. Kurzmeldungen tragen ihre Aktion gefüllt, weil sie nur kurz über der Ansicht liegen.
+**The One-Filled-Button Rule.** Höchstens ein gefüllter Knopf pro Ansicht; alles daneben ist sekundär oder ghost. Welcher es ist, entscheidet der Zustand: In der Schach-Lobby ist es das „Zum Brett“ der ersten Partie, die auf dich wartet, sonst „Bot-Partie starten“; der Server gibt den Zustand schon beim Laden mit. Kurzmeldungen tragen ihre Aktion gefüllt, weil sie nur kurz über der Ansicht liegen.
 
 **The One-Loud-Moment Rule.** Nur das Ende eines Runs ist laut: Die Karte federt, die Zahl zählt hoch, und ein bestätigter Highscore kommt als zweiter Schlag (Gold, Puls, Pokalzeile). Alles andere in der Hülle bleibt kurz (120 ms für Farbe, 200 ms für Wege und Ausblenden, 320 ms für Hereinkommendes) und bewegt sich nur, um einen Zustand zu zeigen.
 

@@ -813,7 +813,7 @@
       },
       {
         "name": "The Games-Are-The-Light Rule",
-        "body": "Kräftige Farbe kommt aus den Spielen: Kapselgrafik, Kapselkante, Spielmarke und Spielfeld. Die Hülle bleibt in den Neutralen; eine Spielfarbe färbt nie Text, Wert oder Bedienelement.",
+        "body": "Kräftige Farbe kommt aus den Spielen: Kapselgrafik, Kapselkante, Spielmarke und Spielfeld. Die Hülle bleibt in den Neutralen; dort färbt eine Spielfarbe nie Text, Wert oder Bedienelement. Im Spielfeld gelten die Farben des Spiels, auch für Texte wie „TETRIS“.",
         "section": "colors"
       },
       {
@@ -848,7 +848,7 @@
       },
       {
         "name": "The One-Filled-Button Rule",
-        "body": "Höchstens ein gefüllter Knopf pro Ansicht; alles daneben ist sekundär oder ghost. Welcher es ist, entscheidet der Zustand: In der Schach-Lobby ist es das „Zum Brett“ der Partie, die auf dich wartet, sonst „Bot-Partie starten“. Kurzmeldungen tragen ihre Aktion gefüllt, weil sie nur kurz über der Ansicht liegen.",
+        "body": "Höchstens ein gefüllter Knopf pro Ansicht; alles daneben ist sekundär oder ghost. Welcher es ist, entscheidet der Zustand: In der Schach-Lobby ist es das „Zum Brett“ der ersten Partie, die auf dich wartet, sonst „Bot-Partie starten“; der Server gibt den Zustand schon beim Laden mit. Kurzmeldungen tragen ihre Aktion gefüllt, weil sie nur kurz über der Ansicht liegen.",
         "section": "components"
       },
       {

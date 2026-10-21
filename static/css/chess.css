@@ -4,7 +4,9 @@
  * (Kontrast Schwarz auf dunklem Feld 5,9 : 1, ähnlich dem braunen Brett von lichess).
  */
 
-.chess-page, .lobby {
+/* Brettfarben für die ganze Schachseite: auch der Dialog zur Umwandlung,
+   der außerhalb von .chess-page liegt, braucht sie (chess.css lädt nur hier). */
+:root {
   --board-light: #c9bfe8;
   --board-dark: #8b7fc0;
   --board-ink: #1d1638;   /* Schrift auf hellem Lavendel */
