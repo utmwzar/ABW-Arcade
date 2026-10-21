@@ -465,6 +465,26 @@ python3 -m venv .venv
 Oder so, wie der Dienst startet (waitress, Einstellungen aus `arcade.conf`
 oder `ARCADE_PORT` usw.): `.venv/bin/python run.py`.
 
+### Testversion als einzelne HTML-Datei
+
+Zum Ausprobieren ganz ohne Server baut `werkzeuge/testversion/bauen.py` die
+fünf Arcade-Spiele in eine einzige HTML-Datei, die per Doppelklick im Browser
+läuft:
+
+```bash
+.venv/bin/python werkzeuge/testversion/bauen.py    # schreibt abw-arcade-lokal.html
+```
+
+- Gebaut wird der eingecheckte Stand. `--ref` wählt ihn (Standard `HEAD`),
+  `--out` legt die Datei woanders ab.
+- Neben den Paketen aus `requirements.txt` braucht das Skript Node mit `npx`;
+  beim ersten Lauf lädt es darüber esbuild.
+- Die Datei zeigt die echten Seiten, und jedes Spiel wird mit derselben Engine
+  nachgerechnet wie auf dem Server. Die Scores bleiben aber im Browser.
+  Schach und DOOM fehlen, weil sie den Server brauchen.
+- Die CI baut die Testversion bei jedem Lauf mit. Passt eine Vorlage nicht
+  mehr zum Skript, nennt es die Stelle.
+
 ### Gestaltung und Texte
 
 Tonfall und Begriffe (Score, Leaderboard, Gesten usw.) stehen in
@@ -598,6 +618,7 @@ abw-arcade/
 ├── CHANGELOG.md            was sich je Version geändert hat
 ├── PRODUCT.md, DESIGN.md   Tonfall und Begriffe; das Design-System
 ├── docs/bilder/            Bilder für diese Seite
+├── werkzeuge/testversion/  baut die Testversion als einzelne HTML-Datei
 ├── .github/                CI, Release-Workflow, Issue-Vorlagen
 ├── templates/              Hub, Spiele, Login/Registrierung, admin/, thumbs/
 └── static/
@@ -616,9 +637,9 @@ abw-arcade/
 Zur Laufzeit kommen `arcade.db`, `secret_key`, `arcade.conf` und `.venv/`
 hinzu, unter macOS und Windows außerdem `data/`, `logs/` und (Windows)
 `service/`. Die gehören nicht ins Repository und überstehen jedes Update.
-Installationsskripte, `installer/`, `tests/` und `docs/` landen nicht im
-Programmordner auf dem Server; `PRODUCT.md`, `DESIGN.md`, `docs/` und
-`.github/` fehlen auch in den Paketen.
+Installationsskripte, `installer/`, `tests/`, `docs/` und `werkzeuge/` landen
+nicht im Programmordner auf dem Server; `PRODUCT.md`, `DESIGN.md`, `docs/`,
+`werkzeuge/` und `.github/` fehlen auch in den Paketen.
 
 ---
 

@@ -57,7 +57,7 @@ EXCLUDE_SUFFIXES = (".pyc", ".pyo", ".swp")
 # Unterlagen fuer die Entwicklung und die Pakete selbst.
 EXCLUDE_ROOT = (
     "install.sh", "install.cmd", "install.ps1", "paket-bauen.sh",
-    "pruefe-engines.js", "pruefe_engines.py", "installer", "tests", "docs",
+    "pruefe-engines.js", "pruefe_engines.py", "installer", "tests", "docs", "werkzeuge",
     "PRODUCT.md", "DESIGN.md", ".impeccable", "abw-arcade.tar.gz", "abw-arcade.zip",
 )
 

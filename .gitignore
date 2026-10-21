@@ -13,6 +13,9 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 
+# Lokale Testversion (werkzeuge/testversion/bauen.py)
+abw-arcade-lokal.html
+
 # OS / editor cruft
 .DS_Store
 *.swp

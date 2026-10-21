@@ -141,6 +141,7 @@ class ExcludeTest(SyncTestCase):
         "install.cmd", "install.ps1", "paket-bauen.sh", "pruefe-engines.js",
         "pruefe_engines.py", "installer/sync.py", "abw-arcade.tar.gz",
         "abw-arcade.zip", ".impeccable/design.json", "docs/bilder/banner.png",
+        "werkzeuge/testversion/bauen.py",
     ]
 
     def test_dev_files_are_not_copied(self):

@@ -49,6 +49,12 @@ jobs:
       - name: JavaScript-Tests
         run: node --test "tests/js/**/*.test.mjs"
 
+      - name: Lokale Testversion bauen
+        # Faellt auf, wenn eine Aenderung an Vorlagen oder Texten das Bauskript
+        # bricht (es nennt dann die Stelle). Einmal genuegt.
+        if: matrix.python == '3.13'
+        run: python werkzeuge/testversion/bauen.py --out "$RUNNER_TEMP/abw-arcade-lokal.html"
+
       - name: Shell-Skripte
         run: shellcheck install.sh paket-bauen.sh .github/release-bauen.sh
 
@@ -113,7 +119,7 @@ jobs:
           tar -tzf abw-arcade.tar.gz | grep -v '/$' | sort > tar.txt
           unzip -Z1 abw-arcade.zip | grep -v '/$' | sort > zip.txt
           diff tar.txt zip.txt
-          if grep -E '^abw-arcade/(\.github|\.claude|\.impeccable|tests|docs)/|^abw-arcade/(PRODUCT|DESIGN)\.md$' tar.txt; then
+          if grep -E '^abw-arcade/(\.github|\.claude|\.impeccable|tests|docs|werkzeuge)/|^abw-arcade/(PRODUCT|DESIGN)\.md$' tar.txt; then
             echo "Entwicklungsdateien im Paket"; exit 1
           fi
           for datei in PAKET-INFO run.py install.sh install.cmd install.ps1 installer/sync.py requirements.txt README.md LICENSE CHANGELOG.md; do
