@@ -36,7 +36,6 @@ const scoreEl = document.getElementById("score");
 const bestTileEl = document.getElementById("best-tile");
 
 // Farben aus static/css/tokens.css: kühl bis warm, die 2048 in Cyan.
-const COL_BOARD = "#0a0816";
 const COL_SLOT = "rgba(255,255,255,0.05)";
 const DARK = "#110d20", LIGHT = "#eeeafe";
 const TILES = {
@@ -140,8 +139,7 @@ const easeOut = (k) => 1 - (1 - k) * (1 - k);
 
 // Zeichnet und meldet, ob die Animation noch läuft.
 function draw(now) {
-  ctx.fillStyle = COL_BOARD;
-  ctx.fillRect(0, 0, PX, PX);
+  ctx.clearRect(0, 0, PX, PX);   // den Grund malt .board-wrap (--playfield)
   for (let i = 0; i < SIZE * SIZE; i++) {
     const { x, y } = cellXY(i);
     ctx.fillStyle = COL_SLOT;

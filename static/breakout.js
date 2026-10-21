@@ -24,7 +24,6 @@ const scoreEl = document.getElementById("score");
 const livesEl = document.getElementById("lives");
 
 // Farben aus static/css/tokens.css; Steinreihen von oben nach unten
-const COL_BG = "#0a0816";
 const COL_PADDLE = "#eeeafe";
 const COL_BALL = "#eeeafe";
 const COL_DANGER = "#f0606b";
@@ -84,8 +83,7 @@ const arcade = createArcade({
 
 // ---------- rendering ----------
 function draw() {
-  ctx.fillStyle = COL_BG;
-  ctx.fillRect(0, 0, W, H);
+  ctx.clearRect(0, 0, W, H);   // den Grund malt .board-wrap (--playfield)
   ctx.save();
   fx.applyShake(ctx);
 

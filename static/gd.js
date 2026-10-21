@@ -34,7 +34,6 @@ const scoreEl = document.getElementById("score");
 const bestEl = document.getElementById("best");
 
 // Farben aus static/css/tokens.css
-const COL_BG = "#0a0816";
 const COL_GRID = "rgba(255,255,255,0.04)";
 const COL_LINE = "#6c8cff";
 const COL_CUBE = "#6c8cff";
@@ -111,8 +110,7 @@ const cubeBottom = () => GROUND_Y - engine.y * PXFP;
 
 // ---------- rendering ----------
 function drawBackground() {
-  ctx.fillStyle = COL_BG;
-  ctx.fillRect(0, 0, W, H);
+  ctx.clearRect(0, 0, W, H);   // den Grund malt .board-wrap (--playfield)
 
   // scrolling grid
   const wx = engine ? engine.worldX : 0;

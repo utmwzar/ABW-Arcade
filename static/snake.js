@@ -31,7 +31,6 @@ const scoreEl = document.getElementById("score");
 const lengthEl = document.getElementById("length");
 
 // Farben aus static/css/tokens.css
-const COL_BG = "#0a0816";
 const COL_GRID = "rgba(255,255,255,0.04)";
 const COL_BODY = "#4ad08a";
 const COL_HEAD = "#8fe9b8";
@@ -100,8 +99,7 @@ function cell(x, y, color, inset) {
 }
 
 function draw() {
-  ctx.fillStyle = COL_BG;
-  ctx.fillRect(0, 0, W, H);
+  ctx.clearRect(0, 0, W, H);   // den Grund malt .board-wrap (--playfield)
   ctx.save();
   fx.applyShake(ctx);
 
