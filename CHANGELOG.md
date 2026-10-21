@@ -60,6 +60,8 @@ beim Update erhalten.
   mehr verloren.
 - Die Meldung „Kein Zugriff“ erscheint wieder, und die Admin-Seite nennt den
   richtigen Befehl für neue Admins.
+- Die Liste der FreeDoom-Mitwirkenden liegt jetzt bei. Der mitgelieferte
+  Lizenztext verwies auf sie, sie fehlte aber.
 
 ### Betrieb und Umstieg von v1.0
 
