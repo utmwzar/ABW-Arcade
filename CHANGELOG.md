@@ -22,7 +22,8 @@ beim Update erhalten.
   „Neuer Highscore · Platz 4 → 3“. Schlägt das Speichern fehl, heißt der Knopf
   „Erneut senden“.
 - **Pause** mit P, Esc, per Knopf oder von selbst beim Fensterwechsel; ein
-  Neustart fragt vorher nach.
+  Neustart fragt vorher nach. Wer mitten im Spiel beendet oder neu startet,
+  bekommt genau den Score, der in diesem Moment stand.
 - **Touch-Steuerung** auf Handy und Tablet: Tetris mit Tippen, Ziehen und
   Wischen, Snake mit Wischen, in Breakout folgt das Paddle dem Finger, 2048 mit
   Wischen, Geometry Dash mit Tippen und Halten. Jede Geste erzeugt dieselben

@@ -50,6 +50,8 @@ function editing(target) {
  *   begin(data)  neues Spiel mit { game_id, seed } aufsetzen
  *   resume()     nach der Pause weiter (Uhr des Spiels zurücksetzen)
  *   inputs()     aufgezeichnete Eingaben für den Abschluss
+ *   ticks()      optional: gespielte Ticks. Bricht der Spieler ab, rechnet der
+ *                Server nur bis dahin nach statt bis zum Game Over.
  *   snapshot()   lokales Ergebnis { score, won, detail } (z. B. für "Beenden")
  *   detail(res)  Zeile unter dem Score aus der Server-Antwort
  *   sync(res)    Anzeige auf die Werte des Servers setzen
@@ -217,7 +219,7 @@ export function createArcade(cfg) {
         ? "Angehalten, weil du das Fenster gewechselt hast. Es geht genau hier weiter."
         : "Das Spiel ist angehalten. Es geht genau hier weiter.")],
       primary: { label: "Weiter", key: "P", run: resume },
-      secondary: { label: "Beenden", run: () => finish(cfg.snapshot()) },
+      secondary: { label: "Beenden", run: () => finish(cfg.snapshot(), { quit: true }) },
     });
     announce("Pause.");
   }
@@ -247,10 +249,19 @@ export function createArcade(cfg) {
   function restartNow() {
     if (state !== "confirm") return;
     const local = cfg.snapshot();
-    const payload = { game_id: gameId, inputs: cfg.inputs() };
+    const payload = payloadOf(true);
     state = "over";
     saveQuietly(payload, local);
     start();
+  }
+
+  // Was der Server zum Nachrechnen bekommt. Bei einem Abbruch (Beenden, Neu
+  // starten) gehört die Zahl der gespielten Ticks dazu; ohne sie spielte er den
+  // Rest ohne Eingaben bis zum Game Over weiter und zählte das mit.
+  function payloadOf(quit) {
+    const payload = { game_id: gameId, inputs: cfg.inputs() };
+    if (quit && cfg.ticks) payload.ticks = cfg.ticks();
+    return payload;
   }
 
   // Der vorige Run wird im Hintergrund gewertet; das Ergebnis kommt als Kurzmeldung.
@@ -296,13 +307,13 @@ export function createArcade(cfg) {
   // Das Spiel ist sofort vorbei und wird gespeichert; die Karte kommt, wenn
   // reveal erfüllt ist. Startet vorher schon das nächste Spiel (R, Leertaste),
   // erscheint sie nicht mehr, das Ergebnis kommt dann als Kurzmeldung.
-  function finish(local, { reveal = null } = {}) {
+  function finish(local, { reveal = null, quit = false } = {}) {
     if (state === "over" || state === "idle" || state === "starting") return;
     state = "over";
     syncPause();
     const r = {
       local,
-      payload: { game_id: gameId, inputs: cfg.inputs() },
+      payload: payloadOf(quit),
       title: local.won ? "GESCHAFFT!" : "GAME OVER",
       scoreEl: el("p", { class: "result-score" }, "0"),
       bestEl: el("p", { class: "result-best", hidden: true }),   // gold, erst wenn der Server einen Highscore bestätigt
