@@ -83,6 +83,7 @@ const arcade = createArcade({
   },
   resume() { lastFrame = performance.now(); },
   inputs: () => recorded,
+  ticks: () => tickCount,
   snapshot: local,
   detail: (d) => detail(d.lines, d.level),
   sync(d) {

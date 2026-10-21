@@ -76,6 +76,7 @@ const arcade = createArcade({
   },
   resume() { lastFrame = performance.now(); },
   inputs: () => recorded,
+  ticks: () => tickCount,
   snapshot: local,
   detail: (d) => detail(d.bricks),
   sync(d) { scoreEl.textContent = fmt(d.score); },

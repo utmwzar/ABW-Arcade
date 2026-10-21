@@ -729,6 +729,24 @@ def _claim_finish(db, game_id):
     return cur.rowcount == 1
 
 
+def _replay_limit(data, clean):
+    """Wie weit der Server nachrechnet, als Argumente für simulate().
+
+    Ohne Angabe läuft die Wiederholung bis zum Game Over, wie am natürlichen
+    Spielende. Beendet der Spieler mitten im Spiel (Pause → Beenden, Neu starten),
+    schickt der Client die Zahl der gespielten Ticks mit. Dann zählt genau der
+    Stand bis dahin und nicht, was ohne Eingaben noch passiert wäre.
+    None heißt: ungültige Angabe."""
+    ticks = data.get("ticks")
+    if ticks is None:
+        return {}
+    if isinstance(ticks, bool) or not isinstance(ticks, int) or not 0 <= ticks <= MAX_TICK + 1:
+        return None
+    if any(it["tick"] >= ticks for it in clean):   # keine Eingabe nach dem Abbruch
+        return None
+    return {"max_ticks": ticks - 1}   # simulate() spielt die Ticks 0 bis max_ticks
+
+
 def _standing(db, uid, game):
     """Highscore und Platz eines Spielers in einem Leaderboard samt Zahl der
     Spieler darin. Runs ohne Punkte zählen nicht."""
@@ -822,6 +840,9 @@ def api_game_finish():
         if isinstance(tick, bool) or not isinstance(tick, int) or tick < 0 or tick > MAX_TICK:
             return jsonify({"error": "invalid_input"}), 400
         clean.append({"tick": tick, "action": action})
+    limit = _replay_limit(data, clean)
+    if limit is None:
+        return jsonify({"error": "invalid_input"}), 400
 
     db = get_db()
     game = db.execute(
@@ -837,7 +858,7 @@ def api_game_finish():
         return jsonify({"error": "already_finished"}), 409
 
     # The server replays the deterministic game and trusts only its own result.
-    result = tetris_engine.simulate(game["seed"], clean)
+    result = tetris_engine.simulate(game["seed"], clean, **limit)
     score, lines, level = int(result["score"]), int(result["lines"]), int(result["level"])
 
     standing = _save_score(db, uid, "tetris", game_id, score, lines=lines, level=level)
@@ -906,6 +927,9 @@ def api_snake_finish():
         if isinstance(tick, bool) or not isinstance(tick, int) or tick < 0 or tick > MAX_TICK:
             return jsonify({"error": "invalid_input"}), 400
         clean.append({"tick": tick, "dir": d})
+    limit = _replay_limit(data, clean)
+    if limit is None:
+        return jsonify({"error": "invalid_input"}), 400
 
     db = get_db()
     game = db.execute(
@@ -921,7 +945,7 @@ def api_snake_finish():
         return jsonify({"error": "already_finished"}), 409
 
     # The server replays the deterministic game and trusts only its own result.
-    result = snake_engine.simulate(game["seed"], clean)
+    result = snake_engine.simulate(game["seed"], clean, **limit)
     score = int(result["score"])
     length = int(result["length"])
 
@@ -991,6 +1015,9 @@ def api_breakout_finish():
         if isinstance(tick, bool) or not isinstance(tick, int) or tick < 0 or tick > MAX_TICK:
             return jsonify({"error": "invalid_input"}), 400
         clean.append({"tick": tick, "dir": d})
+    limit = _replay_limit(data, clean)
+    if limit is None:
+        return jsonify({"error": "invalid_input"}), 400
 
     db = get_db()
     game = db.execute(
@@ -1006,7 +1033,7 @@ def api_breakout_finish():
         return jsonify({"error": "already_finished"}), 409
 
     # The server replays the deterministic game and trusts only its own result.
-    result = breakout_engine.simulate(game["seed"], clean)
+    result = breakout_engine.simulate(game["seed"], clean, **limit)
     score = int(result["score"])
     bricks = int(result["bricks"])
 
@@ -1170,6 +1197,9 @@ def api_gd_finish():
         if isinstance(tick, bool) or not isinstance(tick, int) or tick < 0 or tick > MAX_TICK:
             return jsonify({"error": "invalid_input"}), 400
         clean.append({"tick": tick, "dir": d})
+    limit = _replay_limit(data, clean)
+    if limit is None:
+        return jsonify({"error": "invalid_input"}), 400
 
     db = get_db()
     game = db.execute(
@@ -1185,7 +1215,7 @@ def api_gd_finish():
         return jsonify({"error": "already_finished"}), 409
 
     # The server replays the deterministic run and trusts only its own result.
-    result = gd_engine.simulate(game["seed"], clean)
+    result = gd_engine.simulate(game["seed"], clean, **limit)
     score = int(result["score"])
 
     standing = _save_score(db, uid, "geometry-dash", game_id, score)
