@@ -222,6 +222,8 @@ html[data-touch="on"] .controls.controls-touch { display: grid; }
 }
 .tag-accent { background: var(--accent-soft); color: var(--accent); }
 .tag-gold { background: rgb(247 192 74 / 0.14); color: var(--gold); }
+/* Gold heißt Highscore und nichts anderes (DESIGN.md); Werte bekommen es nur ausdrücklich. */
+.stat-gold { color: var(--gold); }
 .tag-ok { background: var(--ok-soft); color: var(--ok); }
 .tag-danger { background: var(--danger-soft); color: var(--danger); }
 .tag-muted { background: var(--surface-2); color: var(--text-muted); }
@@ -293,7 +295,7 @@ html[data-touch="on"] .controls.controls-touch { display: grid; }
 
 /* ---------- Fehlerseiten ---------- */
 .error-page { max-width: 600px; margin: 12vh auto 0; display: grid; gap: var(--s-4); justify-items: start; }
-.error-page .error-code { font: var(--pixel-lg)/1 var(--font-pixel); color: var(--gold); }
+.error-page .error-code { font: var(--pixel-lg)/1 var(--font-pixel); color: var(--text-muted); }
 .error-page h1 { font-size: var(--fs-2xl); line-height: 1.2; }
 .error-page p { color: var(--text-muted); }
 

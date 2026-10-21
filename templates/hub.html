@@ -21,13 +21,13 @@
       <p class="capsule-stat">
         {% if gm.board == 'score' and mine %}
         <span class="stat-label">Highscore</span>
-        <span class="stat-value">{{ mine.best|num }}</span>
+        <span class="stat-value stat-gold">{{ mine.best|num }}</span>
         <span class="stat-note">Platz {{ mine.rank }} von {{ mine.players }}</span>
         {% elif gm.board == 'score' %}
         <span class="stat-note">Noch kein Score</span>
         {% elif gm.board == 'elo' and chess.rated %}
         <span class="stat-label">Elo</span>
-        <span class="stat-value stat-elo">{{ chess.rating|num }}</span>
+        <span class="stat-value">{{ chess.rating|num }}</span>
         {% elif gm.board == 'elo' %}
         <span class="stat-note">Noch keine gewertete Partie</span>
         {% else %}

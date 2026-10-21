@@ -44,7 +44,9 @@ function update(name, data, build) {
 
 function renderActive(list) {
   const sorted = [...list].sort((a, b) => b.your_turn - a.your_turn);
-  // Gefüllt ist nur der erste Knopf, und nur wenn du dort am Zug bist.
+  // Ein gefüllter Knopf je Ansicht: Wartet eine Partie auf deinen Zug, ist es ihr
+  // „Zum Brett“ (nur der erste), sonst „Bot-Partie starten“.
+  $("[data-bot]").classList.toggle("btn-secondary", sorted.some((g) => g.your_turn));
   $('[data-list="active"]').replaceChildren(...(sorted.length ? sorted.map((g, i) => row(
     ["gegen ", el("b", {}, g.opponent || "?"), g.your_turn ? [" ", el("span", { class: "tag tag-accent" }, "Du bist am Zug")] : []],
     `${g.moves} ${g.moves === 1 ? "Zug" : "Züge"} · du spielst ${g.you === "w" ? "Weiß" : "Schwarz"}${g.bot ? " · Übung" : ""}`,

@@ -58,8 +58,8 @@
 .board.no-coords .coord { display: none; }
 
 .sq.last { box-shadow: inset 0 0 0 100vmax rgb(44 207 227 / 0.3); }
-/* Schach ist ein Hinweis, kein Alarm; rot wird nur das Matt. */
-.sq.check { box-shadow: inset 0 0 0 100vmax rgb(247 192 74 / 0.6); }
+/* Schach ist ein Hinweis: ein roter Ring ums Königsfeld. Gefüllt rot wird nur das Matt. */
+.sq.check { box-shadow: inset 0 0 0 3px var(--danger); }
 .sq.mate { box-shadow: inset 0 0 0 100vmax rgb(240 96 107 / 0.7); }
 .sq.sel { box-shadow: inset 0 0 0 3px var(--accent), inset 0 0 0 100vmax rgb(44 207 227 / 0.35); }
 .sq.over { box-shadow: inset 0 0 0 3px #fff; }
@@ -108,12 +108,12 @@
 /* ---------- Stand, Remis, Aktionen ---------- */
 .chess-status { font-size: var(--fs-lg); font-weight: 700; line-height: 1.35; min-height: 1.35em; }
 .chess-status[data-tone="turn"] { color: var(--accent); }
-.chess-status[data-tone="win"] { color: var(--gold); }
+.chess-status[data-tone="win"] { color: var(--ok); }
 .chess-status[data-tone="loss"] { color: #ff9aa2; }
 .chess-status[data-tone="draw"] { color: var(--text-muted); }
 .draw-offer {
   display: grid; gap: var(--s-2); padding: var(--s-3) var(--s-4); border-radius: var(--r-md);
-  background: rgb(247 192 74 / 0.12); border: 1px solid rgb(247 192 74 / 0.45);
+  background: var(--accent-soft); border: 1px solid rgb(44 207 227 / 0.45);   /* ein Angebot an dich */
 }
 .draw-offer-actions { display: flex; gap: var(--s-2); }
 .chess-actions { display: flex; flex-wrap: wrap; gap: var(--s-2); }

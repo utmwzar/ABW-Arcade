@@ -32,7 +32,6 @@ const COLORS = {
 };
 const COL_GRID = "rgba(255,255,255,0.04)";
 const COL_TEXT = "#eeeafe";
-const COL_GOLD = "#f7c04a";
 const COL_DANGER = "#f0606b";
 
 // Wall-clock per logical tick. Only affects feel/speed, not correctness:
@@ -191,7 +190,8 @@ function react(events) {
         });
       }
       if (ev.rows.length === 4) {
-        fx.text(W / 2, H * 0.42, "TETRIS", { color: COL_GOLD, size: 24 });
+        // in der Farbe des I-Steins, mit dem ein Tetris meist gelingt; Gold bleibt dem Highscore
+        fx.text(W / 2, H * 0.42, "TETRIS", { color: COLORS[1], size: 24 });
         fx.shake(3, 220);
       }
     } else if (ev.type === "level") {

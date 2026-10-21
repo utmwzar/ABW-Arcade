@@ -127,7 +127,7 @@ Konstanten der Spiele, nie `canvas.width`.
 | Neuer Highscore | Score per `countTo`, danach `bump`; goldene Statuszeile unter dem Score (kein Badge über dem Titel) |
 | Leaderboard-Rang neu | Zeile kurz hervorheben (`flash`), keine Sortier-Animation |
 | Schachzug | Figur gleitet per CSS-Transition auf `transform` (200 ms) an ihr Feld; geschlagene Figur blendet aus; Turm bei Rochade mit |
-| Schach | Königsfeld gold markiert, Matt rot; nichts blinkt |
+| Schach | Roter Ring ums Königsfeld, Matt rot gefüllt; nichts blinkt |
 | Treffer im Spiel | Partikel aus `fx-canvas` (Stein, Futter, Reihe); Wackeln nur bei Leben-Verlust und Game Over |
 
 ## Prüfen
