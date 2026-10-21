@@ -38,7 +38,7 @@
 
 .capsule-art {
   aspect-ratio: 16 / 9; overflow: hidden;
-  background: color-mix(in oklab, var(--game) 13%, #0a0816);
+  background: color-mix(in oklab, var(--game) 13%, var(--playfield));
   border-bottom: 3px solid var(--game);
 }
 .capsule-svg { width: 100%; height: 100%; }

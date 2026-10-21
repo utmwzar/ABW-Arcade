@@ -154,13 +154,13 @@ a:hover { color: var(--accent-hover); }
 .btn:active { transform: translateY(1px); }
 .btn:disabled, .btn[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; transform: none; }
 .btn-secondary { background: var(--surface-2); color: var(--text); border-color: var(--line-strong); }
-.btn-secondary:hover { background: #2f2754; color: var(--text); }
+.btn-secondary:hover { background: var(--surface-2-hover); color: var(--text); }
 .btn-ghost { background: transparent; color: var(--text-muted); }
 .btn-ghost:hover { background: var(--surface); color: var(--text); }
 .btn-danger { background: transparent; color: var(--danger); border-color: rgb(240 96 107 / 0.5); }
 .btn-danger:hover { background: var(--danger-soft); color: var(--danger); }
-.btn-danger-solid { background: var(--danger); color: #1d0509; }
-.btn-danger-solid:hover { background: #f4848d; color: #1d0509; }
+.btn-danger-solid { background: var(--danger); color: var(--danger-ink); }
+.btn-danger-solid:hover { background: var(--danger-hover); color: var(--danger-ink); }
 .btn-sm { min-height: 34px; padding: 0 var(--s-3); font-size: var(--fs-sm); border-radius: var(--r-sm); }
 .btn-lg { min-height: 50px; padding: 0 var(--s-6); font-size: var(--fs-lg); }
 .btn .icon { width: 18px; height: 18px; }
@@ -221,11 +221,9 @@ html[data-touch="on"] .controls.controls-touch { display: grid; }
   border-radius: var(--r-sm); font-size: var(--fs-xs); font-weight: 700; line-height: 1; white-space: nowrap;
 }
 .tag-accent { background: var(--accent-soft); color: var(--accent); }
-.tag-gold { background: rgb(247 192 74 / 0.14); color: var(--gold); }
+.tag-gold { background: var(--gold-soft); color: var(--gold); }
 /* Gold heißt Highscore und nichts anderes (DESIGN.md); Werte bekommen es nur ausdrücklich. */
 .stat-gold { color: var(--gold); }
-.tag-ok { background: var(--ok-soft); color: var(--ok); }
-.tag-danger { background: var(--danger-soft); color: var(--danger); }
 .tag-muted { background: var(--surface-2); color: var(--text-muted); }
 
 /* ---------- Formulare ---------- */
@@ -240,7 +238,7 @@ html[data-touch="on"] .controls.controls-touch { display: grid; }
   transition: border-color var(--dur-short) var(--ease-out);
 }
 .input::placeholder { color: var(--text-muted); }
-.input:hover, .select:hover { border-color: #5a4f8c; }
+.input:hover, .select:hover { border-color: var(--line-hover); }
 .input:focus-visible, .select:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
 .input[aria-invalid="true"] { border-color: var(--danger); }
 

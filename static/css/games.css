@@ -40,7 +40,7 @@
 /* ---------- Spielfeld ---------- */
 .board-wrap {
   position: relative; justify-self: center; max-width: 100%;
-  background: #0a0816; border: 1px solid var(--line); border-radius: var(--r-lg);
+  background: var(--playfield); border: 1px solid var(--line); border-radius: var(--r-lg);
   overflow: hidden; box-shadow: var(--shadow-2);
 }
 .board-wrap canvas { display: block; max-width: 100%; height: auto; }
@@ -87,8 +87,7 @@
 .status-line { display: flex; align-items: center; gap: var(--s-2); font-weight: 700; font-size: var(--fs-sm); color: var(--text-muted); }
 .status-line .icon { width: 18px; height: 18px; flex: none; }
 .status-ok { color: var(--ok); }
-.status-gold { color: var(--gold); }
-.status-error { color: #ff9aa2; align-items: flex-start; }
+.status-error { color: var(--danger-text); align-items: flex-start; }
 .status-error .icon { margin-top: 1px; }
 .status-note { font-size: var(--fs-sm); color: var(--text-muted); }
 .status-note a { font-weight: 600; }

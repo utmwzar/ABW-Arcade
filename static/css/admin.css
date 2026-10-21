@@ -29,7 +29,7 @@
   border: 1px solid var(--line-strong); border-radius: var(--r-pill);
   color: var(--text-muted); font-size: var(--fs-sm); font-weight: 600; text-decoration: none;
 }
-.chip:hover { color: var(--text); border-color: #5a4f8c; }
+.chip:hover { color: var(--text); border-color: var(--line-hover); }
 .chip[aria-current="true"] { background: var(--accent-soft); border-color: rgb(44 207 227 / 0.5); color: var(--accent); }
 
 .table td.actions, .table th.actions-h { text-align: right; }

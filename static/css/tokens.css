@@ -24,12 +24,15 @@
   color-scheme: dark;
 
   /* Flächen: von hinten nach vorne */
+  --playfield: #0a0816;   /* Spielfeld und Kapselgrafik, eine Stufe unter dem Seitengrund */
   --bg: #110d20;
   --bg-raised: #181331;
   --surface: #1e1838;
   --surface-2: #261f45;
+  --surface-2-hover: #2f2754;
   --line: #2e2752;
   --line-strong: #43396f;
+  --line-hover: #5a4f8c;
 
   /* Text */
   --text: #eeeafe;
@@ -44,12 +47,15 @@
   /* Zustände */
   --ok: #4ad08a;
   --ok-soft: rgb(74 208 138 / 0.14);
-  --gold: #f7c04a;
-  --gold-ink: #1c1405;
+  --gold: #f7c04a;   /* heißt Highscore und nichts anderes */
+  --gold-soft: rgb(247 192 74 / 0.14);
   --danger: #f0606b;
+  --danger-hover: #f4848d;
+  --danger-ink: #1d0509;
+  --danger-text: #ff9aa2;   /* Fehler- und Niederlagentext auf dunklem Grund */
   --danger-soft: rgb(240 96 107 / 0.14);
 
-  /* Spielfarben: nur in der Kapsel des Spiels und als Akzent seiner Seite */
+  /* Spielfarben: nur in Kapsel, Spielmarke und Spielfeld des Spiels */
   --game-tetris: #2ccfe3;
   --game-snake: #4ad08a;
   --game-breakout: #f06bb2;
@@ -105,7 +111,6 @@
   /* Ebenen */
   --z-overlay: 10;
   --z-topbar: 20;
-  --z-popover: 30;
   --z-toast: 40;
 
   /* Seitenbreite */
