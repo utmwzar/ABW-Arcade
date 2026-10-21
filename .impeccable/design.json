@@ -1,9 +1,24 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-20T21:18:19Z",
+  "generatedAt": "2026-10-21T05:15:17Z",
   "title": "Design System: ABW Arcade",
   "extensions": {
     "colorMeta": {
+      "playfield": {
+        "role": "neutral",
+        "displayName": "Spielfeld-Schwarz",
+        "canonical": "#0a0816",
+        "tonalRamp": [
+          "#0b0917",
+          "#232232",
+          "#3f3d4f",
+          "#5d5b6e",
+          "#7f7e92",
+          "#a09fb4",
+          "#c6c5da",
+          "#edecff"
+        ]
+      },
       "bg": {
         "role": "neutral",
         "displayName": "Nachtviolett",
@@ -64,6 +79,21 @@
           "#eeecff"
         ]
       },
+      "surface-2-hover": {
+        "role": "neutral",
+        "displayName": "Tastenviolett hell",
+        "canonical": "#2f2754",
+        "tonalRamp": [
+          "#0d0129",
+          "#241b47",
+          "#3f3866",
+          "#5c5687",
+          "#7e78ad",
+          "#a09ad0",
+          "#c5c0f8",
+          "#edecff"
+        ]
+      },
       "line": {
         "role": "neutral",
         "displayName": "Haarlinie",
@@ -92,6 +122,21 @@
           "#a098d6",
           "#c6befe",
           "#eeecfe"
+        ]
+      },
+      "line-hover": {
+        "role": "neutral",
+        "displayName": "Kante hell",
+        "canonical": "#5a4f8c",
+        "tonalRamp": [
+          "#0e002b",
+          "#26174e",
+          "#40346f",
+          "#5e5390",
+          "#8076b6",
+          "#a197da",
+          "#c6beff",
+          "#eeecff"
         ]
       },
       "text": {
@@ -229,6 +274,21 @@
           "#ffecca"
         ]
       },
+      "gold-soft": {
+        "role": "state",
+        "displayName": "Gold-Schleier",
+        "canonical": "rgb(247 192 74 / 0.14)",
+        "tonalRamp": [
+          "#110a00",
+          "#302100",
+          "#533b02",
+          "#785804",
+          "#a37801",
+          "#cd9705",
+          "#f5be47",
+          "#ffecca"
+        ]
+      },
       "danger": {
         "role": "state",
         "displayName": "Signalrot",
@@ -242,6 +302,51 @@
           "#fc6b75",
           "#feafb0",
           "#fee9e8"
+        ]
+      },
+      "danger-hover": {
+        "role": "state",
+        "displayName": "Helles Signalrot",
+        "canonical": "#f4848d",
+        "tonalRamp": [
+          "#1e0004",
+          "#4a0012",
+          "#770e26",
+          "#9b3543",
+          "#c45964",
+          "#ea7b84",
+          "#ffaeb2",
+          "#ffe8e9"
+        ]
+      },
+      "danger-ink": {
+        "role": "state",
+        "displayName": "Rot-Tinte",
+        "canonical": "#1d0509",
+        "tonalRamp": [
+          "#1a0307",
+          "#361b1f",
+          "#54363a",
+          "#745457",
+          "#997679",
+          "#bb979a",
+          "#e2bcc0",
+          "#ffe8ea"
+        ]
+      },
+      "danger-text": {
+        "role": "state",
+        "displayName": "Fehlertext-Rot",
+        "canonical": "#ff9aa2",
+        "tonalRamp": [
+          "#1e0004",
+          "#4a0013",
+          "#721a2a",
+          "#953b47",
+          "#bd5f68",
+          "#e38089",
+          "#ffaeb3",
+          "#ffe8e9"
         ]
       },
       "danger-soft": {
@@ -392,6 +497,21 @@
           "#a297d9",
           "#c8bdfe",
           "#eeecfe"
+        ]
+      },
+      "board-ink": {
+        "role": "game",
+        "displayName": "Brett-Tinte",
+        "canonical": "#1d1638",
+        "tonalRamp": [
+          "#0c0423",
+          "#241d40",
+          "#3f3a5f",
+          "#5d577f",
+          "#7f7aa4",
+          "#a09bc7",
+          "#c6c1ef",
+          "#eeecff"
         ]
       }
     },
@@ -602,7 +722,7 @@
       "refersTo": "button-secondary",
       "description": "Jede Nebenaktion neben dem gefüllten Knopf.",
       "html": "<button class=\"ds-btn-secondary\" type=\"button\">Alle Spiele</button>",
-      "css": ".ds-btn-secondary { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 0 16px; border: 1px solid transparent; border-radius: var(--r-md, 10px); font: 700 1rem/1.1 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), border-color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), transform var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)); } .ds-btn-secondary { background: var(--surface-2, #261f45); color: var(--text, #eeeafe); border-color: var(--line-strong, #43396f); } .ds-btn-secondary:hover { background: #2f2754; } .ds-btn-secondary:focus-visible { outline: 2px solid var(--accent, #2ccfe3); outline-offset: 2px; } .ds-btn-secondary:active { transform: translateY(1px); }"
+      "css": ".ds-btn-secondary { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 0 16px; border: 1px solid transparent; border-radius: var(--r-md, 10px); font: 700 1rem/1.1 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), border-color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), transform var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)); } .ds-btn-secondary { background: var(--surface-2, #261f45); color: var(--text, #eeeafe); border-color: var(--line-strong, #43396f); } .ds-btn-secondary:hover { background: var(--surface-2-hover, #2f2754); } .ds-btn-secondary:focus-visible { outline: 2px solid var(--accent, #2ccfe3); outline-offset: 2px; } .ds-btn-secondary:active { transform: translateY(1px); }"
     },
     {
       "name": "Ghost Button",
@@ -618,7 +738,7 @@
       "refersTo": "input",
       "description": "Eingabefeld mit Label darüber; Fokus als Cyan-Kante und Ring.",
       "html": "<div class=\"ds-field\"><label class=\"ds-field-label\" for=\"ds-username\">Benutzername</label><input class=\"ds-input\" id=\"ds-username\" name=\"username\" autocomplete=\"off\"></div>",
-      "css": ".ds-field { display: grid; gap: 8px; width: min(100%, 320px); } .ds-field-label { font: 600 0.875rem/1.5 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); color: var(--text, #eeeafe); } .ds-input { box-sizing: border-box; width: 100%; min-height: 44px; padding: 0 12px; background: var(--bg, #110d20); color: var(--text, #eeeafe); border: 1px solid var(--line-strong, #43396f); border-radius: var(--r-md, 10px); font: 400 1rem/1.5 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); transition: border-color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)); } .ds-input::placeholder { color: var(--text-muted, #a59dcb); } .ds-input:hover { border-color: #5a4f8c; } .ds-input:focus-visible { outline: 2px solid var(--accent, #2ccfe3); outline-offset: 0; border-color: var(--accent, #2ccfe3); } .ds-input[aria-invalid=\"true\"] { border-color: var(--danger, #f0606b); }"
+      "css": ".ds-field { display: grid; gap: 8px; width: min(100%, 320px); } .ds-field-label { font: 600 0.875rem/1.5 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); color: var(--text, #eeeafe); } .ds-input { box-sizing: border-box; width: 100%; min-height: 44px; padding: 0 12px; background: var(--bg, #110d20); color: var(--text, #eeeafe); border: 1px solid var(--line-strong, #43396f); border-radius: var(--r-md, 10px); font: 400 1rem/1.5 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); transition: border-color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)); } .ds-input::placeholder { color: var(--text-muted, #a59dcb); } .ds-input:hover { border-color: var(--line-hover, #5a4f8c); } .ds-input:focus-visible { outline: 2px solid var(--accent, #2ccfe3); outline-offset: 0; border-color: var(--accent, #2ccfe3); } .ds-input[aria-invalid=\"true\"] { border-color: var(--danger, #f0606b); }"
     },
     {
       "name": "Topbar Navigation",
@@ -634,7 +754,7 @@
       "refersTo": "tag-accent",
       "description": "Zustands-Tags: Cyan für deinen Zug, Gold nur für Highscore.",
       "html": "<span class=\"ds-tags\"><span class=\"ds-tag ds-tag-accent\">Du bist am Zug</span><span class=\"ds-tag ds-tag-gold\">Highscore</span></span>",
-      "css": ".ds-tags { display: inline-flex; flex-wrap: wrap; gap: 8px; } .ds-tag { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: var(--r-sm, 6px); font: 700 0.8125rem/1 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); white-space: nowrap; } .ds-tag-accent { background: var(--accent-soft, rgb(44 207 227 / 0.14)); color: var(--accent, #2ccfe3); } .ds-tag-gold { background: rgb(247 192 74 / 0.14); color: var(--gold, #f7c04a); }"
+      "css": ".ds-tags { display: inline-flex; flex-wrap: wrap; gap: 8px; } .ds-tag { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: var(--r-sm, 6px); font: 700 0.8125rem/1 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); white-space: nowrap; } .ds-tag-accent { background: var(--accent-soft, rgb(44 207 227 / 0.14)); color: var(--accent, #2ccfe3); } .ds-tag-gold { background: var(--gold-soft, rgb(247 192 74 / 0.14)); color: var(--gold, #f7c04a); }"
     },
     {
       "name": "Game Capsule",
@@ -642,7 +762,7 @@
       "refersTo": "capsule",
       "description": "Signatur: ein Spiel wie im Regal einer Spielebibliothek; Grafik in Spielfarbe, Highscore in Gold, Zahlentaste.",
       "html": "<a class=\"ds-capsule\" href=\"#\" style=\"--ds-game: var(--game-snake, #4ad08a)\"><div class=\"ds-capsule-art\"><svg viewBox=\"0 0 320 180\" aria-hidden=\"true\" focusable=\"false\"><path d=\"M20 0V180 M40 0V180 M60 0V180 M80 0V180 M100 0V180 M120 0V180 M140 0V180 M160 0V180 M180 0V180 M200 0V180 M220 0V180 M240 0V180 M260 0V180 M280 0V180 M300 0V180 M0 20H320 M0 40H320 M0 60H320 M0 80H320 M0 100H320 M0 120H320 M0 140H320 M0 160H320\" stroke=\"#fff\" stroke-opacity=\".04\"/><rect x=\"21\" y=\"141\" width=\"18\" height=\"18\" rx=\"4\" fill=\"#4ad08a\" fill-opacity=\"0.45\"/><rect x=\"41\" y=\"141\" width=\"18\" height=\"18\" rx=\"4\" fill=\"#4ad08a\" fill-opacity=\"0.49\"/><rect x=\"61\" y=\"141\" width=\"18\" height=\"18\" rx=\"4\" fill=\"#4ad08a\" fill-opacity=\"0.53\"/><rect x=\"81\" y=\"141\" width=\"18\" height=\"18\" rx=\"4\" fill=\"#4ad08a\" fill-opacity=\"0.58\"/><rect x=\"81\" y=\"121\" width=\"18\" height=\"18\" rx=\"4\" fill=\"#4ad08a\" fill-opacity=\"0.62\"/><rect x=\"81\" y=\"101\" width=\"18\" height=\"18\" rx=\"4\" fill=\"#4ad08a\" fill-opacity=\"0.66\"/><rect x=\"101\" y=\"101\" width=\"18\" height=\"18\" rx=\"4\" fill=\"#4ad08a\" fill-opacity=\"0.7\"/><rect x=\"121\" y=\"101\" width=\"18\" height=\"18\" rx=\"4\" fill=\"#4ad08a\" fill-opacity=\"0.75\"/><rect x=\"141\" y=\"101\" width=\"18\" height=\"18\" rx=\"4\" fill=\"#4ad08a\" fill-opacity=\"0.79\"/><rect x=\"161\" y=\"101\" width=\"18\" height=\"18\" rx=\"4\" fill=\"#4ad08a\" fill-opacity=\"0.83\"/><rect x=\"161\" y=\"81\" width=\"18\" height=\"18\" rx=\"4\" fill=\"#4ad08a\" fill-opacity=\"0.87\"/><rect x=\"161\" y=\"61\" width=\"18\" height=\"18\" rx=\"4\" fill=\"#4ad08a\" fill-opacity=\"0.92\"/><rect x=\"181\" y=\"61\" width=\"18\" height=\"18\" rx=\"4\" fill=\"#4ad08a\" fill-opacity=\"0.96\"/><rect x=\"201\" y=\"61\" width=\"18\" height=\"18\" rx=\"4\" fill=\"#4ad08a\" fill-opacity=\"1.0\"/><rect x=\"221\" y=\"61\" width=\"18\" height=\"18\" rx=\"5\" fill=\"#8fe9b8\"/><rect x=\"232\" y=\"65\" width=\"3\" height=\"3\" fill=\"#110d20\"/><rect x=\"232\" y=\"72\" width=\"3\" height=\"3\" fill=\"#110d20\"/><circle cx=\"290\" cy=\"70\" r=\"6\" fill=\"#f06bb2\"/></svg></div><div class=\"ds-capsule-body\"><h3 class=\"ds-capsule-title\">Snake</h3><p class=\"ds-capsule-goal\">Futter sammeln, nicht anstoßen.</p><div class=\"ds-capsule-foot\"><p class=\"ds-capsule-stat\"><span class=\"ds-capsule-label\">Highscore</span><span class=\"ds-capsule-value\">1.180</span><span class=\"ds-capsule-note\">Platz 2 von 3</span></p><kbd class=\"ds-capsule-key\">2</kbd></div></div></a>",
-      "css": ".ds-capsule, .ds-capsule * { box-sizing: border-box; } .ds-capsule { --ds-game: #4ad08a; display: flex; flex-direction: column; width: min(100%, 300px); color: var(--text, #eeeafe); text-decoration: none; background: var(--surface, #1e1838); border: 1px solid var(--line, #2e2752); border-radius: var(--r-lg, 12px); overflow: hidden; box-shadow: var(--shadow-1, 0 1px 2px rgb(0 0 0 / 0.35)); font: 400 1rem/1.5 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); font-variant-numeric: tabular-nums; transition: transform var(--dur-base, 200ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), border-color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), box-shadow var(--dur-base, 200ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)); } .ds-capsule:hover { transform: translateY(-2px); border-color: color-mix(in oklab, var(--ds-game) 55%, var(--line, #2e2752)); box-shadow: var(--shadow-2, 0 1px 2px rgb(0 0 0 / 0.4), 0 12px 28px -14px rgb(0 0 0 / 0.75)); } .ds-capsule:focus-visible { outline: 2px solid var(--accent, #2ccfe3); outline-offset: 3px; } .ds-capsule:active { transform: none; border-color: var(--accent, #2ccfe3); } .ds-capsule-art { aspect-ratio: 16 / 9; overflow: hidden; background: color-mix(in oklab, var(--ds-game) 13%, #0a0816); border-bottom: 3px solid var(--ds-game); } .ds-capsule-art svg { display: block; width: 100%; height: 100%; } .ds-capsule-body { display: grid; gap: 4px; padding: 16px; } .ds-capsule-title { margin: 0; font: 700 1.125rem/1.25 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); } .ds-capsule-goal { margin: 0; color: var(--text-muted, #a59dcb); font-size: 0.875rem; line-height: 1.4; } .ds-capsule-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-top: 12px; } .ds-capsule-stat { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; } .ds-capsule-label { flex-basis: 100%; font-size: 0.8125rem; font-weight: 600; color: var(--text-muted, #a59dcb); } .ds-capsule-value { font-size: 1.375rem; font-weight: 800; line-height: 1.15; color: var(--gold, #f7c04a); } .ds-capsule-note { font-size: 0.8125rem; color: var(--text-muted, #a59dcb); } .ds-capsule-key { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; padding: 0 8px; font: 700 0.8125rem/1 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); color: var(--text-muted, #a59dcb); background: var(--surface-2, #261f45); border: 1px solid var(--line-strong, #43396f); border-radius: var(--r-sm, 6px); box-shadow: var(--shadow-1, 0 1px 2px rgb(0 0 0 / 0.35)); } @media (prefers-reduced-motion: reduce) { .ds-capsule:hover { transform: none; } }"
+      "css": ".ds-capsule, .ds-capsule * { box-sizing: border-box; } .ds-capsule { --ds-game: #4ad08a; display: flex; flex-direction: column; width: min(100%, 300px); color: var(--text, #eeeafe); text-decoration: none; background: var(--surface, #1e1838); border: 1px solid var(--line, #2e2752); border-radius: var(--r-lg, 12px); overflow: hidden; box-shadow: var(--shadow-1, 0 1px 2px rgb(0 0 0 / 0.35)); font: 400 1rem/1.5 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); font-variant-numeric: tabular-nums; transition: transform var(--dur-base, 200ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), border-color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), box-shadow var(--dur-base, 200ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)); } .ds-capsule:hover { transform: translateY(-2px); border-color: color-mix(in oklab, var(--ds-game) 55%, var(--line, #2e2752)); box-shadow: var(--shadow-2, 0 1px 2px rgb(0 0 0 / 0.4), 0 12px 28px -14px rgb(0 0 0 / 0.75)); } .ds-capsule:focus-visible { outline: 2px solid var(--accent, #2ccfe3); outline-offset: 3px; } .ds-capsule:active { transform: none; border-color: var(--accent, #2ccfe3); } .ds-capsule-art { aspect-ratio: 16 / 9; overflow: hidden; background: color-mix(in oklab, var(--ds-game) 13%, var(--playfield, #0a0816)); border-bottom: 3px solid var(--ds-game); } .ds-capsule-art svg { display: block; width: 100%; height: 100%; } .ds-capsule-body { display: grid; gap: 4px; padding: 16px; } .ds-capsule-title { margin: 0; font: 700 1.125rem/1.25 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); } .ds-capsule-goal { margin: 0; color: var(--text-muted, #a59dcb); font-size: 0.875rem; line-height: 1.4; } .ds-capsule-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-top: 12px; } .ds-capsule-stat { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; } .ds-capsule-label { flex-basis: 100%; font-size: 0.8125rem; font-weight: 600; color: var(--text-muted, #a59dcb); } .ds-capsule-value { font-size: 1.375rem; font-weight: 800; line-height: 1.15; color: var(--gold, #f7c04a); } .ds-capsule-note { font-size: 0.8125rem; color: var(--text-muted, #a59dcb); } .ds-capsule-key { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; padding: 0 8px; font: 700 0.8125rem/1 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); color: var(--text-muted, #a59dcb); background: var(--surface-2, #261f45); border: 1px solid var(--line-strong, #43396f); border-radius: var(--r-sm, 6px); box-shadow: var(--shadow-1, 0 1px 2px rgb(0 0 0 / 0.35)); } @media (prefers-reduced-motion: reduce) { .ds-capsule:hover { transform: none; } }"
     },
     {
       "name": "Result Card",
@@ -650,7 +770,7 @@
       "refersTo": "overlay-card",
       "description": "Signatur: die Ergebniskarte über dem Spielfeld nach einem bestätigten neuen Highscore.",
       "html": "<div class=\"ds-result-stage\"><div class=\"ds-result-card\" role=\"group\" aria-labelledby=\"ds-result-title\"><h2 class=\"ds-result-title\" id=\"ds-result-title\">GAME OVER</h2><p class=\"ds-result-score is-best\">13.604</p><p class=\"ds-result-best\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7\"/></svg><span>Neuer Highscore · Platz 4 → 3</span></p><p class=\"ds-result-detail\">56 Lines · Level 6</p><div class=\"ds-result-status\" role=\"status\"><p class=\"ds-result-ok\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4.5 12.5l5 5L19.5 7\"/></svg><span>Gespeichert · Platz 3 von 9</span></p><p class=\"ds-result-note\">Bisher 9.348</p><p class=\"ds-result-note\">Vom Server nachgerechnet</p></div><div class=\"ds-result-actions\"><button class=\"ds-result-primary\" type=\"button\">Nochmal <span class=\"ds-result-hint\">Enter</span></button><button class=\"ds-result-secondary\" type=\"button\">Alle Spiele</button></div></div></div>",
-      "css": ".ds-result-stage, .ds-result-stage * { box-sizing: border-box; } .ds-result-stage { display: grid; place-items: center; padding: 24px; background: #0a0816; border-radius: var(--r-lg, 12px); } .ds-result-card { width: min(100%, 360px); display: grid; gap: 16px; padding: 24px; background: var(--surface, #1e1838); color: var(--text, #eeeafe); border: 1px solid var(--line-strong, #43396f); border-radius: var(--r-lg, 12px); box-shadow: var(--shadow-3, 0 2px 6px rgb(0 0 0 / 0.4), 0 28px 56px -22px rgb(0 0 0 / 0.9)); font: 400 1rem/1.5 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); font-variant-numeric: tabular-nums; animation: ds-result-in var(--dur-long, 320ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) both; } .ds-result-title { margin: 0; font: 16px/1.4 var(--font-pixel, \"Press Start 2P\", \"Archivo\", system-ui, sans-serif); color: var(--text, #eeeafe); } .ds-result-score { margin: 0; font: 800 3.5rem/1 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); letter-spacing: -0.01em; color: var(--text, #eeeafe); } .ds-result-score.is-best { color: var(--gold, #f7c04a); } .ds-result-best { margin: 0; display: flex; align-items: center; gap: 8px; color: var(--gold, #f7c04a); font-weight: 700; } .ds-result-best svg, .ds-result-ok svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; } .ds-result-detail { margin: 0; color: var(--text-muted, #a59dcb); font-size: 0.875rem; } .ds-result-status { display: grid; gap: 4px; padding-top: 12px; border-top: 1px solid var(--line, #2e2752); } .ds-result-ok { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 0.875rem; font-weight: 700; color: var(--ok, #4ad08a); } .ds-result-note { margin: 0; font-size: 0.875rem; color: var(--text-muted, #a59dcb); } .ds-result-actions { display: grid; gap: 8px; } .ds-result-primary { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 24px; border: 1px solid transparent; border-radius: var(--r-md, 10px); font: 700 1.125rem/1.1 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), border-color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), transform var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)); } .ds-result-secondary { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 24px; border: 1px solid transparent; border-radius: var(--r-md, 10px); font: 700 1.125rem/1.1 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), border-color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), transform var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)); } .ds-result-primary, .ds-result-secondary { width: 100%; } .ds-result-primary { background: var(--accent, #2ccfe3); color: var(--accent-ink, #06121a); } .ds-result-primary:hover { background: var(--accent-hover, #63e0ef); } .ds-result-secondary { background: var(--surface-2, #261f45); color: var(--text, #eeeafe); border-color: var(--line-strong, #43396f); } .ds-result-secondary:hover { background: #2f2754; } .ds-result-primary:focus-visible, .ds-result-secondary:focus-visible { outline: 2px solid var(--accent, #2ccfe3); outline-offset: 2px; } .ds-result-primary:active, .ds-result-secondary:active { transform: translateY(1px); } .ds-result-hint { font: 700 0.8125rem/1 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); padding: 4px 6px; border-radius: 4px; background: rgb(0 0 0 / 0.16); } @keyframes ds-result-in { from { opacity: 0; transform: scale(0.96); } } @keyframes ds-result-fade { from { opacity: 0; } } @media (prefers-reduced-motion: reduce) { .ds-result-card { animation-name: ds-result-fade; } }"
+      "css": ".ds-result-stage, .ds-result-stage * { box-sizing: border-box; } .ds-result-stage { display: grid; place-items: center; padding: 24px; background: var(--playfield, #0a0816); border-radius: var(--r-lg, 12px); } .ds-result-card { width: min(100%, 360px); display: grid; gap: 16px; padding: 24px; background: var(--surface, #1e1838); color: var(--text, #eeeafe); border: 1px solid var(--line-strong, #43396f); border-radius: var(--r-lg, 12px); box-shadow: var(--shadow-3, 0 2px 6px rgb(0 0 0 / 0.4), 0 28px 56px -22px rgb(0 0 0 / 0.9)); font: 400 1rem/1.5 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); font-variant-numeric: tabular-nums; animation: ds-result-in var(--dur-long, 320ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) both; } .ds-result-title { margin: 0; font: 16px/1.4 var(--font-pixel, \"Press Start 2P\", \"Archivo\", system-ui, sans-serif); color: var(--text, #eeeafe); } .ds-result-score { margin: 0; font: 800 3.5rem/1 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); letter-spacing: -0.01em; color: var(--text, #eeeafe); } .ds-result-score.is-best { color: var(--gold, #f7c04a); } .ds-result-best { margin: 0; display: flex; align-items: center; gap: 8px; color: var(--gold, #f7c04a); font-weight: 700; } .ds-result-best svg, .ds-result-ok svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; } .ds-result-detail { margin: 0; color: var(--text-muted, #a59dcb); font-size: 0.875rem; } .ds-result-status { display: grid; gap: 4px; padding-top: 12px; border-top: 1px solid var(--line, #2e2752); } .ds-result-ok { margin: 0; display: flex; align-items: center; gap: 8px; font-size: 0.875rem; font-weight: 700; color: var(--ok, #4ad08a); } .ds-result-note { margin: 0; font-size: 0.875rem; color: var(--text-muted, #a59dcb); } .ds-result-actions { display: grid; gap: 8px; } .ds-result-primary { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 24px; border: 1px solid transparent; border-radius: var(--r-md, 10px); font: 700 1.125rem/1.1 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), border-color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), transform var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)); } .ds-result-secondary { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 24px; border: 1px solid transparent; border-radius: var(--r-md, 10px); font: 700 1.125rem/1.1 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); text-decoration: none; cursor: pointer; transition: background-color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), border-color var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)), transform var(--dur-short, 120ms) var(--ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)); } .ds-result-primary, .ds-result-secondary { width: 100%; } .ds-result-primary { background: var(--accent, #2ccfe3); color: var(--accent-ink, #06121a); } .ds-result-primary:hover { background: var(--accent-hover, #63e0ef); } .ds-result-secondary { background: var(--surface-2, #261f45); color: var(--text, #eeeafe); border-color: var(--line-strong, #43396f); } .ds-result-secondary:hover { background: var(--surface-2-hover, #2f2754); } .ds-result-primary:focus-visible, .ds-result-secondary:focus-visible { outline: 2px solid var(--accent, #2ccfe3); outline-offset: 2px; } .ds-result-primary:active, .ds-result-secondary:active { transform: translateY(1px); } .ds-result-hint { font: 700 0.8125rem/1 var(--font-ui, \"Archivo\", system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif); padding: 4px 6px; border-radius: 4px; background: rgb(0 0 0 / 0.16); } @keyframes ds-result-in { from { opacity: 0; transform: scale(0.96); } } @keyframes ds-result-fade { from { opacity: 0; } } @media (prefers-reduced-motion: reduce) { .ds-result-card { animation-name: ds-result-fade; } }"
     },
     {
       "name": "Key Caps and Gesture Pills",
@@ -675,7 +795,7 @@
     "keyCharacteristics": [
       "Tonal geschichtetes Nachtviolett mit Haarlinien; kräftige Farbe nur in Kapseln und Spielfeldern.",
       "Ein Akzent: Cyan für Aktion, Auswahl, Fokus und alles, was dich meint.",
-      "Zustandsfarben mit fester Bedeutung: Grün gespeichert, Gold Highscore, Rot Verlust und Fehler.",
+      "Zustandsfarben mit fester Bedeutung: Grün gespeichert und gewonnen, Gold Highscore, Rot Gefahr, Verlust und Fehler.",
       "Press Start 2P nur in 16, 24 und 32 px; sonst Archivo mit Tabellenziffern, Werte in 800.",
       "Ecken von 6 bis 12 px, schwarze, weich nach unten versetzte Schatten, kein Glow, kein Verlauf auf Text.",
       "Ein lauter Moment: die Ergebniskarte am Ende eines Runs."
@@ -688,7 +808,7 @@
       },
       {
         "name": "The Gold-Is-Highscore Rule",
-        "body": "Gold heißt Highscore und nichts anderes. Golden sind dein Highscore in Kapsel und Werte-Panel, unter dem Leaderboard und als Tag in „Zuletzt gespielt“, die Rangziffer von Platz 1 und die Ergebniszahl, diese erst, wenn der Server den neuen Highscore bestätigt hat. Elo, Lines, Level und alle anderen Werte stehen in Textfarbe.",
+        "body": "Gold heißt Highscore und nichts anderes. Golden sind dein Highscore in Kapsel und Werte-Panel, unter dem Leaderboard und als Tag in „Zuletzt gespielt“, die Rangziffer von Platz 1 und die Ergebniszahl, diese erst, wenn der Server den neuen Highscore bestätigt hat. Elo, Lines, Level und alle anderen Werte stehen in Textfarbe. Siege, Angebote und Fehlercodes tragen ihre eigene Farbe. Ausgenommen sind Spielfarben: 2048 ist golden, der O-Stein und die 1024-Kachel auch, und im Konfetti mischt Gold mit. Das gehört zum Spiel, nicht zur Hülle.",
         "section": "colors"
       },
       {
@@ -728,7 +848,7 @@
       },
       {
         "name": "The One-Filled-Button Rule",
-        "body": "Höchstens ein gefüllter Knopf pro Ansicht; alles daneben ist sekundär oder ghost.",
+        "body": "Höchstens ein gefüllter Knopf pro Ansicht; alles daneben ist sekundär oder ghost. Welcher es ist, entscheidet der Zustand: In der Schach-Lobby ist es das „Zum Brett“ der Partie, die auf dich wartet, sonst „Bot-Partie starten“. Kurzmeldungen tragen ihre Aktion gefüllt, weil sie nur kurz über der Ansicht liegen.",
         "section": "components"
       },
       {
@@ -750,7 +870,7 @@
     "donts": [
       "Don't verwende Verlaufsschrift, Glow-Ränder, Scanlines über der Oberfläche oder Pixelschrift in 8 px; das ist der abgelehnte Synthwave-Standard.",
       "Don't setze Press Start 2P unter 16 px oder für Fließtext, Knöpfe, Labels und Werte.",
-      "Don't färbe Elo, Lines, Level oder andere Werte golden.",
+      "Don't färbe Elo, Lines, Level, Siege, Angebote oder Fehlercodes golden.",
       "Don't nimm eine Spielfarbe für Knöpfe, Links, Fokus, Text oder Auswahl.",
       "Don't stelle mehr als einen gefüllten Knopf in eine Ansicht.",
       "Don't streife Tabellen und Leaderboards (Zebra); Zeilen trennen Haarlinien oder Luft.",

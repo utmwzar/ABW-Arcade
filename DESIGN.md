@@ -2,12 +2,15 @@
 name: ABW Arcade
 description: Dunkle Spielebibliothek für die Pause – die Hülle bleibt ruhig violett-schwarz, die Spiele bringen die Farbe.
 colors:
+  playfield: "#0a0816"
   bg: "#110d20"
   bg-raised: "#181331"
   surface: "#1e1838"
   surface-2: "#261f45"
+  surface-2-hover: "#2f2754"
   line: "#2e2752"
   line-strong: "#43396f"
+  line-hover: "#5a4f8c"
   text: "#eeeafe"
   text-muted: "#a59dcb"
   accent: "#2ccfe3"
@@ -17,7 +20,11 @@ colors:
   ok: "#4ad08a"
   ok-soft: "rgb(74 208 138 / 0.14)"
   gold: "#f7c04a"
+  gold-soft: "rgb(247 192 74 / 0.14)"
   danger: "#f0606b"
+  danger-hover: "#f4848d"
+  danger-ink: "#1d0509"
+  danger-text: "#ff9aa2"
   danger-soft: "rgb(240 96 107 / 0.14)"
   game-tetris: "#2ccfe3"
   game-snake: "#4ad08a"
@@ -28,6 +35,7 @@ colors:
   game-doom: "#f0606b"
   board-light: "#c9bfe8"
   board-dark: "#8b7fc0"
+  board-ink: "#1d1638"
 typography:
   display:
     fontFamily: '"Press Start 2P", "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif'
@@ -127,7 +135,7 @@ components:
     padding: "0 16px"
     height: "42px"
   button-secondary-hover:
-    backgroundColor: "#2f2754"
+    backgroundColor: "{colors.surface-2-hover}"
     textColor: "{colors.text}"
   button-ghost:
     backgroundColor: "transparent"
@@ -192,7 +200,7 @@ components:
     padding: "0 8px"
     height: "22px"
   tag-highscore:
-    backgroundColor: "rgb(247 192 74 / 0.14)"
+    backgroundColor: "{colors.gold-soft}"
     textColor: "{colors.gold}"
     typography: "{typography.label-strong}"
     rounded: "{rounded.sm}"
@@ -268,7 +276,7 @@ Bewegung ist kurz und zeigt Zustand: 120 ms für Farbe und Hover, 200 ms für We
 **Key Characteristics:**
 - Tonal geschichtetes Nachtviolett mit Haarlinien; kräftige Farbe nur in Kapseln und Spielfeldern.
 - Ein Akzent: Cyan für Aktion, Auswahl, Fokus und alles, was dich meint.
-- Zustandsfarben mit fester Bedeutung: Grün gespeichert, Gold Highscore, Rot Verlust und Fehler.
+- Zustandsfarben mit fester Bedeutung: Grün gespeichert und gewonnen, Gold Highscore, Rot Gefahr, Verlust und Fehler.
 - Press Start 2P nur in 16, 24 und 32 px; sonst Archivo mit Tabellenziffern, Werte in 800.
 - Ecken von 6 bis 12 px, schwarze, weich nach unten versetzte Schatten, kein Glow, kein Verlauf auf Text.
 - Ein lauter Moment: die Ergebniskarte am Ende eines Runs.
@@ -285,14 +293,15 @@ Ein Nachtviolett in vier Stufen trägt die Oberfläche, Cyan ist der einzige Akz
 
 ### State Colors
 - **Gespeichert-Grün** (#4ad08a): bestätigt. „Gespeichert“ auf der Ergebniskarte, Erfolgsmeldungen, das Schild bei „Jeder Score ist vom Server nachgerechnet“; im Schach Sieg und Elo-Gewinn. Sein Schleier (rgb(74 208 138 / 0.14)) trägt Erfolgsmeldungen.
-- **Highscore-Gold** (#f7c04a): der Highscore, sonst nichts (siehe The Gold-Is-Highscore Rule).
-- **Signalrot** (#f0606b): Verlust und Fehler. Der rote Blitz im Spielfeld bei Leben-Verlust und Game Over, das Matt-Feld, „Aufgeben“ und Löschen. Sein Schleier (rgb(240 96 107 / 0.14)) trägt Fehlermeldungen und den Hover roter Knöpfe. Fehler- und Niederlagentext auf dunklem Grund steht in einem helleren Rot (#ff9aa2, 8,4 : 1, kein eigener Token): „Nicht gespeichert“, „Niederlage“, Elo-Verlust, Fehler in der Lobby. Der Titel GAME OVER bleibt in Textfarbe; der Richtungsvertrag nannte Rot für Game Over, gebaut ist Rot dort als Blitz im Spielfeld.
+- **Highscore-Gold** (#f7c04a): der Highscore, sonst nichts (siehe The Gold-Is-Highscore Rule). Sein Schleier (**Gold-Schleier**, 14 %) trägt den Tag „Highscore“.
+- **Signalrot** (#f0606b): Gefahr, Verlust und Fehler. Der rote Blitz im Spielfeld bei Leben-Verlust und Game Over, der Ring ums Königsfeld bei Schach und die Füllung des Matt-Felds, „Aufgeben“ und Löschen. Sein Schleier (rgb(240 96 107 / 0.14)) trägt Fehlermeldungen und den Hover roter Knöpfe. Gefülltes Rot wird beim Zeigen heller (**Helles Signalrot**, #f4848d) und trägt dunkle **Rot-Tinte** (#1d0509). Fehler- und Niederlagentext auf dunklem Grund steht im **Fehlertext-Rot** (#ff9aa2, 8,4 : 1): „Nicht gespeichert“, „Niederlage“, Elo-Verlust, Fehler in der Lobby. Der Titel GAME OVER bleibt in Textfarbe; der Richtungsvertrag nannte Rot für Game Over, gebaut ist Rot dort als Blitz im Spielfeld.
 
 ### Game Colors
 Jedes Spiel behält die Farbe seiner Vorschau-Grafik: **Tetris-Cyan** (#2ccfe3), **Snake-Grün** (#4ad08a), **Breakout-Pink** (#f06bb2), **2048-Gold** (#f7c04a), **Geometry-Dash-Blau** (#6c8cff), **Schach-Violett** (#a98bfa), **DOOM-Rot** (#f0606b).
 - **Wo sie stehen:** in der Kapsel (Grafik auf 13 % Spielfarbe über Spielfeld-Schwarz, 3-px-Kante unter der Grafik, beim Zeigen ein Rahmen aus 55 % Spielfarbe), als 8-px-Quadrat vor dem Spielnamen in „Zuletzt gespielt“ und im Spielfeld. Auf der eigenen Seite zeigt nur DOOM seine Farbe, im Ladebalken. Der Richtungsvertrag sah die Spielfarbe als Akzent der ganzen Spielseite vor; gebaut bleibt dort alles Bedienbare cyan.
 - **Gleiche Werte:** Tetris, Snake, 2048 und DOOM teilen ihren Wert mit dem Akzent oder einer Zustandsfarbe. Sie geraten nicht aneinander, weil eine Spielfarbe nie Text, Wert oder Bedienelement färbt.
-- **Lavendelbrett** (hell #c9bfe8, dunkel #8b7fc0): die Felder des Schachbretts. Schwarze Figuren stehen auf dunklen Feldern mit 5,9 : 1.
+- **Gold als Spielfarbe:** 2048 hat denselben Wert wie das Highscore-Gold, ebenso der O-Stein und die 1024-Kachel, und im Konfetti mischt Gold mit. Das sind Spielfarben in Kapsel, Spielmarke und Spielfeld; die Gold-Regel gilt für die Hülle.
+- **Lavendelbrett** (hell #c9bfe8, dunkel #8b7fc0): die Felder des Schachbretts. Schwarze Figuren stehen auf dunklen Feldern mit 5,9 : 1. Schrift auf hellem Lavendel steht in **Brett-Tinte** (#1d1638).
 
 ### Neutral
 - **Nachtviolett** (#110d20): Grund der Seite, Eingabefelder, Spur des Segmentschalters.
@@ -303,12 +312,14 @@ Jedes Spiel behält die Farbe seiner Vorschau-Grafik: **Tetris-Cyan** (#2ccfe3),
 - **Kantenviolett** (#43396f): Kante alles Bedienbaren (Eingabefelder, sekundäre Knöpfe, Tastenkappen, Overlay-Karte, Dialoge), Tabellenköpfe, Scrollbalken.
 - **Lavendelweiß** (#eeeafe): Text, auf jeder Fläche mindestens 13 : 1.
 - **Nebel-Lavendel** (#a59dcb): Nebentext, Labels, inaktive Navigation, Platzhalter; auf jeder Fläche mindestens 6 : 1.
-- **Spielfeld-Schwarz** (#0a0816, kein eigener Token): Grund jedes Spielfelds und jeder Kapselgrafik, eine Stufe unter dem Seitengrund.
+- **Spielfeld-Schwarz** (#0a0816): Grund jedes Spielfelds und jeder Kapselgrafik, eine Stufe unter dem Seitengrund. Die Spiele lassen ihren Canvas leer; man sieht den Grund des Spielfeld-Rahmens.
+- **Hover-Töne:** **Tastenviolett hell** (#2f2754) für sekundäre Knöpfe, **Kante hell** (#5a4f8c) für Eingabefelder und Filter-Chips.
+- **Einzelwerte ohne Token:** aufgehellte Texte in Meldungen (#ffd9dc auf Rot-Schleier, #d3f7e2 auf Grün-Schleier), reines Weiß und Schwarz für die Farbpunkte der Spieler und den Zielring beim Ziehen, Schwarz hinter DOOM.
 
 ### Named Rules
 **The One-Accent Rule.** Cyan ist der einzige Akzent der Hülle: Aktion, Auswahl, Fokus und alles, was dich meint (deine Zeile, dein Zug, dein Initial). Auch auf einer Spielseite sind Knöpfe, Links und Fokusringe cyan, nie in der Spielfarbe.
 
-**The Gold-Is-Highscore Rule.** Gold heißt Highscore und nichts anderes. Golden sind dein Highscore in Kapsel und Werte-Panel, unter dem Leaderboard und als Tag in „Zuletzt gespielt“, die Rangziffer von Platz 1 und die Ergebniszahl, diese erst, wenn der Server den neuen Highscore bestätigt hat. Elo, Lines, Level und alle anderen Werte stehen in Textfarbe.
+**The Gold-Is-Highscore Rule.** Gold heißt Highscore und nichts anderes. Golden sind dein Highscore in Kapsel und Werte-Panel, unter dem Leaderboard und als Tag in „Zuletzt gespielt“, die Rangziffer von Platz 1 und die Ergebniszahl, diese erst, wenn der Server den neuen Highscore bestätigt hat. Elo, Lines, Level und alle anderen Werte stehen in Textfarbe. Siege, Angebote und Fehlercodes tragen ihre eigene Farbe. Ausgenommen sind Spielfarben: 2048 ist golden, der O-Stein und die 1024-Kachel auch, und im Konfetti mischt Gold mit. Das gehört zum Spiel, nicht zur Hülle.
 
 **The Games-Are-The-Light Rule.** Kräftige Farbe kommt aus den Spielen: Kapselgrafik, Kapselkante, Spielmarke und Spielfeld. Die Hülle bleibt in den Neutralen; eine Spielfarbe färbt nie Text, Wert oder Bedienelement.
 
@@ -324,7 +335,7 @@ Beide Schriften liegen lokal im Projekt (OFL), es gibt keinen Schriftdienst von 
 
 ### Hierarchy
 - **Display** (Press Start 2P 400, 24 px, 1,3): Seitentitel („Spiele“, „Schach“, „Admin“) und der Spielname auf der Spielseite; die Wortmarke auf der Anmeldekarte.
-- **Screen Title** (Press Start 2P 400, 16 px, 1,4): Overlay-Titel (BEREIT?, PAUSE, GAME OVER, GESCHAFFT!, NEUES SPIEL?, DU HAST GEWONNEN), die Wortmarke in der Kopfleiste (Zeilenhöhe 1) und Texte im Spielfeld („LEVEL 2“; „TETRIS“ in 24 px). Die dritte Rasterstufe, 32 px, trägt bisher nur den Code der Fehlerseite.
+- **Screen Title** (Press Start 2P 400, 16 px, 1,4): Overlay-Titel (BEREIT?, PAUSE, GAME OVER, GESCHAFFT!, NEUES SPIEL?, DU HAST GEWONNEN), die Wortmarke in der Kopfleiste (Zeilenhöhe 1) und Texte im Spielfeld („LEVEL 2“; „TETRIS“ in 24 px). Die dritte Rasterstufe, 32 px, trägt bisher nur den Code der Fehlerseite, in Nebentext.
 - **Score** (Archivo 800, 3,5 rem = 56 px, 1, −0,01 em): die Ergebniszahl am Spielende; in der flachen Karte von Geometry Dash 2,75 rem.
 - **Stat Large** (Archivo 800, 2,5 rem = 40 px, 1): der Hauptwert im Werte-Panel (Score, Distance), der Highscore in „Weiterspielen“, deine Elo in Lobby und Endkarte. Auf dem Handy wird der Hauptwert 28 px.
 - **Stat** (Archivo 800, 22 px, 1,1): Werte in Panels und Kapseln (Lines, Level, Highscore). Kennzahlen im Admin stehen in 28 px.
@@ -384,11 +395,11 @@ Das Quadrat ist die zweite Form der Welt: Pixelschrift, quadratische Partikel, d
 ### Buttons
 Fest und flach, mit einem klaren Hauptknopf.
 - **Shape:** sanft gerundet (10 px), 42 px hoch, 16 px Innenabstand; klein 34 px mit 12 px Innenabstand und 6 px Rundung, groß 50 px mit 24 px.
-- **Primary:** Arcade-Cyan mit Cyan-Tinte, Archivo 700. „Spiel starten“, „Nochmal“, „Spielen“, „Anmelden“, „Bot-Partie starten“.
+- **Primary:** Arcade-Cyan mit Cyan-Tinte, Archivo 700. „Spiel starten“, „Nochmal“, „Spielen“, „Anmelden“; in der Lobby „Bot-Partie starten“ oder „Zum Brett“, je nach Zustand (siehe The One-Filled-Button Rule).
 - **Hover / Focus:** Hover hellt in 120 ms zu Hellem Cyan auf; Fokus ist ein 2-px-Ring in Cyan mit 2 px Abstand; gedrückt sitzt der Knopf 1 px tiefer; deaktiviert 45 % Deckkraft.
-- **Secondary:** Tastenviolett mit Kante in Kantenviolett und Textfarbe, Hover etwas heller (#2f2754). Für jede Nebenaktion: „Alle Spiele“, „Zum Brett“, „Pause“, „Abbrechen“.
+- **Secondary:** Tastenviolett mit Kante in Kantenviolett und Textfarbe, Hover Tastenviolett hell. Für jede Nebenaktion: „Alle Spiele“, „Pause“, „Abbrechen“, „Zur aktuellen Stellung“, „Zum Brett“ bei Partien, die nicht auf dich warten.
 - **Ghost:** transparent mit Nebentext, Hover Kapselviolett und Textfarbe: Kopfleiste, „Menü“, Nachspielen im Schach, „Ansehen“.
-- **Danger:** roter Umriss (50 %) mit rotem Text, Hover Rot-Schleier: „Aufgeben“, Löschen und Leeren im Admin. Gefülltes Rot (#f0606b mit Schrift #1d0509) gibt es nur als „Bestätigen“ im Rückfrage-Dialog.
+- **Danger:** roter Umriss (50 %) mit rotem Text, Hover Rot-Schleier: „Aufgeben“, Löschen und Leeren im Admin. Gefülltes Rot (Signalrot mit Rot-Tinte, Hover Helles Signalrot) gibt es nur als „Bestätigen“ im Rückfrage-Dialog.
 - **Tastenhinweis:** Die passende Taste steht rechts im Knopf („Enter“, „P“, „R“) als kleine Kappe in Label Strong mit 4 px Rundung, auf Cyan in 16 % Schwarz, auf sekundären Knöpfen in Nachtviolett mit Nebentext. Ohne Hover entfällt sie.
 
 ### Chips
@@ -405,7 +416,7 @@ Fest und flach, mit einem klaren Hauptknopf.
 - **Meldungen:** Schleier der Zustandsfarbe, Rand in der Zustandsfarbe (45 %), aufgehellte Schrift und das Symbol links.
 
 ### Inputs / Fields
-- **Style:** 44 px hoch, Nachtviolett, 1-px-Kante in Kantenviolett, 10 px Rundung, 12 px Innenabstand; Label darüber in 14 px 600, Platzhalter in Nebentext. Hover hellt die Kante auf (#5a4f8c).
+- **Style:** 44 px hoch, Nachtviolett, 1-px-Kante in Kantenviolett, 10 px Rundung, 12 px Innenabstand; Label darüber in 14 px 600, Platzhalter in Nebentext. Hover hellt die Kante auf (Kante hell).
 - **Focus:** Kante und 2-px-Ring in Cyan, ohne Abstand.
 - **Error / Disabled:** ungültige Felder bekommen eine Kante in Signalrot, die Meldung steht über dem Formular.
 - **Segmentschalter:** eine Spur in Nachtviolett mit Haarlinie und 4 px Innenabstand, Segmente in 14 px 600 Nebentext; das gewählte Segment liegt in Tastenviolett mit Textfarbe und Auflage. Er dient für Einstellungen (Bewegung, Touch-Steuerung) und die Wahl gegen den Bot. Der Design-Detektor meldet ihn im Panel als „nested cards“; er ist ein Bedienelement, keine Karte in der Karte.
@@ -444,19 +455,19 @@ Tasten sehen aus wie Tasten, Gesten wie Gesten.
 
 ### Schachbrett
 - **Brett:** 8 × 8 Lavendelfelder, 6 px Rundung, Schatten Gehoben; Figuren aus dem Satz Chessnut (SVG). Die Koordinaten liegen als eigene Ebene über den Feldern und unter den Figuren (11 px Archivo 700, auf kleinen Brettern 9 px in den Ecken) und lassen sich abschalten. Sie stehen in Tinte aus dem Nachtviolett: Kantenviolett auf hellen Feldern (5,9 : 1), Erhöhtes Nachtviolett auf dunklen (5,0 : 1). Helle Schrift erreicht auf dem mittleren Lavendel höchstens 3,6 : 1.
-- **Feldzustände:** Der letzte Zug liegt unter 30 % Cyan, die Auswahl trägt einen 3-px-Ring in Cyan über 35 %. Mögliche Züge zeigen einen Punkt, Schlagzüge einen Ring, beide in Nachtviolett mit 38 %. Beim Ziehen markiert ein weißer 3-px-Ring das Zielfeld. Steht ein König im Schach, wird sein Feld getönt: ein Hinweis, kein Alarm. Rot bekommt nur das Matt (70 %).
+- **Feldzustände:** Der letzte Zug liegt unter 30 % Cyan, die Auswahl trägt einen 3-px-Ring in Cyan über 35 %. Mögliche Züge zeigen einen Punkt, Schlagzüge einen Ring, beide in Nachtviolett mit 38 %. Beim Ziehen markiert ein weißer 3-px-Ring das Zielfeld. Steht ein König im Schach, trägt sein Feld einen roten 3-px-Ring nach innen: ein Hinweis, den die Statuszeile auch in Worten gibt. Gefüllt rot (70 %) wird nur das Matt.
 - **Bewegung:** Figuren gleiten in 200 ms (ease-out), neue blenden aus 85 % Größe ein, die gezogene Figur hebt sich mit ihrem Schatten.
-- **Drumherum:** Spielerleisten mit Farbpunkt, Name (700), Elo in Nebentext, Tag „am Zug“ und den geschlagenen Figuren in einer hellen Lavendel-Pille. Die Statuszeile ist cyan, wenn du am Zug bist. Ein Remis-Angebot erscheint als Kasten über der Zugliste mit „Annehmen“ (gefüllt) und „Ablehnen“ (sekundär). Die Zugliste markiert den gezeigten Zug mit Cyan-Schleier und Cyan.
+- **Drumherum:** Spielerleisten mit Farbpunkt, Name (700), Elo in Nebentext, Tag „am Zug“ und den geschlagenen Figuren in einer hellen Lavendel-Pille. Die Statuszeile ist cyan, wenn du am Zug bist, grün, wenn du gewonnen hast, und hellrot nach einer Niederlage. Ein Remis-Angebot ist ein Angebot an dich: ein Kasten mit Cyan-Schleier und Cyan-Rand (45 %) über der Zugliste, mit „Annehmen“ (gefüllt) und „Ablehnen“ (sekundär). Die Zugliste markiert den gezeigten Zug mit Cyan-Schleier und Cyan.
 
 ### Effekte im Spielfeld
 - **Partikel:** quadratisch (2 bis 4 px, Konfetti 3 bis 6 px), in der Farbe dessen, was getroffen wurde (Stein, Futter, Würfel), in voller Deckkraft und ohne Glow.
 - **Blitze:** höchstens drei pro Sekunde. Hell (Lavendelweiß, 50 %) nur über abgeräumten Reihen, rot (18 bis 26 %) über dem Feld bei Leben-Verlust und Game Over.
 - **Wackeln:** 3 bis 6 px für 220 bis 380 ms, nur bei voller Bewegung.
-- **Texte:** in Press Start 2P 16 oder 24 px („LEVEL 2“, „TETRIS“), steigen 18 px und blenden in 900 ms aus.
+- **Texte:** in Press Start 2P 16 oder 24 px, „LEVEL 2“ in Textfarbe, „TETRIS“ in der Farbe des I-Steins; sie steigen 18 px und blenden in 900 ms aus.
 - **Reduziert / Aus:** Bei reduzierter Bewegung gibt es kein Wackeln und keine Spuren, ein Drittel der Partikel und Texte, die stehen bleiben; bei „Aus“ keine Effekte.
 
 ### Named Rules
-**The One-Filled-Button Rule.** Höchstens ein gefüllter Knopf pro Ansicht; alles daneben ist sekundär oder ghost.
+**The One-Filled-Button Rule.** Höchstens ein gefüllter Knopf pro Ansicht; alles daneben ist sekundär oder ghost. Welcher es ist, entscheidet der Zustand: In der Schach-Lobby ist es das „Zum Brett“ der Partie, die auf dich wartet, sonst „Bot-Partie starten“. Kurzmeldungen tragen ihre Aktion gefüllt, weil sie nur kurz über der Ansicht liegen.
 
 **The One-Loud-Moment Rule.** Nur das Ende eines Runs ist laut: Die Karte federt, die Zahl zählt hoch, und ein bestätigter Highscore kommt als zweiter Schlag (Gold, Puls, Pokalzeile). Alles andere in der Hülle bleibt kurz (120 ms für Farbe, 200 ms für Wege und Ausblenden, 320 ms für Hereinkommendes) und bewegt sich nur, um einen Zustand zu zeigen.
 
@@ -475,7 +486,7 @@ Tasten sehen aus wie Tasten, Gesten wie Gesten.
 ### Don't:
 - **Don't** verwende Verlaufsschrift, Glow-Ränder, Scanlines über der Oberfläche oder Pixelschrift in 8 px; das ist der abgelehnte Synthwave-Standard.
 - **Don't** setze Press Start 2P unter 16 px oder für Fließtext, Knöpfe, Labels und Werte.
-- **Don't** färbe Elo, Lines, Level oder andere Werte golden.
+- **Don't** färbe Elo, Lines, Level, Siege, Angebote oder Fehlercodes golden.
 - **Don't** nimm eine Spielfarbe für Knöpfe, Links, Fokus, Text oder Auswahl.
 - **Don't** stelle mehr als einen gefüllten Knopf in eine Ansicht.
 - **Don't** streife Tabellen und Leaderboards (Zebra); Zeilen trennen Haarlinien oder Luft.
