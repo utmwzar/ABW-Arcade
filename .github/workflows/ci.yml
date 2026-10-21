@@ -113,10 +113,10 @@ jobs:
           tar -tzf abw-arcade.tar.gz | grep -v '/$' | sort > tar.txt
           unzip -Z1 abw-arcade.zip | grep -v '/$' | sort > zip.txt
           diff tar.txt zip.txt
-          if grep -E '^abw-arcade/(\.github|\.claude|tests)/|^abw-arcade/(PRODUCT|DESIGN)\.md$' tar.txt; then
+          if grep -E '^abw-arcade/(\.github|\.claude|\.impeccable|tests|docs)/|^abw-arcade/(PRODUCT|DESIGN)\.md$' tar.txt; then
             echo "Entwicklungsdateien im Paket"; exit 1
           fi
-          for datei in PAKET-INFO run.py install.sh install.cmd install.ps1 installer/sync.py requirements.txt; do
+          for datei in PAKET-INFO run.py install.sh install.cmd install.ps1 installer/sync.py requirements.txt README.md LICENSE; do
             grep -qx "abw-arcade/$datei" tar.txt || { echo "$datei fehlt im Paket"; exit 1; }
           done
           mkdir aus-tar aus-zip

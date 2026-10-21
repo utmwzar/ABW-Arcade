@@ -140,7 +140,7 @@ class ExcludeTest(SyncTestCase):
         "tests/test_pages.py", "PRODUCT.md", "DESIGN.md", "install.sh",
         "install.cmd", "install.ps1", "paket-bauen.sh", "pruefe-engines.js",
         "pruefe_engines.py", "installer/sync.py", "abw-arcade.tar.gz",
-        "abw-arcade.zip",
+        "abw-arcade.zip", ".impeccable/design.json", "docs/bilder/banner.png",
     ]
 
     def test_dev_files_are_not_copied(self):
@@ -151,9 +151,11 @@ class ExcludeTest(SyncTestCase):
 
     def test_root_only_names_are_copied_deeper_down(self):
         write(self.src, "static/tests/hilfe.js")
+        write(self.src, "static/docs/hilfe.html")
         write(self.src, "templates/install.sh")
         self.assertSynced()
         self.assertIn("static/tests/hilfe.js", files(self.dst))
+        self.assertIn("static/docs/hilfe.html", files(self.dst))
         self.assertIn("templates/install.sh", files(self.dst))
 
     def test_excluded_files_in_target_are_left_alone(self):
