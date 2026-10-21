@@ -1,13 +1,59 @@
-# ABW Arcade
+# <img src="docs/bilder/banner.png" width="880" alt="ABW Arcade">
 
-Selbstgehostete Spiele-Website für den Homelab-Container. Ein Account, sieben
-Spiele, server-geprüfte Leaderboards.
+Die Pausen-Arcade der Ausbildungswerkstatt Wittmund: sieben Spiele, ein
+Account und Leaderboards, die der Server nachrechnet. Selbst gehostet im
+Firmennetz, ohne Werbung und ohne Tracking.
 
-**Tetris · Snake · Breakout · 2048 · Geometry Dash · Schach · DOOM**
+[![CI](https://github.com/utmwzar/ABW-Arcade/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/utmwzar/ABW-Arcade/actions/workflows/ci.yml)
 
-Flask + SQLite + waitress, als Systemdienst unter Linux, macOS oder Windows.
-Keine Datenbank aufzusetzen, kein Reverse Proxy nötig, kein Docker, keine
-externen Dienste.
+**[Installieren](#schnellstart) · [Spiele](#die-spiele--wie-sie-funktionieren) · [Mitentwickeln](#mitentwickeln) · [Changelog](CHANGELOG.md)**
+
+## So sieht es aus
+
+<img src="docs/bilder/hub.png" width="880" alt="Der Hub am Desktop: oben Weiterspielen mit Tetris, darunter die übrigen Spiele als Kapseln mit Highscore und Platz, rechts die Schachpartien und Zuletzt gespielt">
+
+<table>
+<tr>
+<td width="50%"><img src="docs/bilder/ergebnis.png" alt="Tetris am Spielende: die Ergebniskarte mit neuem Highscore und dem Hinweis, dass der Server den Score nachgerechnet hat"></td>
+<td width="50%"><img src="docs/bilder/schach.png" alt="Eine Schachpartie auf dem Lavendelbrett mit Zugliste zum Nachspielen"></td>
+</tr>
+</table>
+
+<img src="docs/bilder/handy.png" width="880" alt="Drei Ansichten auf dem Handy: der Hub, Tetris mit den Gesten zum Spielen und eine Schachpartie">
+
+## Was drin ist
+
+- **Tetris, Snake, Breakout, 2048 und Geometry Dash** mit Leaderboard. Der
+  Server spielt jede Partie nach, ein gefälschter Score kommt nicht durch.
+- **Schach** gegen Kollegen mit Elo-Wertung oder gegen den Bot in drei
+  Stärken, jede Partie lässt sich nachspielen.
+- **DOOM** mit den freien Spieldaten von FreeDoom, direkt im Browser.
+- **Ein Hub wie eine Spielebibliothek**: weiterspielen, Highscores und Platz je
+  Spiel, offene Schachpartien.
+- **Am Desktop mit Tastatur und Maus, auf Handy und Tablet mit Gesten.**
+- **Admin-Bereich** für Accounts und Scores.
+- **Läuft als Dienst unter Linux, macOS und Windows**: Flask, SQLite und
+  waitress. Keine Datenbank aufzusetzen, kein Reverse Proxy, kein Docker,
+  keine externen Dienste.
+
+## Schnellstart
+
+**Linux (Debian, Ubuntu) und macOS**, im Terminal mit Administratorrechten:
+
+```bash
+curl -fsSL -o abw-arcade.tar.gz \
+  https://github.com/utmwzar/ABW-Arcade/releases/latest/download/abw-arcade.tar.gz
+tar -xzf abw-arcade.tar.gz && cd abw-arcade && sudo ./install.sh
+```
+
+**Windows 10 und 11**: [`abw-arcade.zip`](https://github.com/utmwzar/ABW-Arcade/releases/latest/download/abw-arcade.zip)
+herunterladen, in den Eigenschaften der Datei *Zulassen* ankreuzen, entpacken
+und `install.cmd` doppelklicken.
+
+Danach die Seite im Browser öffnen (Port 5000, unter macOS 5050), einen
+Account registrieren und den [ersten Admin ernennen](#ersten-admin-ernennen).
+Voraussetzungen und Einzelheiten je System stehen unter
+[Installation](#installation).
 
 ---
 
@@ -182,7 +228,8 @@ mehr schreiben; `run.py` warnt in diesem Fall.
 ## Update
 
 Neues Paket holen, entpacken und das Skript erneut starten — derselbe Ablauf
-wie bei der Installation. Die Skripte sind idempotent und lassen sich
+wie bei der Installation. Was sich geändert hat, steht im
+[Changelog](CHANGELOG.md). Die Skripte sind idempotent und lassen sich
 beliebig oft ausführen.
 
 **Port, Accounts und Leaderboards bleiben erhalten.** Ohne `--port` bzw.
@@ -494,11 +541,25 @@ Soll das Spiel ein server-geprüftes Leaderboard haben, braucht es die Engine
 zweimal — als `<spiel>_engine.py` und `static/<spiel>_engine.js` — und einen
 Eintrag in `pruefe-engines.js`, damit der Gleichlauf mitgeprüft wird.
 
-### Ein Release-Paket bauen
+### Ein Release veröffentlichen
+
+1. In `CHANGELOG.md` einen Abschnitt für die neue Version anlegen, etwa
+   `## [1.2] – TT.MM.JJJJ`. Sein Text wird zum Text des Releases.
+2. Den Stand nach `main` bringen und warten, bis die CI dort grün ist.
+3. Unter *Actions → Release → Run workflow* die Version ohne `v` eingeben,
+   also `1.2`.
+
+Der Workflow setzt den Tag `v1.2`, baut beide Pakete mit `paket-bauen.sh`,
+prüft ihren Inhalt und legt das Release an. Er bricht ab, wenn er nicht auf
+`main` läuft, die CI für den Commit nicht grün ist oder es das Release schon
+gibt. Bei jedem Pull Request läuft derselbe Weg als Probe, ohne etwas zu
+veröffentlichen (`.github/release-bauen.sh`).
+
+Die Pakete lassen sich auch lokal bauen:
 
 ```bash
 ./paket-bauen.sh              # aus HEAD
-./paket-bauen.sh v1.0         # aus einem Tag oder Commit
+./paket-bauen.sh v1.1         # aus einem Tag oder Commit
 ```
 
 Das Skript baut `abw-arcade.tar.gz` (Linux, macOS) und `abw-arcade.zip`
@@ -508,13 +569,6 @@ genau den eingecheckten Stand; eine `.venv`, eine `arcade.db` oder
 halbfertige Änderungen können gar nicht hineingeraten. Die Zeilenenden
 regelt `.gitattributes`: `install.sh` bekommt in beiden Archiven LF,
 `install.cmd` und `install.ps1` CRLF.
-
-Veröffentlichen:
-
-```bash
-gh release create v1.1 abw-arcade.tar.gz abw-arcade.zip \
-  --title "ABW Arcade v1.1" --notes "Was sich geändert hat ..."
-```
 
 ---
 
@@ -541,6 +595,10 @@ abw-arcade/
 ├── pruefe-engines.js       vergleicht die .py- gegen die .js-Engines
 ├── pruefe_engines.py       Python-Seite dieser Pruefung
 ├── tests/                  unittest: Seiten, APIs, Perft, Installer
+├── CHANGELOG.md            was sich je Version geändert hat
+├── PRODUCT.md, DESIGN.md   Tonfall und Begriffe; das Design-System
+├── docs/bilder/            Bilder für diese Seite
+├── .github/                CI, Release-Workflow, Issue-Vorlagen
 ├── templates/              Hub, Spiele, Login/Registrierung, admin/, thumbs/
 └── static/
     ├── css/                tokens.css (Design-Tokens), app.css und je Bereich eine Datei
@@ -558,14 +616,20 @@ abw-arcade/
 Zur Laufzeit kommen `arcade.db`, `secret_key`, `arcade.conf` und `.venv/`
 hinzu, unter macOS und Windows außerdem `data/`, `logs/` und (Windows)
 `service/`. Die gehören nicht ins Repository und überstehen jedes Update.
-Installationsskripte, `installer/` und `tests/` landen nicht im
-Programmordner auf dem Server.
+Installationsskripte, `installer/`, `tests/` und `docs/` landen nicht im
+Programmordner auf dem Server; `PRODUCT.md`, `DESIGN.md`, `docs/` und
+`.github/` fehlen auch in den Paketen.
 
 ---
 
 ## Lizenz
 
-MIT, siehe [LICENSE](LICENSE).
+Der Code steht unter MIT, siehe [LICENSE](LICENSE). Mitgeliefert werden
+außerdem:
 
-DOOM: Chocolate Doom steht unter GPL, FreeDoom unter BSD. Die vollständigen
-Lizenztexte liegen in `static/doom/`.
+| Teil | Lizenz | Lizenztext |
+|---|---|---|
+| Schriften Archivo und Press Start 2P | SIL Open Font License 1.1 | `static/fonts/OFL-*.txt` |
+| Schachfiguren „Chessnut“ | Apache 2.0 | `static/chess/pieces/LICENSE.txt` |
+| Chocolate Doom als WebAssembly | GPL v2 | `static/doom/LICENSE-doom-wasm.md` |
+| FreeDoom Phase 1 | BSD | `static/doom/LICENSE-freedoom.txt` |
