@@ -487,11 +487,9 @@ läuft:
 
 ### Gestaltung und Texte
 
-Tonfall und Begriffe (Score, Leaderboard, Gesten usw.) stehen in
-`PRODUCT.md`, Farben, Schrift, Abstände und Bausteine in `DESIGN.md`. Die
-Werte selbst liegen in `static/css/tokens.css`. Für Bewegung und Effekte gilt
-der Projekt-Skill `.claude/skills/motion-gaming/`, für gespeicherte
-Einstellungen `.claude/skills/local-storage-state/`.
+Farben, Schrift, Bausteine, Bewegung, gespeicherte Einstellungen sowie
+Tonfall und Begriffe beschreibt [`docs/gestaltung.md`](docs/gestaltung.md).
+Die Werte selbst liegen in `static/css/tokens.css`.
 
 ### Tests
 
@@ -616,8 +614,7 @@ abw-arcade/
 ├── pruefe_engines.py       Python-Seite dieser Pruefung
 ├── tests/                  unittest: Seiten, APIs, Perft, Installer
 ├── CHANGELOG.md            was sich je Version geändert hat
-├── PRODUCT.md, DESIGN.md   Tonfall und Begriffe; das Design-System
-├── docs/bilder/            Bilder für diese Seite
+├── docs/                   gestaltung.md (Gestaltung und Texte), bilder/ für diese Seite
 ├── werkzeuge/testversion/  baut die Testversion als einzelne HTML-Datei
 ├── .github/                CI, Release-Workflow, Issue-Vorlagen
 ├── templates/              Hub, Spiele, Login/Registrierung, admin/, thumbs/
@@ -638,8 +635,8 @@ Zur Laufzeit kommen `arcade.db`, `secret_key`, `arcade.conf` und `.venv/`
 hinzu, unter macOS und Windows außerdem `data/`, `logs/` und (Windows)
 `service/`. Die gehören nicht ins Repository und überstehen jedes Update.
 Installationsskripte, `installer/`, `tests/`, `docs/` und `werkzeuge/` landen
-nicht im Programmordner auf dem Server; `PRODUCT.md`, `DESIGN.md`, `docs/`,
-`werkzeuge/` und `.github/` fehlen auch in den Paketen.
+nicht im Programmordner auf dem Server. `tests/`, `docs/`, `werkzeuge/` und
+`.github/` fehlen außerdem in den Paketen.
 
 ---
 

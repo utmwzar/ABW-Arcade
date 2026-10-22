@@ -13,7 +13,7 @@
   {% block extra_head %}{% endblock %}
   <script>
     // Was das erste Bild betrifft, setzt dieses Skript vor dem Zeichnen
-    // (Regeln: .claude/skills/local-storage-state). Alles andere: static/js/prefs.js.
+    // (siehe docs/gestaltung.md). Alles andere: static/js/prefs.js.
     try {
       var m = JSON.parse(localStorage.getItem("abw.v1.ui.motion"));
       if (m === "full" || m === "reduced" || m === "off") document.documentElement.dataset.motion = m;

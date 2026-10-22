@@ -1,7 +1,7 @@
 // Gemeinsamer Rahmen der Arcade-Spiele: Start, Pause, Neustart, Spielende mit
 // dem vom Server nachgerechneten Ergebnis und das Leaderboard. Regeln, Zeichnen
 // und Eingaben bleiben im jeweiligen Spiel-Skript; es meldet sich hier mit
-// createArcade() an. Bewegung nach .claude/skills/motion-gaming.
+// createArcade() an. Regeln für Bewegung: docs/gestaltung.md.
 
 import { animate, countTo, bump, flash, enter, spring, DUR, EASE_IN, EASE_OUT } from "./fx.js";
 import { toast } from "./shell.js";

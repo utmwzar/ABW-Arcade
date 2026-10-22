@@ -1,5 +1,5 @@
-// Bewegung für Overlays, Zahlen und Schachfiguren – ohne React, mit der
-// Web Animations API. Regeln: .claude/skills/motion-gaming.
+// Bewegung für Overlays, Zahlen und Schachfiguren mit der Web Animations API.
+// Regeln: docs/gestaltung.md, Abschnitt „Bewegung“.
 //
 // Jede Funktion fragt motion() und hält sich daran: "off" setzt sofort den
 // Endzustand, "reduced" blendet nur noch (keine Wege, kein Wackeln). Die

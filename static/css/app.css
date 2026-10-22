@@ -222,7 +222,7 @@ html[data-touch="on"] .controls.controls-touch { display: grid; }
 }
 .tag-accent { background: var(--accent-soft); color: var(--accent); }
 .tag-gold { background: var(--gold-soft); color: var(--gold); }
-/* Gold heißt Highscore und nichts anderes (DESIGN.md); Werte bekommen es nur ausdrücklich. */
+/* Gold steht nur an Highscores (docs/gestaltung.md); Werte bekommen es nur ausdrücklich. */
 .stat-gold { color: var(--gold); }
 .tag-muted { background: var(--surface-2); color: var(--text-muted); }
 
