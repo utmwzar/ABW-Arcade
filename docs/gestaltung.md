@@ -111,10 +111,14 @@ Hinweise Gesten statt Tasten; das lässt sich in den Einstellungen unter „Touc
 | Token (CSS / `fx.DUR`) | Wert | Verwendung |
 |---|---|---|
 | `--dur-short` / `DUR.short` | 120 ms | Farbwechsel und Hover |
-| `--dur-base` / `DUR.base` | 200 ms | Wege wie Schachzüge, jedes Ausblenden |
-| `--dur-long` / `DUR.long` | 320 ms | alles, was hereinkommt: Overlay, Ergebniskarte, Kurzmeldung |
-| `--ease-out` | `cubic-bezier(.2,.8,.2,1)` | Hereinkommendes und Wege |
+| `--dur-base` / `DUR.base` | 200 ms | Wege wie Schachzüge, Schleier, jedes Ausblenden |
+| `--dur-long` / `DUR.long` | 320 ms | Einblenden, etwa von Kurzmeldungen oder der Zeile „Neuer Highscore“ |
+| `--ease-out` | `cubic-bezier(.2,.8,.2,1)` | Einblenden und Wege |
 | `--ease-in` | `cubic-bezier(.4,0,1,1)` | Ausblenden |
+
+Die Karte im Overlay federt beim Einblenden leicht nach. `spring()` in `fx.js` beschreibt dafür
+eine gedämpfte Feder als CSS-Kurve `linear()`; sie kommt nach etwa 550 ms zur Ruhe und schwingt
+kaum über. Browser ohne `linear()` nehmen stattdessen `--dur-long` mit `--ease-out`.
 
 Bewegung entsteht ohne Framework mit der Web Animations API und CSS-Transitions. Vier Module
 teilen sich die Arbeit:
