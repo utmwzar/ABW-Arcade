@@ -48,7 +48,7 @@ if ! diff "$TMP/tar.txt" "$TMP/zip.txt"; then
   echo "::error::tar.gz und zip enthalten nicht dieselben Dateien."
   exit 1
 fi
-if grep -E '^abw-arcade/(\.github|\.claude|\.impeccable|tests|docs)/|^abw-arcade/(PRODUCT|DESIGN)\.md$' "$TMP/tar.txt"; then
+if grep -E '^abw-arcade/(\.github|tests|docs|werkzeuge)/' "$TMP/tar.txt"; then
   echo "::error::Entwicklungsdateien im Paket."
   exit 1
 fi

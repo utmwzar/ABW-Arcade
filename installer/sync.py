@@ -48,8 +48,8 @@ import unicodedata
 # (.git ist in einem git-worktree eine Datei, kein Ordner.)
 EXCLUDE_NAMES = (
     ".git", ".venv", "__pycache__", "node_modules", ".github", ".claude",
-    ".pytest_cache", ".gitignore", ".gitattributes", ".DS_Store", "Thumbs.db",
-    "desktop.ini",
+    ".vscode", ".idea", ".pytest_cache", ".gitignore", ".gitattributes",
+    ".DS_Store", "Thumbs.db", "desktop.ini",
 )
 EXCLUDE_SUFFIXES = (".pyc", ".pyo", ".swp")
 
@@ -58,7 +58,7 @@ EXCLUDE_SUFFIXES = (".pyc", ".pyo", ".swp")
 EXCLUDE_ROOT = (
     "install.sh", "install.cmd", "install.ps1", "paket-bauen.sh",
     "pruefe-engines.js", "pruefe_engines.py", "installer", "tests", "docs", "werkzeuge",
-    "PRODUCT.md", "DESIGN.md", ".impeccable", "abw-arcade.tar.gz", "abw-arcade.zip",
+    "abw-arcade.tar.gz", "abw-arcade.zip",
 )
 
 # Geschuetzt im Programmordner (samt allem, was darin liegt).

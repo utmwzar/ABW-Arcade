@@ -1,5 +1,0 @@
-Quelle: https://github.com/pbakaus/impeccable
-Tag:    skill-v4.7.0 (Commit aeeb3d8c30b5f95aeeb3e893b0f1a308af8fdb8f)
-Kopiert aus .claude/skills/impeccable/ des Repos, ohne Hooks.
-Grund: Der offizielle Installer laedt von impeccable.style; das war
-in der Cloud-Umgebung nicht erreichbar.
