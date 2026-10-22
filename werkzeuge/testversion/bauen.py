@@ -37,6 +37,11 @@ import tempfile
 HIER = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HIER))
 ESBUILD = "esbuild@0.25.0"
+# Fuer npx: keine Audit-Anfrage und keine Hinweise von npm. Unten gilt jede Ausgabe
+# auf stderr als Fehler, und eine Meldung von npm ist keine Meldung von esbuild.
+NPM_ENV = {"npm_config_audit": "false", "npm_config_fund": "false",
+           "npm_config_update_notifier": "false", "npm_config_loglevel": "error"}
+NPX_ZEITLIMIT = 300   # Sekunden je Aufruf; beim ersten Aufruf laedt npx esbuild
 
 # slug, Seite, API-Praefix, Engine-Datei, Engine-Global, Seitenmodul, Endpoint
 GAMES = [
@@ -203,10 +208,14 @@ def buendeln(b, name, module, ziel):
         f.write("".join(f'import "./static/{m}";\n' for m in module))
     aus = os.path.join(ziel, f"bundle-{name}.js")
     # Im Quellordner gestartet, damit die Pfadkommentare im Bundle relativ bleiben.
-    r = subprocess.run([npx, "--yes", ESBUILD, eintrag, "--bundle", "--format=iife",
-                        "--charset=utf8", "--banner:js=\"use strict\";", "--log-level=warning",
-                        f"--outfile={aus}"],
-                       capture_output=True, text=True, cwd=b.src)
+    try:
+        r = subprocess.run([npx, "--yes", ESBUILD, eintrag, "--bundle", "--format=iife",
+                            "--charset=utf8", "--banner:js=\"use strict\";", "--log-level=warning",
+                            f"--outfile={aus}"],
+                           capture_output=True, text=True, cwd=b.src,
+                           env={**os.environ, **NPM_ENV}, timeout=NPX_ZEITLIMIT)
+    except subprocess.TimeoutExpired:
+        raise SystemExit(f"esbuild {name}: npx hat nach {NPX_ZEITLIMIT} s nicht geantwortet.")
     if r.returncode != 0 or r.stderr.strip():
         raise SystemExit(f"esbuild {name}:\n{r.stderr}")
     with open(aus, encoding="utf-8") as f:
