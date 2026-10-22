@@ -1,54 +1,35 @@
-# Zeilenenden festnageln — bewusst minimal gehalten.
+# Zeilenenden und Verteilpaket.
 #
-# Das Problem, das hier geloest wird: Auf Windows steht core.autocrlf
-# haeufig auf true. Ein Shell-Skript, das dadurch mit CRLF ins Repo
-# geraet, startet auf Debian nicht. Es scheitert mit
+# Standard: keine automatische Umwandlung. Alle Dateien bleiben Byte für Byte
+# so, wie sie im Repository liegen. Das schützt vor allem die DOOM-Daten
+# (.wad, .wasm, .cfg), die eine Umwandlung von Zeilenenden unbemerkt
+# beschädigen würde.
 #
-#     bad interpreter: /usr/bin/env bash^M
-#
-# und das sieht nicht nach einem Zeilenendenproblem aus, sondern nach
-# einem kaputten Skript. Genau die Sorte Fehler, die eine Stunde kostet.
-#
-# Die erste Zeile schaltet jede automatische Umwandlung fuer ALLE Dateien
-# ab — sie bleiben Byte fuer Byte so, wie sie im Repo liegen. Das schuetzt
-# vor allem die DOOM-Daten: eine CRLF-"Korrektur" in einer .wad, .wasm
-# oder .cfg zerstoert sie unbemerkt.
-#
-# Danach die eine Ausnahme, auf die es ankommt.
+# Shell-Skripte brauchen LF. Mit CRLF (etwa durch core.autocrlf=true unter
+# Windows) brechen sie mit "bad interpreter: /usr/bin/env bash^M" ab.
 
 *       -text
 *.sh    text eol=lf
 
-# Dasselbe Problem andersherum: cmd.exe liest Batch-Dateien mit LF-Enden
-# unzuverlaessig (Sprungmarken und Klammerbloecke brechen still), und
-# PowerShell-Skripte sollen sich im Windows-Editor ordentlich oeffnen.
-# Gilt auch beim Packen: git archive schreibt sie mit CRLF ins tar.gz und
-# ins zip, egal auf welchem System das Paket gebaut wird.
+# Windows-Skripte brauchen CRLF: cmd.exe liest Batch-Dateien mit LF-Enden
+# unzuverlässig. git archive schreibt sie so auch ins tar.gz und ins zip,
+# unabhängig vom System, auf dem das Paket gebaut wird.
 *.cmd      text eol=crlf
 *.bat      text eol=crlf
 *.ps1      text eol=crlf
-# Doppelklick-Skripte fuer den macOS-Finder sind Shell-Skripte: LF.
+# Doppelklick-Skripte für den macOS-Finder sind Shell-Skripte: LF.
 *.command  text eol=lf
 
-# Ausdruecklich binaer: keine Umwandlung, kein Text-Diff, kein Merge.
+# Binär: keine Umwandlung, kein Text-Diff, kein Merge.
 *.wad      binary
 *.wasm     binary
 
-# Nicht ins Verteilpaket (git archive) — sie gehoeren zur Entwicklung,
-# nicht zur Installation.
+# Nicht im Verteilpaket (git archive): Dateien für die Entwicklung.
+# Verzeichnisse verankert und ohne Schrägstrich am Ende, weil
+# "verzeichnis/" in .gitattributes nicht zuverlässig greift.
 .gitattributes  export-ignore
 .gitignore      export-ignore
-
-# Werkzeuge und Unterlagen fuer die Entwicklung (Skills, CI, Tests, Produkt-
-# und Design-Beschreibung, Bilder fuer die GitHub-Seite, Bau der lokalen
-# Testversion) gehoeren ebenfalls nicht ins Paket. Verankert und ohne
-# Schraegstrich am Ende, weil "verzeichnis/" in .gitattributes nicht
-# zuverlaessig greift.
-/.claude        export-ignore
-/.impeccable    export-ignore
 /.github        export-ignore
 /tests          export-ignore
 /docs           export-ignore
 /werkzeuge      export-ignore
-/PRODUCT.md     export-ignore
-/DESIGN.md      export-ignore

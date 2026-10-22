@@ -1,9 +1,9 @@
-// Einstellungen eines Spielers in seinem Browser – Komfort, nie Spielstände.
+// Einstellungen eines Spielers in seinem Browser: Komfort, nie Spielstände.
 //
-// Das ist die einzige Stelle der Seite, die localStorage benutzt (Regeln:
-// .claude/skills/local-storage-state). Gespeichert wird nur, was in SCHEMA
-// steht; alles andere – Sitzung, Scores, game_id, Seeds – gehört auf den
-// Server, der jede Partie selbst nachspielt.
+// Bis auf ein kleines Skript im <head> von base.html ist das die einzige
+// Stelle, die localStorage benutzt (Regeln: docs/gestaltung.md). Gespeichert
+// wird nur, was in SCHEMA steht. Sitzung, Scores, game_id und Seeds gehören
+// auf den Server, der jede Partie selbst nachspielt.
 //
 // Die Seite muss mit leerem oder gesperrtem Speicher genauso funktionieren
 // (privates Fenster, blockierte Website-Daten). Darum steckt jeder Zugriff in
@@ -22,7 +22,7 @@ export const SCHEMA = {
   "chess.hints":    { default: true,     type: "boolean" },
   "chess.botLevel": { default: "medium", values: ["easy", "medium", "hard"] },
   "chess.botColor": { default: "random", values: ["random", "w", "b"] },
-  "doom.sound":     { default: false,    type: "boolean" },  // stumm: Arbeitsplatz
+  "doom.sound":     { default: false,    type: "boolean" },
   "help.seen":      { default: [],       type: "slugs", max: 16 },  // Spiel-Slugs
 };
 

@@ -31,9 +31,9 @@ beim Update erhalten.
 - **Effekte im Spielfeld**: Partikel, Blitze und Wackeln. Sie richten sich nach
   der Einstellung für Bewegung und lassen sich ganz abschalten.
 - **Schach neu**: festes Brett mit gleitenden Figuren, Ziehen mit Maus oder
-  Finger, Bedienung per Tastatur, Nachspielen jeder Partie, eine Spielende-Karte
-  mit Elo-Änderung und ein Hinweis in der Lobby, wenn jemand deiner Partie
-  beitritt.
+  Finger, Bedienung per Tastatur, Nachspielen jeder Partie, eine Ergebniskarte
+  mit Elo-Änderung und ein Hinweis in der Lobby, wenn jemand einer selbst
+  erstellten Partie beitritt.
 - **Installation als Dienst unter macOS** (LaunchDaemon, Port 5050) und
   **Windows** (Windows-Dienst, Firewall-Regel, Start per `install.cmd`).
 - **Zwei Pakete mit demselben Inhalt**: `abw-arcade.tar.gz` für Linux und macOS,
@@ -56,7 +56,7 @@ beim Update erhalten.
   konnte zweimal gewertet werden.
 - Wird dasselbe Spiel zweimal gleichzeitig gesendet, zählt der Score nur
   einmal.
-- Schnelle Doppelkurven in Snake und kurze Tipps in Geometry Dash gehen nicht
+- Schnelle Doppelkurven in Snake und kurzes Tippen in Geometry Dash gehen nicht
   mehr verloren.
 - Die Meldung „Kein Zugriff“ erscheint wieder, und die Admin-Seite nennt den
   richtigen Befehl für neue Admins.
@@ -68,13 +68,13 @@ beim Update erhalten.
 - Das Update unter Linux geht wie bisher: neues Paket entpacken und
   `sudo ./install.sh` starten. Accounts, Scores, eigene WADs und der Port
   bleiben erhalten.
-- Einen anderen Port gibt man als Schalter an: `sudo ./install.sh --port 8080`.
+- Ein anderer Port wird als Schalter angegeben: `sudo ./install.sh --port 8080`.
   Die Form `PORT=8080 sudo ./install.sh` aus den Notizen zu v1.0 kam nie im
   Skript an, weil `sudo` Umgebungsvariablen verwirft.
 - Port, Threads und Datenordner stehen jetzt in `arcade.conf` und überstehen
   jedes Update.
-- Neue Admins ernennt man mit `run.py make-admin NAME`; die Befehle je System
-  stehen in der
+- Neue Admins werden mit `run.py make-admin BENUTZERNAME` ernannt; die Befehle
+  je System stehen in der
   [README](https://github.com/utmwzar/ABW-Arcade#ersten-admin-ernennen).
   Der bisherige Befehl `flask --app app make-admin` funktioniert weiter.
 

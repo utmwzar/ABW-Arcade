@@ -1,14 +1,19 @@
 """
-ABW Arcade — Spiele-Server
------------------
-Flask backend: account login (hashed passwords) and a leaderboard.
+ABW Arcade: game server
+-----------------------
+Flask backend for accounts (hashed passwords), the game hub, leaderboards,
+chess and the admin area.
 
-Scores are server-authoritative: the client never submits a score. Instead it
-asks the server to /api/game/start (which issues a random seed + a single-use
-game id), plays a fully deterministic game while recording every input, and on
-game over posts seed-id + the input log to /api/game/finish. The server then
-REPLAYS the identical game in tetris_engine.py and computes the score itself. Faking a
-score therefore requires submitting an input log that genuinely reaches it.
+Arcade scores are server-authoritative: the client never submits a score.
+It asks for a random seed and a single-use game id (/api/game/start for
+Tetris, /api/<game>/start for the others), plays a fully deterministic game
+while recording every input, and on game over posts the game id and the input
+log to the matching /finish endpoint. The server then replays the game with
+the Python engine (tetris_engine.py, snake_engine.py, ...) and computes the
+score itself. Faking a score therefore requires an input log that genuinely
+reaches it.
+
+Chess has nothing to replay: chess_engine.py validates every single move.
 """
 
 import os
@@ -147,7 +152,7 @@ GAMES = [
     {
         "slug": "chess", "title": "Schach", "endpoint": "chess_lobby_page", "status": "live",
         "board": "elo",
-        "goal": "Gegen Kollegen oder den Bot.",
+        "goal": "Gegen Mitspieler oder den Bot.",
         "controls": [],
     },
     {

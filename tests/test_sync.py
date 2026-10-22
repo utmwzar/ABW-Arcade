@@ -133,14 +133,15 @@ class CopyTest(SyncTestCase):
 class ExcludeTest(SyncTestCase):
     DEV_FILES = [
         ".git/config", ".github/workflows/ci.yml", ".claude/settings.json",
+        ".vscode/settings.json", ".idea/workspace.xml",
         ".gitignore", ".gitattributes", ".DS_Store", "static/.DS_Store",
         "Thumbs.db", "static/desktop.ini", "__pycache__/app.cpython-312.pyc",
         "static/__pycache__/x.pyc", "node_modules/pkg/index.js", ".pytest_cache/v/x",
         ".venv/bin/python", "modul.pyc", "modul.pyo", ".app.py.swp",
-        "tests/test_pages.py", "PRODUCT.md", "DESIGN.md", "install.sh",
+        "tests/test_pages.py", "install.sh",
         "install.cmd", "install.ps1", "paket-bauen.sh", "pruefe-engines.js",
         "pruefe_engines.py", "installer/sync.py", "abw-arcade.tar.gz",
-        "abw-arcade.zip", ".impeccable/design.json", "docs/bilder/banner.png",
+        "abw-arcade.zip", "docs/gestaltung.md", "docs/bilder/banner.png",
         "werkzeuge/testversion/bauen.py",
     ]
 

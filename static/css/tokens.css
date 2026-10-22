@@ -1,9 +1,9 @@
 /*
- * ABW Arcade – Design-Tokens (Richtung C: klassische Arcade, Messlatte Steam-Bibliothek).
+ * ABW Arcade: Design-Tokens.
  *
  * Einzige Quelle für Farben, Schrift, Abstände, Radien, Schatten und Bewegung.
- * Beschrieben in DESIGN.md. Kontraste: Text und Nebentext liegen auf allen
- * Flächen über 4,5:1.
+ * Beschrieben in docs/gestaltung.md. Kontraste: Text und Nebentext liegen auf
+ * allen Flächen über 4,5:1.
  */
 
 @font-face {

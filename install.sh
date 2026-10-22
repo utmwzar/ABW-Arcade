@@ -14,10 +14,10 @@
 # steht in installer/sync.py, das auch die Windows-Installation benutzt.
 #
 # Der Port eines bestehenden Servers bleibt bei Updates erhalten: Ohne
-# --port gilt, was in arcade.conf steht; bei Installationen von vor
-# arcade.conf (Linux) das, was in der bisherigen Dienstdatei steht.
+# --port gilt, was in arcade.conf steht; bei Linux-Installationen von
+# Version 1.0 ohne arcade.conf das, was in der bisherigen Dienstdatei steht.
 #
-# Laeuft mit dem bash 3.2 von macOS. Deshalb hier bewusst nichts aus bash 4
+# Laeuft mit dem bash 3.2 von macOS. Deshalb hier nichts aus bash 4
 # (keine assoziativen Arrays, kein ${x,,}, kein mapfile) und keine Werkzeuge,
 # die es nur in der GNU-Fassung gibt (sed -i, readlink -f, stat -c, date -d,
 # grep -P, timeout).
@@ -375,8 +375,7 @@ programm_abgleichen() {  # PYTHON
 
 abschluss() {  # IP MAKE-ADMIN-BEFEHL
   echo ""
-  # Welcher Stand liegt jetzt eigentlich da? Genau die Frage war beim
-  # Auseinanderlaufen von Paket und Code nicht zu beantworten.
+  # Den installierten Stand aus PAKET-INFO zeigen (siehe paket-bauen.sh).
   if [ -f "$APP_DIR/PAKET-INFO" ]; then
     info "Installierter Stand:"
     sed 's/^/     /' "$APP_DIR/PAKET-INFO"
@@ -496,7 +495,7 @@ EOF
   fi
 
   ip="$(hostname -I 2>/dev/null | awk '{print $1}' || true)"
-  abschluss "$ip" "cd ${APP_DIR} && sudo -u arcade .venv/bin/python run.py make-admin NUTZERNAME"
+  abschluss "$ip" "cd ${APP_DIR} && sudo -u arcade .venv/bin/python run.py make-admin BENUTZERNAME"
 }
 
 # ---------------------------------------------------------------------------
@@ -796,7 +795,7 @@ EOF
   fi
   js_pruefen
 
-  abschluss "$(macos_ip)" "sudo -u _arcade ${APP_DIR}/.venv/bin/python ${APP_DIR}/run.py make-admin NUTZERNAME"
+  abschluss "$(macos_ip)" "sudo -u _arcade ${APP_DIR}/.venv/bin/python ${APP_DIR}/run.py make-admin BENUTZERNAME"
 }
 
 # ---------------------------------------------------------------------------

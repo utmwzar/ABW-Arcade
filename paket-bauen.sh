@@ -11,17 +11,13 @@
 #     abw-arcade.tar.gz   fuer Linux und macOS (install.sh)
 #     abw-arcade.zip      fuer Windows (install.cmd)
 #
-# Warum ueberhaupt ein Skript: Ein von Hand gepacktes Archiv hat keine
-# Zusicherung, dass sein Inhalt zum Code passt - es enthaelt, was zufaellig
-# gerade im Ordner lag. Dieses hier hat sie, weil es ausschliesslich aus git
-# liest.
-#
-# Konkret: `git archive` nimmt genau die eingecheckten Dateien eines Commits.
-# Nicht das Arbeitsverzeichnis. Damit koennen weder eine .venv noch eine
-# arcade.db noch halbfertige Aenderungen ins Paket geraten. Dabei gelten die
-# Regeln aus .gitattributes: Entwicklungsdateien bleiben draussen
-# (export-ignore), und install.cmd/install.ps1 bekommen in BEIDEN Archiven
-# Windows-Zeilenenden, install.sh Unix-Zeilenenden.
+# Das Skript liest ausschliesslich aus git: `git archive` nimmt die
+# eingecheckten Dateien eines Commits, nicht das Arbeitsverzeichnis. Damit
+# koennen weder eine .venv noch eine arcade.db noch halbfertige Aenderungen
+# ins Paket geraten. Dabei gelten die Regeln aus .gitattributes:
+# Entwicklungsdateien bleiben draussen (export-ignore), und
+# install.cmd/install.ps1 bekommen in beiden Archiven Windows-Zeilenenden,
+# install.sh Unix-Zeilenenden.
 set -euo pipefail
 
 REF="${1:-HEAD}"
@@ -75,10 +71,8 @@ fi
 BAU="$(mktemp -d)"
 trap 'rm -rf "$BAU"' EXIT
 
-# Herkunft mitliefern. Ohne das laesst sich auf einem laufenden Server nicht
-# feststellen, welcher Stand dort eigentlich installiert ist - genau die
-# Frage, die beim Auseinanderlaufen von Paket und Code niemand beantworten
-# konnte.
+# Herkunft mitliefern, damit sich auf einem laufenden Server feststellen
+# laesst, welcher Stand dort installiert ist.
 cat > "${BAU}/PAKET-INFO" <<EOF
 Paket:   ${NAME}
 Quelle:  ${QUELLE}

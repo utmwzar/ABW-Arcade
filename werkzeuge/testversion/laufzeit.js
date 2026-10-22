@@ -1,7 +1,7 @@
 // ABW Arcade, lokale Testversion. Dieses Skript ersetzt den Server: Start, Ende und
 // Leaderboard laufen im Browser, und jedes Spiel wird mit derselben Engine
 // nachgerechnet wie auf dem Server. Die Scores liegen im localStorage dieses
-// Browsers. Der Hash waehlt die Seite (#tetris, #snake …); jeder Wechsel laedt die
+// Browsers. Der Hash wählt die Seite (#tetris, #snake …); jeder Wechsel lädt die
 // Datei neu, damit jedes Spiel in einer frischen Seite startet.
 // bauen.py setzt dieses Skript in die HTML-Datei ein und trägt dabei die Spiele ein.
 (() => {

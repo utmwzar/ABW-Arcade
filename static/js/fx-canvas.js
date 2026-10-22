@@ -1,5 +1,5 @@
 // Effekte im Spielfeld: Partikel, Wackeln, Blitze, Spuren und kurze Texte.
-// Regeln: .claude/skills/motion-gaming.
+// Regeln: docs/gestaltung.md, Abschnitt „Bewegung“.
 //
 // Die Effekte haben eine eigene Uhr (update(dt) je Frame) und lesen nie aus
 // einer Engine; was passiert ist, melden die Beobachter in static/js/observe/.
