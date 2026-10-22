@@ -115,8 +115,8 @@ def vorlagen_anpassen(b):
     b.ausschneiden(T + "_settings.html", """      <fieldset class="setting">\n        <legend>Schach</legend>""", "</fieldset>\n")
     b.ausschneiden(T + "_settings.html", """      <fieldset class="setting">\n        <legend>DOOM</legend>""", "</fieldset>\n")
     b.ersetzen(T + "hub.html",
-               "Ein Account, {{ games|length }} Spiele. Jeder Score wird vom Server nachgerechnet.",
-               "{{ games|length }} Spiele zum Testen, ganz ohne Server. Jeder Score wird lokal mit derselben Engine nachgerechnet.")
+               "Jeder Score wird vom Server nachgerechnet.",
+               "Testversion ohne Server. Jeder Score wird lokal mit derselben Engine nachgerechnet.")
     b.ausschneiden(T + "hub.html", """    <section class="panel hub-panel" aria-labelledby="chess-title">""", "    </section>\n")
     b.ersetzen(T + "hub.html", "Jeder Score ist vom Server nachgerechnet.", "Jeder Score ist lokal nachgerechnet.")
     b.ersetzen(T + "hub.html",
