@@ -53,6 +53,7 @@ jobs:
         # Fällt auf, wenn eine Änderung an Vorlagen oder Texten das Bauskript
         # bricht (es nennt dann die Stelle). Einmal genügt.
         if: matrix.python == '3.13'
+        timeout-minutes: 10
         run: python werkzeuge/testversion/bauen.py --out "$RUNNER_TEMP/abw-arcade-lokal.html"
 
       - name: Shell-Skripte
