@@ -40,13 +40,15 @@
 .gitignore      export-ignore
 
 # Werkzeuge und Unterlagen fuer die Entwicklung (Skills, CI, Tests, Produkt-
-# und Design-Beschreibung, Bilder fuer die GitHub-Seite) gehoeren ebenfalls
-# nicht ins Paket. Verankert und ohne Schraegstrich am Ende, weil
-# "verzeichnis/" in .gitattributes nicht zuverlaessig greift.
+# und Design-Beschreibung, Bilder fuer die GitHub-Seite, Bau der lokalen
+# Testversion) gehoeren ebenfalls nicht ins Paket. Verankert und ohne
+# Schraegstrich am Ende, weil "verzeichnis/" in .gitattributes nicht
+# zuverlaessig greift.
 /.claude        export-ignore
 /.impeccable    export-ignore
 /.github        export-ignore
 /tests          export-ignore
 /docs           export-ignore
+/werkzeuge      export-ignore
 /PRODUCT.md     export-ignore
 /DESIGN.md      export-ignore
