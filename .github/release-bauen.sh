@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Baut ein Release und prueft es, ohne etwas zu veroeffentlichen: Notizen aus
+# Baut ein Release und prüft es, ohne etwas zu veröffentlichen: Notizen aus
 # CHANGELOG.md schneiden, Tag lokal setzen (oder einen vorhandenen nutzen),
-# Pakete bauen und ihren Inhalt pruefen. Danach liegen abw-arcade.tar.gz,
+# Pakete bauen und ihren Inhalt prüfen. Danach liegen abw-arcade.tar.gz,
 # abw-arcade.zip und "$RUNNER_TEMP/notes.md" bereit.
 #
-#   .github/release-bauen.sh 1.1            fuer das echte Release (Workflow)
+#   .github/release-bauen.sh 1.1            für das echte Release (Workflow)
 #   .github/release-bauen.sh 1.1 --probe    Probelauf: baut immer den aktuellen
 #                                           Stand, auch wenn es v1.1 schon gibt
 set -euo pipefail
@@ -17,15 +17,15 @@ NOTES="$TMP/notes.md"
 
 re='^[0-9]+\.[0-9]+(\.[0-9]+)?$'
 if ! [[ $VERSION =~ $re ]]; then
-  echo "::error::Version \"$VERSION\" ist ungueltig, erwartet wird z. B. 1.1 (ohne v)."
+  echo "::error::Version \"$VERSION\" ist ungültig, erwartet wird z. B. 1.1 (ohne v)."
   exit 1
 fi
 
-# Notizen: alles zwischen "## [VERSION]" und der naechsten Versionsueberschrift
+# Notizen: alles zwischen "## [VERSION]" und der nächsten Versionsüberschrift
 awk -v v="$VERSION" 'index($0, "## [" v "]") == 1 { on = 1; next } on && /^## \[/ { exit } on' \
   CHANGELOG.md > "$NOTES"
 if ! grep -q '[^[:space:]]' "$NOTES"; then
-  echo "::error::CHANGELOG.md hat keinen Abschnitt fuer $VERSION."
+  echo "::error::CHANGELOG.md hat keinen Abschnitt für $VERSION."
   exit 1
 fi
 
@@ -64,4 +64,4 @@ if ! tar -xzOf abw-arcade.tar.gz abw-arcade/PAKET-INFO | grep -Eq "^Quelle:[[:sp
   exit 1
 fi
 
-echo "Release $TAG gebaut und geprueft ($(wc -l < "$TMP/tar.txt") Dateien)."
+echo "Release $TAG gebaut und geprüft ($(wc -l < "$TMP/tar.txt") Dateien)."

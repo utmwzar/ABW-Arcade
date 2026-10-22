@@ -50,8 +50,8 @@ jobs:
         run: node --test "tests/js/**/*.test.mjs"
 
       - name: Lokale Testversion bauen
-        # Faellt auf, wenn eine Aenderung an Vorlagen oder Texten das Bauskript
-        # bricht (es nennt dann die Stelle). Einmal genuegt.
+        # Fällt auf, wenn eine Änderung an Vorlagen oder Texten das Bauskript
+        # bricht (es nennt dann die Stelle). Einmal genügt.
         if: matrix.python == '3.13'
         run: python werkzeuge/testversion/bauen.py --out "$RUNNER_TEMP/abw-arcade-lokal.html"
 
@@ -60,7 +60,7 @@ jobs:
 
       - name: install.ps1 parst ohne Fehler
         run: |
-          # shellcheck disable=SC2016  # $errors gehoert zu PowerShell
+          # shellcheck disable=SC2016  # $errors gehört zu PowerShell
           pwsh -NoProfile -Command '
             $errors = $null
             [void][System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path install.ps1).Path, [ref]$null, [ref]$errors)
@@ -78,7 +78,7 @@ jobs:
           bad = [p for p in sys.argv[1:] if any(b > 127 for b in open(p, "rb").read())]
           for p in bad:
               print("Nicht-ASCII-Zeichen in", p)
-          print("geprueft:", ", ".join(sys.argv[1:]))
+          print("geprüft:", ", ".join(sys.argv[1:]))
           sys.exit(1 if bad else 0)
           EOF
 
@@ -221,7 +221,7 @@ jobs:
           name: abw-arcade-pakete
 
       - name: Python von python.org installieren
-        # Der Dienst laeuft als _arcade und darf nicht in /Users lesen; das
+        # Der Dienst läuft als _arcade und darf nicht in /Users lesen; das
         # Python von setup-python liegt unter /Users/runner.
         run: |
           set -euxo pipefail

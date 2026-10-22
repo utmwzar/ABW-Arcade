@@ -1,16 +1,18 @@
-# <img src="docs/bilder/banner.png" width="880" alt="ABW Arcade">
+# ABW Arcade
 
-Die Pausen-Arcade der Ausbildungswerkstatt Wittmund: sieben Spiele, ein
-Account und Leaderboards, die der Server nachrechnet. Selbst gehostet im
-Firmennetz, ohne Werbung und ohne Tracking.
+<img src="docs/bilder/banner.png" width="880" alt="ABW Arcade">
+
+Browser-Spiele zum Selbsthosten: sieben Spiele, ein Account für alle und
+Leaderboards, die der Server nachrechnet. ABW Arcade läuft als Dienst im
+eigenen Netz, ohne Werbung, Tracking oder externe Dienste.
 
 [![CI](https://github.com/utmwzar/ABW-Arcade/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/utmwzar/ABW-Arcade/actions/workflows/ci.yml)
 
-**[Installieren](#schnellstart) · [Spiele](#die-spiele--wie-sie-funktionieren) · [Mitentwickeln](#mitentwickeln) · [Changelog](CHANGELOG.md)**
+**[Installieren](#schnellstart) · [Spiele](#spiele-und-technik) · [Mitentwickeln](#mitentwickeln) · [Changelog](CHANGELOG.md)**
 
 ## So sieht es aus
 
-<img src="docs/bilder/hub.png" width="880" alt="Der Hub am Desktop: oben Weiterspielen mit Tetris, darunter die übrigen Spiele als Kapseln mit Highscore und Platz, rechts die Schachpartien und Zuletzt gespielt">
+<img src="docs/bilder/hub.png" width="880" alt="Die Übersicht am Desktop: oben Weiterspielen mit Tetris, darunter die übrigen Spiele als Kapseln mit Highscore und Platz, rechts die Schachpartien und Zuletzt gespielt">
 
 <table>
 <tr>
@@ -19,26 +21,30 @@ Firmennetz, ohne Werbung und ohne Tracking.
 </tr>
 </table>
 
-<img src="docs/bilder/handy.png" width="880" alt="Drei Ansichten auf dem Handy: der Hub, Tetris mit den Gesten zum Spielen und eine Schachpartie">
+<img src="docs/bilder/handy.png" width="880" alt="Drei Ansichten auf dem Handy: die Übersicht, Tetris mit den Gesten zum Spielen und eine Schachpartie">
 
-## Was drin ist
+Namen und Spielstände in den Bildern sind ausgedacht.
 
-- **Tetris, Snake, Breakout, 2048 und Geometry Dash** mit Leaderboard. Der
-  Server spielt jede Partie nach, ein gefälschter Score kommt nicht durch.
-- **Schach** gegen Kollegen mit Elo-Wertung oder gegen den Bot in drei
-  Stärken, jede Partie lässt sich nachspielen.
-- **DOOM** mit den freien Spieldaten von FreeDoom, direkt im Browser.
-- **Ein Hub wie eine Spielebibliothek**: weiterspielen, Highscores und Platz je
-  Spiel, offene Schachpartien.
-- **Am Desktop mit Tastatur und Maus, auf Handy und Tablet mit Gesten.**
-- **Admin-Bereich** für Accounts und Scores.
-- **Läuft als Dienst unter Linux, macOS und Windows**: Flask, SQLite und
-  waitress. Keine Datenbank aufzusetzen, kein Reverse Proxy, kein Docker,
-  keine externen Dienste.
+## Funktionen
+
+- Tetris, Snake, Breakout, 2048 und Geometry Dash mit Leaderboard. Der
+  Server spielt jede Partie nach, ein gefälschter Score wird nicht
+  angenommen.
+- Schach gegen andere Spieler mit Elo-Wertung oder gegen einen Bot in drei
+  Stärken. Jede Partie lässt sich Zug für Zug nachspielen.
+- DOOM mit den freien Spieldaten von FreeDoom, direkt im Browser.
+- Eine Übersicht wie in einer Spielebibliothek, mit dem zuletzt gespielten
+  Spiel, Highscore und Platz je Spiel und offenen Schachpartien.
+- Bedienung mit Tastatur und Maus am Desktop und mit Gesten auf Handy und
+  Tablet.
+- Ein Admin-Bereich für Accounts und Scores.
+- Läuft als Dienst unter Linux, macOS und Windows, gebaut mit Flask, SQLite
+  und waitress. Es braucht keinen Datenbankserver, keinen Reverse Proxy,
+  kein Docker und keine externen Dienste.
 
 ## Schnellstart
 
-**Linux (Debian, Ubuntu) und macOS**, im Terminal mit Administratorrechten:
+Unter Linux (Debian, Ubuntu) und macOS im Terminal mit Administratorrechten:
 
 ```bash
 curl -fsSL -o abw-arcade.tar.gz \
@@ -46,7 +52,8 @@ curl -fsSL -o abw-arcade.tar.gz \
 tar -xzf abw-arcade.tar.gz && cd abw-arcade && sudo ./install.sh
 ```
 
-**Windows 10 und 11**: [`abw-arcade.zip`](https://github.com/utmwzar/ABW-Arcade/releases/latest/download/abw-arcade.zip)
+Unter Windows 10 und 11
+[`abw-arcade.zip`](https://github.com/utmwzar/ABW-Arcade/releases/latest/download/abw-arcade.zip)
 herunterladen, in den Eigenschaften der Datei *Zulassen* ankreuzen, entpacken
 und `install.cmd` doppelklicken.
 
@@ -60,17 +67,23 @@ Voraussetzungen und Einzelheiten je System stehen unter
 ## Installation
 
 ABW Arcade läuft als Dienst, der beim Hochfahren von selbst startet und im
-lokalen Netz erreichbar ist. Für jedes System gibt es ein Installations-
-skript; es braucht Administratorrechte und Internet für die Python-Pakete.
-Mehr nicht — alles Weitere richtet das Skript ein.
+lokalen Netz erreichbar ist. Für jedes System gibt es ein
+Installationsskript. Es braucht Administratorrechte und eine
+Internetverbindung für die Python-Pakete; alles Weitere richtet es selbst
+ein.
 
-Die Download-Links zeigen immer auf das neueste Release; es ist keine
-Versionsnummer nachzuschlagen. Das `.tar.gz` ist für Linux und macOS, das
-`.zip` für Windows; der Inhalt ist derselbe.
+Die Download-Links zeigen immer auf das neueste Release. Das `.tar.gz` ist
+für Linux und macOS, das `.zip` für Windows; der Inhalt ist derselbe.
+
+Unter Linux läuft ABW Arcade seit dem ersten Release. Die Installation unter
+macOS und Windows ist bisher in der CI auf den Testmaschinen von GitHub
+geprüft. Erfahrungen von anderen Rechnern sind als
+[Issue](https://github.com/utmwzar/ABW-Arcade/issues) willkommen.
 
 ### Linux (Debian, Ubuntu)
 
-Vorausgesetzt wird Debian oder Ubuntu (LXC, VM, Container) mit Root-Zugang.
+Vorausgesetzt wird Debian oder Ubuntu (LXC, VM oder Container) mit
+Root-Zugang.
 
 ```bash
 curl -fsSL -o abw-arcade.tar.gz \
@@ -82,20 +95,20 @@ sudo ./install.sh
 
 Wo `curl` fehlt, tut `wget -O abw-arcade.tar.gz <URL>` dasselbe.
 
-Danach läuft die Seite auf Port **5000**. Ein anderer Port geht über
-`sudo ./install.sh --port 8080`. Den Port als Schalter angeben, nicht als
-Umgebungsvariable: `sudo` verwirft Umgebungsvariablen, ein vorangestelltes
-`PORT=8080` käme im Skript gar nicht an. Nur in einer Root-Shell geht auch
-`PORT=8080 ./install.sh`.
+Danach läuft die Seite auf Port **5000**. Einen anderen Port setzt
+`sudo ./install.sh --port 8080`. Als Umgebungsvariable (`PORT=8080`) kommt
+der Port nur in einer Root-Shell an, weil `sudo` Umgebungsvariablen
+verwirft.
 
 ### macOS
 
-Vorausgesetzt wird ein Administratorkonto und Python 3.10 oder neuer, für
-alle Benutzer installiert. Am einfachsten ist der „macOS 64-bit universal2
-installer“ von [python.org](https://www.python.org/downloads/macos/); ein
+Vorausgesetzt werden ein Administratorkonto und Python 3.10 oder neuer, für
+alle Benutzer installiert. Am einfachsten ist der *macOS 64-bit universal2
+installer* von [python.org](https://www.python.org/downloads/macos/); ein
 Python aus Homebrew geht ebenfalls. Das Python von macOS selbst
-(`/usr/bin/python3`) taugt nicht, und eines in einem Benutzerordner auch
-nicht: Der Dienst läuft unter einem eigenen Konto und darf dort nicht lesen.
+(`/usr/bin/python3`) eignet sich nicht, ebenso wenig eines in einem
+Benutzerordner, denn der Dienst läuft unter einem eigenen Konto und darf
+dort nicht lesen.
 
 ```bash
 curl -fsSL -o abw-arcade.tar.gz \
@@ -105,32 +118,32 @@ cd abw-arcade
 sudo ./install.sh
 ```
 
-Danach läuft die Seite auf Port **5050**. Port 5000 ist auf dem Mac ab
-macOS 12 meist schon belegt — vom AirPlay-Empfänger. Ein anderer Port geht
-wie unter Linux über `sudo ./install.sh --port 8080`. Findet das Skript
-kein passendes Python, sagt es, was zu tun ist; ein bestimmtes lässt sich mit
+Danach läuft die Seite auf Port **5050**, weil ab macOS 12 meist der
+AirPlay-Empfänger Port 5000 belegt. Ein anderer Port geht wie unter Linux
+über `sudo ./install.sh --port 8080`. Findet das Skript kein passendes
+Python, sagt es, was zu tun ist; ein bestimmtes lässt sich mit
 `--python /pfad/zu/python3` vorgeben.
 
 ### Windows
 
 Vorausgesetzt wird Windows 10 oder 11 mit Administratorrechten. Python 3.10
-oder neuer muss „für alle Benutzer“ installiert sein; fehlt es, bietet das
-Skript an, es über `winget` einzurichten. Wer es selbst installiert, wählt im
-Installer von [python.org](https://www.python.org/downloads/windows/)
-„Customize installation“ und kreuzt „Install Python for all users“ an. Das
-Python aus dem Microsoft Store geht nicht.
+oder neuer muss für alle Benutzer installiert sein; fehlt es, bietet das
+Skript an, es über `winget` einzurichten. Wer Python selbst installiert,
+wählt im Installer von [python.org](https://www.python.org/downloads/windows/)
+*Customize installation* und kreuzt *Install Python for all users* an. Das
+Python aus dem Microsoft Store funktioniert nicht.
 
 1. [`abw-arcade.zip`](https://github.com/utmwzar/ABW-Arcade/releases/latest/download/abw-arcade.zip)
    herunterladen.
-2. Rechtsklick auf die Datei → *Eigenschaften* → unten bei „Sicherheit“
-   **Zulassen** ankreuzen. Sonst behandelt Windows jede Datei daraus als
+2. Rechtsklick auf die Datei → *Eigenschaften* → unten bei *Sicherheit*
+   *Zulassen* ankreuzen. Sonst behandelt Windows jede Datei daraus als
    Download aus dem Internet und warnt bei jedem Skript.
 3. Rechtsklick → *Alle extrahieren …*. Dabei entsteht ein Ordner
-   `abw-arcade`, in dem noch einmal ein Ordner `abw-arcade` liegt —
-   `install.cmd` steckt im inneren.
+   `abw-arcade` mit einem gleichnamigen Ordner darin; `install.cmd` liegt im
+   inneren.
 4. `install.cmd` doppelklicken und die Rückfrage nach Administratorrechten
-   bestätigen. Meldet sich stattdessen „Der Computer wurde durch Windows
-   geschützt“, über *Weitere Informationen* → *Trotzdem ausführen*.
+   bestätigen. Erscheint stattdessen *Der Computer wurde durch Windows
+   geschützt*, über *Weitere Informationen* → *Trotzdem ausführen* starten.
 
 Dasselbe in einer PowerShell:
 
@@ -144,13 +157,12 @@ Expand-Archive abw-arcade.zip -DestinationPath .
 
 Danach läuft die Seite auf Port **5000**. Ein anderer Port geht über
 `install.cmd -Port 8080`. Das Fenster bleibt am Ende offen, bis Enter
-gedrückt wird; dort stehen die Adresse der Seite und der Befehl für den
+gedrückt wird. Dort stehen die Adresse der Seite und der Befehl für den
 ersten Admin.
 
 ### Alternative: direkt aus git
 
-Die Skripte laufen in jedem Ordner, in dem das Projekt liegt — ein Archiv
-ist nicht nötig:
+Die Skripte laufen auch in einem Klon des Repositorys:
 
 ```bash
 git clone --depth 1 https://github.com/utmwzar/ABW-Arcade.git
@@ -158,9 +170,9 @@ cd ABW-Arcade
 sudo ./install.sh            # Linux, macOS; unter Windows: install.cmd
 ```
 
-Ein Release ist ein fester, getesteter Stand; der Klon ist der laufende
-Entwicklungsstand. Für einen Server, der einfach laufen soll, ist das
-Release die richtige Wahl.
+Ein Release ist ein fester, getesteter Stand, der Klon dagegen der aktuelle
+Entwicklungsstand. Für einen Server im Dauerbetrieb ist das Release die
+bessere Wahl.
 
 ### Was die Skripte tun
 
@@ -181,13 +193,12 @@ Unter Linux installiert `install.sh` dazu `python3`, `python3-venv` und
 `python3-pip` per `apt`. Unter macOS und Windows darf das Dienstkonto den
 Programmordner nur lesen; schreiben kann es nur in `data` und `logs`.
 
-Die Datenbank `arcade.db` entsteht beim ersten Start leer. Es werden nie
-Accounts oder Scores mitgeliefert.
+Die Datenbank `arcade.db` entsteht beim ersten Start leer. Accounts oder
+Scores werden nie mitgeliefert.
 
-Zum Schluss meldet das Skript, welcher Stand installiert wurde. Dieselbe
-Angabe liegt danach in `PAKET-INFO` im Programmordner — damit lässt sich auf
-einem laufenden Server jederzeit feststellen, welcher Commit dort tatsächlich
-läuft.
+Am Ende meldet das Skript, welcher Stand installiert wurde. Dieselbe Angabe
+steht danach in `PAKET-INFO` im Programmordner. So lässt sich auf einem
+laufenden Server jederzeit feststellen, welcher Commit dort läuft.
 
 ### Ersten Admin ernennen
 
@@ -195,18 +206,18 @@ Zuerst im Browser registrieren, dann auf dem Server:
 
 ```bash
 # Linux
-cd /opt/arcade && sudo -u arcade .venv/bin/python run.py make-admin NUTZERNAME
+cd /opt/arcade && sudo -u arcade .venv/bin/python run.py make-admin BENUTZERNAME
 
 # macOS
-sudo -u _arcade /opt/arcade/.venv/bin/python /opt/arcade/run.py make-admin NUTZERNAME
+sudo -u _arcade /opt/arcade/.venv/bin/python /opt/arcade/run.py make-admin BENUTZERNAME
 ```
 
 ```powershell
 # Windows, in einer PowerShell als Administrator
-& "C:\ProgramData\ABW-Arcade\.venv\Scripts\python.exe" "C:\ProgramData\ABW-Arcade\run.py" make-admin NUTZERNAME
+& "C:\ProgramData\ABW-Arcade\.venv\Scripts\python.exe" "C:\ProgramData\ABW-Arcade\run.py" make-admin BENUTZERNAME
 ```
 
-Wichtig ist `run.py` und das jeweilige Konto: `run.py` liest `arcade.conf`
+Wichtig sind `run.py` und das jeweilige Konto. `run.py` liest `arcade.conf`
 und trifft damit dieselbe Datenbank wie der Dienst. Unter Linux und macOS
 gehörten neu angelegte Dateien sonst `root`, und der Dienst könnte sie nicht
 mehr schreiben; `run.py` warnt in diesem Fall.
@@ -215,11 +226,11 @@ mehr schreiben; `run.py` warnt in diesem Fall.
 
 - **Linux:** Ist `ufw` aktiv, den Port freigeben: `sudo ufw allow 5000/tcp`.
 - **macOS:** Ist die Firewall eingeschaltet, trägt `install.sh` Python als
-  erlaubtes Programm ein. Steht sie auf „Alle eingehenden Verbindungen
-  blockieren“, hilft das nicht.
+  erlaubtes Programm ein. Steht sie auf *Alle eingehenden Verbindungen
+  blockieren*, hilft das nicht.
 - **Windows:** `install.cmd` legt die Regel `ABW-Arcade-HTTP` für den Port an,
   gültig in privaten und Domänen-Netzwerken. Ist das Netzwerk als
-  *Öffentlich* eingestuft, bleibt die Seite von außen gesperrt — dann das
+  *Öffentlich* eingestuft, bleibt die Seite von außen gesperrt. Dann das
   Netzwerk in den Windows-Einstellungen auf *Privat* stellen oder
   `install.cmd -AllowPublic` verwenden.
 
@@ -227,14 +238,15 @@ mehr schreiben; `run.py` warnt in diesem Fall.
 
 ## Update
 
-Neues Paket holen, entpacken und das Skript erneut starten — derselbe Ablauf
-wie bei der Installation. Was sich geändert hat, steht im
+Für ein Update das neue Paket herunterladen, entpacken und das Skript erneut
+starten, wie bei der Installation. Was sich geändert hat, steht im
 [Changelog](CHANGELOG.md). Die Skripte sind idempotent und lassen sich
 beliebig oft ausführen.
 
-**Port, Accounts und Leaderboards bleiben erhalten.** Ohne `--port` bzw.
-`-Port` gilt der Port aus `arcade.conf`. Bei Linux-Installationen von vor
-`arcade.conf` übernimmt `install.sh` ihn aus der bisherigen Dienstdatei.
+Port, Accounts und Leaderboards bleiben erhalten. Ohne `--port` bzw. `-Port`
+gilt der Port aus `arcade.conf`. Bei einer Linux-Installation von Version
+1.0, die noch keine `arcade.conf` hat, übernimmt `install.sh` den Port aus
+der bisherigen Dienstdatei.
 
 Unangetastet bleiben:
 
@@ -253,9 +265,9 @@ kopieren damit.
 
 ### Zurücksetzen
 
-Sollen Accounts und Scores verschwinden, den Dienst anhalten, beide
-Dateien löschen und den Dienst wieder starten. Beides entsteht beim nächsten
-Start neu und leer.
+Um alle Accounts und Scores zu löschen, den Dienst anhalten, `arcade.db` und
+`secret_key` löschen und den Dienst wieder starten. Beide Dateien entstehen
+beim nächsten Start neu.
 
 ```bash
 # Linux
@@ -279,12 +291,12 @@ Start-Service abw-arcade
 ### Deinstallieren
 
 Unter Windows erledigt das `install.cmd -Uninstall`: Dienst, Firewall-Regel
-und Programm verschwinden, `data\` und `arcade.conf` bleiben für eine
+und Programm werden entfernt, `data\` und `arcade.conf` bleiben für eine
 spätere Neuinstallation liegen. `install.cmd -Uninstall -RemoveData` entfernt
 alles.
 
-Unter Linux und macOS geht es von Hand; dabei verschwinden auch alle
-Accounts und Scores:
+Unter Linux und macOS geht es von Hand; dabei werden auch alle Accounts und
+Scores gelöscht:
 
 ```bash
 # Linux
@@ -301,21 +313,6 @@ sudo rm -rf /opt/arcade
 sudo dscl . -delete /Users/_arcade
 sudo dscl . -delete /Groups/_arcade
 ```
-
-### Umstieg von einer älteren `tetris`-Installation
-
-Ältere Stände liefen unter `/opt/tetris` mit dem Dienst `tetris.service`.
-Accounts und Scores werden dabei **nicht** übernommen:
-
-```bash
-sudo systemctl disable --now tetris.service 2>/dev/null
-sudo rm -rf /opt/tetris /etc/systemd/system/tetris.service
-sudo userdel tetris 2>/dev/null
-sudo ./install.sh
-```
-
-`install.sh` weist von selbst darauf hin, falls die alte Installation noch
-liegt — sie belegt denselben Port.
 
 ---
 
@@ -349,106 +346,104 @@ curl.exe http://localhost:5000/healthz                    # {"ok": true}
 ```
 
 In Windows PowerShell ist `curl` nur ein anderer Name für
-`Invoke-WebRequest`; deshalb ausdrücklich `curl.exe`. Die Ausgaben der
-Anwendung stehen in `abw-arcade.err.log`, die des Dienstprogramms in
-`abw-arcade.wrapper.log`.
+`Invoke-WebRequest`, deshalb steht dort ausdrücklich `curl.exe`. Die
+Ausgaben der Anwendung stehen in `abw-arcade.err.log`, die des
+Dienstprogramms in `abw-arcade.wrapper.log`.
 
-`/healthz` braucht keinen Login und prüft die Datenbank gleich mit — taugt
-also unverändert als Ziel für Uptime Kuma oder einen anderen Monitor.
+`/healthz` braucht keine Anmeldung und prüft auch die Datenbank. Die Adresse
+eignet sich damit als Ziel für Uptime Kuma oder ein anderes Monitoring.
 
 ### Einstellungen
 
 Port, Threads und Datenordner stehen in `arcade.conf` im Programmordner
 (`PORT=…`, `THREADS=…`, `HOST=…`, `DATA_DIR=…`). Nach einer Änderung den
-Dienst neu starten. Einen anderen Port setzt man am besten über das
-Installationsskript (`--port` bzw. `-Port`); unter Windows passt das auch die
-Firewall-Regel an.
+Dienst neu starten. Einen anderen Port setzt am besten das
+Installationsskript (`--port` bzw. `-Port`), denn unter Windows passt es
+dabei auch die Firewall-Regel an.
 
-Was tatsächlich gilt und ob der Port frei ist, zeigt `run.py check`, etwa
-unter Linux mit `sudo -u arcade /opt/arcade/.venv/bin/python /opt/arcade/run.py check`.
+Was tatsächlich gilt und ob der Port frei ist, zeigt `run.py check`, unter
+Linux etwa mit `sudo -u arcade /opt/arcade/.venv/bin/python /opt/arcade/run.py check`.
 Ist der Port belegt, startet der Dienst nicht und meldet im Log „Port … ist
-belegt oder reserviert“; unter Linux versucht systemd es dann auch nicht
-endlos weiter.
+belegt oder reserviert“; unter Linux versucht systemd es dann nicht endlos
+weiter.
 
 Wo kein systemd läuft (etwa in einem Docker-Container), schreibt
-`install.sh` die Dienstdatei trotzdem und gibt den passenden manuellen
-Startbefehl aus.
-
-Ehrlicher Hinweis: Unter Linux läuft ABW Arcade seit dem ersten Release.
-Die Installation unter macOS und Windows ist bisher nur auf den
-Testmaschinen von GitHub (CI) geprüft, noch nicht auf echten Rechnern in der
-Werkstatt.
+`install.sh` die Dienstdatei trotzdem und gibt den passenden Startbefehl
+aus.
 
 ---
 
-## Die Spiele & wie sie funktionieren
+## Spiele und Technik
 
 ### Leaderboards ohne Vertrauen in den Browser
 
-Bei **Tetris, Snake, Breakout, 2048 und Geometry Dash** schickt der Client
-nie einen Score. Stattdessen:
+Bei Tetris, Snake, Breakout, 2048 und Geometry Dash schickt der Browser nie
+einen Score. Stattdessen:
 
 1. Der Server vergibt pro Partie einen Zufalls-Seed und eine einmalige
    `game_id`.
 2. Der Browser spielt daraus eine vollständig deterministische Partie und
    zeichnet nur die Eingaben auf (`{tick, action}`).
 3. Nach Spielende schickt er Seed, `game_id` und das Eingabeprotokoll.
-4. Der Server **spielt die Partie mit derselben Engine nach** und rechnet den
+4. Der Server spielt die Partie mit derselben Engine nach und rechnet den
    Score selbst aus.
 
-Einen Score zu fälschen hieße damit, ein Eingabeprotokoll einzureichen,
-das ihn tatsächlich erreicht — man müsste also wirklich so gut spielen oder
-einen Bot schreiben, der es tut.
+Ein gefälschter Score bräuchte also ein Eingabeprotokoll, das ihn
+tatsächlich erreicht, und damit eine echte Partie auf diesem Niveau oder
+einen Bot, der sie spielt.
 
-Damit das aufgeht, müssen die Engines paarweise exakt gleich rechnen:
-`tetris_engine.py` gegen `static/tetris_engine.js` und so weiter. Breakout
-und Geometry Dash benutzen deshalb reine Integer-Fixed-Point-Physik statt
-Fließkomma, 2048 einen geseedeten Tile-Spawn. Bei Geometry Dash hängt das
-Level allein am Seed; der Score ist die erreichte Distance.
+Dafür müssen beide Fassungen jeder Engine exakt gleich rechnen, also
+`tetris_engine.py` und `static/tetris_engine.js` ebenso wie die übrigen
+Paare. Breakout und Geometry Dash rechnen ihre Physik deshalb in
+Festkomma-Arithmetik mit Ganzzahlen statt mit Fließkommazahlen, und 2048
+setzt neue Kacheln anhand des Seeds. Auch das Level von Geometry Dash
+entsteht allein aus dem Seed; der Score ist die erreichte Distance.
 
-Dass die Paare übereinstimmen, ist nicht bloß behauptet, sondern geprüft —
-siehe [Gleichlauf der Engines](#gleichlauf-der-engines-prüfen).
+Ob die Paare übereinstimmen, prüft ein eigener Test, siehe
+[Gleichlauf der Engines prüfen](#gleichlauf-der-engines-prüfen).
 
 Touch-Gesten und die Effekte im Spielfeld ändern daran nichts. Eine Geste
 erzeugt dieselben Aktionen wie die Tasten und wird genauso aufgezeichnet
 (`static/js/touch.js`). Die Effekte lesen die Engine nur und haben eine
-eigene Uhr (`static/js/observe/`, `static/js/fx-canvas.js`); ein Test spielt
+eigene Uhr (`static/js/observe/`, `static/js/fx-canvas.js`). Ein Test spielt
 jedes Spiel mit und ohne sie und verlangt dasselbe Ergebnis.
 
 ### Schach
 
-Spieler gegen Spieler über die Lobby unter `/games/chess`: Partie erstellen,
-ein zweiter Account tritt bei. Hier wird nichts nachgespielt, sondern jeder
-einzelne Zug direkt vom Server geprüft — `chess_engine.py` beherrscht die
-vollen Regeln inklusive Rochade, en passant, Umwandlung, Matt, Patt,
-50-Züge-Regel, Stellungswiederholung und totem Material, abgeglichen gegen
-Perft-Referenzzahlen.
+Partien zwischen zwei Spielern laufen über die Lobby unter `/games/chess`:
+Ein Account erstellt eine Partie, ein zweiter tritt bei. Nachgespielt wird
+hier nichts, stattdessen prüft der Server jeden einzelnen Zug.
+`chess_engine.py` kennt die vollständigen Regeln mit Rochade, en passant,
+Umwandlung, Matt, Patt, 50-Züge-Regel, Stellungswiederholung und
+ungenügendem Material. Die Zuggenerierung ist gegen Perft-Referenzwerte
+abgeglichen.
 
-Dazu Elo-Wertung (K=32, Start 1000), Remisangebot und Aufgabe. Der
-**Bot-Modus** (`chess_bot.py`, Negamax mit Alpha-Beta, drei Stärken) ist
-bewusst unbewertet und auf drei gleichzeitige Partien begrenzt.
+Dazu kommen eine Elo-Wertung (K = 32, Startwert 1000), Remisangebote und
+Aufgeben. Partien gegen den Bot (`chess_bot.py`, Negamax mit
+Alpha-Beta-Suche, drei Stärken) zählen nicht für die Elo-Wertung. Jeder
+Spieler kann höchstens drei davon gleichzeitig führen.
 
 ### DOOM
 
-Chocolate Doom als WebAssembly, mit **FreeDoom Phase 1** als freien
-Spieldaten. Läuft vollständig im Browser; der Server liefert nur die
-statischen Dateien. Deshalb bewusst **ohne Leaderboard** — was im Browser
-gerechnet wird, lässt sich nicht überprüfen.
+DOOM läuft als Chocolate Doom in WebAssembly mit den freien Spieldaten von
+FreeDoom Phase 1, vollständig im Browser. Der Server liefert nur die Dateien
+aus. Deshalb gibt es hier kein Leaderboard: Was nur im Browser gerechnet
+wird, kann der Server nicht prüfen.
 
-Eigene `doom1.wad` oder `doom2.wad` nach `static/doom/` im Programmordner
-legen (unter Linux und macOS `/opt/arcade/static/doom/`, unter Windows
-`C:\ProgramData\ABW-Arcade\static\doom\`); sie erscheinen dann als
+Eigene `doom1.wad` oder `doom2.wad` gehören nach `static/doom/` im
+Programmordner (unter Linux und macOS `/opt/arcade/static/doom/`, unter
+Windows `C:\ProgramData\ABW-Arcade\static\doom\`). Sie erscheinen dann als
 zusätzliche Startoption und überstehen Updates.
 
-Die Steuerung steht auf der DOOM-Seite neben dem Bild. Der Ton ist
-anfangs aus und lässt sich in den Einstellungen einschalten.
+Die Steuerung steht auf der DOOM-Seite neben dem Bild. Der Ton ist anfangs
+aus und lässt sich in den Einstellungen einschalten.
 
 ### Admin
 
-Unter `/admin`, nur für Accounts mit Adminrecht: Dashboard mit Statistik je
-Spiel, Spielerverwaltung (Adminrecht vergeben, Passwort zurücksetzen, Löschen
-mit CASCADE), Verwaltung der Scores mit Filter je Spiel und Aufräumen
-verwaister Replay-Sitzungen.
+Der Bereich unter `/admin` steht nur Accounts mit Adminrecht offen. Er zeigt
+Zahlen je Spiel, verwaltet Accounts (Adminrecht vergeben, Passwort
+zurücksetzen, Account samt Scores und Partien löschen) und Scores mit Filter
+je Spiel. Außerdem räumt er verwaiste Replay-Sitzungen auf.
 
 ---
 
@@ -512,37 +507,40 @@ node pruefe-engines.js            # alle Spiele
 node pruefe-engines.js snake gd   # nur diese
 ```
 
-Braucht `node` und `python3`. Läuft in unter einer Sekunde und endet mit
-Exit-Code 1, sobald etwas abweicht — eignet sich also für einen
-Pre-Commit-Hook oder CI.
+Das Skript braucht `node` und `python3`, läuft in unter einer Sekunde und
+endet mit Exit-Code 1, sobald etwas abweicht. Damit eignet es sich für einen
+Pre-Commit-Hook oder die CI.
 
-Der Test erzeugt Eingabeprotokolle, schickt **jedes davon durch beide
-Fassungen** einer Engine und vergleicht die Ergebnisse Feld für Feld. Damit
-ist die Annahme abgesichert, auf der die Leaderboards beruhen. Laufen die
-Fassungen auseinander, meldet sich sonst nichts: Es würden nur stillschweigend
-ehrliche Partien abgelehnt oder falsche Scores eingetragen.
+Der Test erzeugt Eingabeprotokolle, schickt jedes davon durch beide
+Fassungen einer Engine und vergleicht die Ergebnisse Feld für Feld. Damit ist
+die Annahme abgesichert, auf der die Leaderboards beruhen. Liefen die
+Fassungen auseinander, fiele das sonst nicht auf: Der Server würde ehrliche
+Partien ablehnen oder falsche Scores eintragen, ohne eine Fehlermeldung.
 
-**Nach jeder Änderung an einer Engine ausführen**, und zwar an beiden Seiten
-des Paares.
+Den Test nach jeder Änderung an einer Engine ausführen. Die Änderung gehört
+immer in beide Fassungen.
 
 Snake und Tetris bekommen dabei gesteuerte Partien statt Zufallseingaben.
-Zufällig gespielt frisst die Schlange nie und Tetris räumt nie eine Reihe —
-verglichen würden dann lauter Partien mit Score 0, und ausgerechnet die
-Punktetabellen blieben ungeprüft. Die Begründung steht ausführlich im Skript.
+Mit zufälligen Eingaben frisst die Schlange fast nie, und in Tetris wird fast
+nie eine Reihe voll. Verglichen würden dann nur Partien mit Score 0, und die
+Punkteberechnung bliebe ungeprüft. Die Begründung steht ausführlich im
+Skript.
 
-Deshalb zeigt die Ausgabe je Spiel mit an, wie viele Fälle überhaupt Punkte
-erreicht haben und wie lang die längste Partie war. Stehen dort Nullen, prüft
-der Test nichts mehr — unabhängig davon, ob er grün meldet.
+Die Ausgabe zeigt deshalb je Spiel, wie viele Fälle Punkte erreicht haben
+und wie lang die längste Partie war. Stehen dort Nullen, prüft der Test
+nichts mehr, auch wenn er Erfolg meldet.
 
-Ob er noch Zähne hat, lässt sich jederzeit nachstellen: eine Konstante in
-einer der `*_engine.py` verbiegen (etwa `LINE_SCORES` oder `START_LIVES`),
-laufen lassen, Abweichung erwarten, Änderung zurücknehmen.
+Ob der Test Abweichungen findet, lässt sich jederzeit nachprüfen: eine
+Konstante in einer der `*_engine.py` ändern (etwa `LINE_SCORES` oder
+`START_LIVES`), den Test laufen lassen, die gemeldete Abweichung ansehen und
+die Änderung zurücknehmen.
 
 ### Ein neues Spiel ergänzen
 
 1. Eintrag in der `GAMES`-Registry in `app.py`: slug, title, endpoint,
    status `"live"`, board, dazu die Texte `goal`, `controls` und, wenn es
-   Gesten gibt, `touch`. Hub, Start-Overlay und Steuerung lesen sie nur dort.
+   Gesten gibt, `touch`. Übersicht, Start-Overlay und Steuerung lesen sie nur
+   dort.
 2. Vorschaubild als `templates/thumbs/<slug>.html`.
 3. Route und Template; das Template erbt von `game_base.html` und setzt das
    Spielfeld mit `game_canvas(breite, höhe)`.
@@ -555,9 +553,9 @@ Leaderboard-API und Admin greifen den Eintrag von selbst auf. Auch die
 Installationsskripte brauchen keine Anpassung, sie kopieren den ganzen
 Ordner.
 
-Soll das Spiel ein server-geprüftes Leaderboard haben, braucht es die Engine
-zweimal — als `<spiel>_engine.py` und `static/<spiel>_engine.js` — und einen
-Eintrag in `pruefe-engines.js`, damit der Gleichlauf mitgeprüft wird.
+Für ein vom Server geprüftes Leaderboard braucht das Spiel seine Engine
+zweimal, als `<spiel>_engine.py` und als `static/<spiel>_engine.js`, dazu
+einen Eintrag in `pruefe-engines.js`, damit der Gleichlauf mitgeprüft wird.
 
 ### Ein Release veröffentlichen
 
@@ -583,10 +581,10 @@ Die Pakete lassen sich auch lokal bauen:
 Das Skript baut `abw-arcade.tar.gz` (Linux, macOS) und `abw-arcade.zip`
 (Windows) mit demselben Inhalt. Es liest ausschließlich über `git archive`
 aus einem Commit, nie aus dem Arbeitsverzeichnis. Dadurch enthält das Paket
-genau den eingecheckten Stand; eine `.venv`, eine `arcade.db` oder
-halbfertige Änderungen können gar nicht hineingeraten. Die Zeilenenden
-regelt `.gitattributes`: `install.sh` bekommt in beiden Archiven LF,
-`install.cmd` und `install.ps1` CRLF.
+nur den eingecheckten Stand; eine `.venv`, eine `arcade.db` oder halbfertige
+Änderungen landen nie darin. Die Zeilenenden regelt `.gitattributes`:
+`install.sh` bekommt in beiden Archiven LF, `install.cmd` und `install.ps1`
+CRLF.
 
 ---
 
@@ -594,39 +592,39 @@ regelt `.gitattributes`: `install.sh` bekommt in beiden Archiven LF,
 
 ```
 abw-arcade/
-├── app.py                  Flask: Hub, Auth, Spiel-APIs, Schach, Admin
+├── app.py                  Flask: Übersicht, Auth, Spiel-APIs, Schach, Admin
 ├── run.py                  Startpunkt für Dienst, check und make-admin;
 │                           liest arcade.conf
 ├── tetris_engine.py        Tetris          ┐
 ├── snake_engine.py         Snake           │ Server-Replay, je ein
-├── breakout_engine.py      Breakout        │ JS-Gegenstueck in static/
+├── breakout_engine.py      Breakout        │ JS-Gegenstück in static/
 ├── g2048_engine.py         2048            │
 ├── gd_engine.py            Geometry Dash   ┘
-├── chess_engine.py         Schachregeln, prueft jeden Zug
-├── chess_bot.py            Schach-Bot (Negamax, drei Staerken)
+├── chess_engine.py         Schachregeln, prüft jeden Zug
+├── chess_bot.py            Schach-Bot (Negamax, drei Stärken)
 ├── requirements.txt        Flask, waitress
-├── install.sh              Einrichtung und Update fuer Linux und macOS
-├── install.cmd             Einrichtung und Update fuer Windows ...
+├── install.sh              Einrichtung und Update für Linux und macOS
+├── install.cmd             Einrichtung und Update für Windows ...
 ├── install.ps1             ... install.cmd startet dieses Skript
 ├── installer/sync.py       kopiert das Programm, schont Daten und WADs
 ├── paket-bauen.sh          baut abw-arcade.tar.gz und .zip aus git
-├── pruefe-engines.js       vergleicht die .py- gegen die .js-Engines
-├── pruefe_engines.py       Python-Seite dieser Pruefung
+├── pruefe-engines.js       vergleicht die .py- mit den .js-Engines
+├── pruefe_engines.py       Python-Seite dieser Prüfung
 ├── tests/                  unittest: Seiten, APIs, Perft, Installer
 ├── CHANGELOG.md            was sich je Version geändert hat
 ├── docs/                   gestaltung.md (Gestaltung und Texte), bilder/ für diese Seite
 ├── werkzeuge/testversion/  baut die Testversion als einzelne HTML-Datei
 ├── .github/                CI, Release-Workflow, Issue-Vorlagen
-├── templates/              Hub, Spiele, Login/Registrierung, admin/, thumbs/
+├── templates/              Übersicht, Spiele, Login/Registrierung, admin/, thumbs/
 └── static/
     ├── css/                tokens.css (Design-Tokens), app.css und je Bereich eine Datei
     ├── js/                 gemeinsame ES-Module: arcade.js (Start, Pause, Spielende),
     │                       touch.js (Gesten), fx.js und fx-canvas.js (Bewegung,
     │                       Effekte), canvas.js, prefs.js, shell.js, hub.js, chess-*.js
-    ├── js/observe/         lesen die Engines und melden Ereignisse fuer die Effekte
+    ├── js/observe/         lesen die Engines und melden Ereignisse für die Effekte
     ├── fonts/              Archivo und Press Start 2P (OFL), lokal statt vom CDN
-    ├── chess/pieces/       Schachfiguren "Chessnut" (Apache 2.0)
-    ├── *_engine.js         die JS-Gegenstuecke zu den .py-Engines
+    ├── chess/pieces/       Schachfiguren „Chessnut“ (Apache 2.0)
+    ├── *_engine.js         die JS-Gegenstücke zu den .py-Engines
     ├── tetris.js, snake.js, breakout.js, g2048.js, gd.js, doom.js
     └── doom/               websockets-doom.js/.wasm, freedoom1.wad, Lizenzen und Mitwirkende
 ```
@@ -642,8 +640,8 @@ nicht im Programmordner auf dem Server. `tests/`, `docs/`, `werkzeuge/` und
 
 ## Lizenz
 
-Der Code steht unter MIT, siehe [LICENSE](LICENSE). Mitgeliefert werden
-außerdem:
+Der Code steht unter der MIT-Lizenz, siehe [LICENSE](LICENSE). Mitgeliefert
+werden außerdem:
 
 | Teil | Lizenz | Lizenztext |
 |---|---|---|
@@ -651,3 +649,7 @@ außerdem:
 | Schachfiguren „Chessnut“ | Apache 2.0 | `static/chess/pieces/LICENSE.txt` |
 | Chocolate Doom als WebAssembly | GPL v2 | `static/doom/LICENSE-doom-wasm.md` |
 | FreeDoom Phase 1 (0.13.0) | BSD | `static/doom/LICENSE-freedoom.txt`, Mitwirkende in `static/doom/CREDITS-freedoom.txt` und `static/doom/CREDITS-MUSIC-freedoom.txt` |
+
+ABW Arcade ist ein privates Open-Source-Projekt und kein offizielles Angebot
+einer Firma oder Einrichtung. Genannte Spielnamen können Marken ihrer
+jeweiligen Inhaber sein; ABW Arcade steht mit diesen in keiner Verbindung.

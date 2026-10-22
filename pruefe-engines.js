@@ -1,21 +1,21 @@
 #!/usr/bin/env node
 /**
- * ABW Arcade — Gleichlauf-Pruefung der Engines
+ * ABW Arcade: Gleichlauf-Pruefung der Engines
  *
  *     node pruefe-engines.js            alle Spiele
  *     node pruefe-engines.js snake gd   nur diese
  *
- * Wozu das da ist
- * ---------------
- * Der Betrugsschutz der Bestenlisten steht und faellt mit einer einzigen
- * Annahme: <spiel>_engine.py und static/<spiel>_engine.js rechnen bei
- * gleicher Eingabe exakt dasselbe aus. Der Browser spielt mit der JS-Fassung,
- * der Server rechnet mit der Python-Fassung nach — weichen die beiden ab,
- * passiert nichts Lautes. Es werden nur stillschweigend ehrliche Partien
- * abgelehnt oder falsche Punktestaende eingetragen.
+ * Zweck
+ * -----
+ * Der Betrugsschutz der Bestenlisten beruht auf einer Annahme:
+ * <spiel>_engine.py und static/<spiel>_engine.js rechnen bei gleicher
+ * Eingabe exakt dasselbe aus. Der Browser spielt mit der JS-Fassung, der
+ * Server rechnet mit der Python-Fassung nach. Weichen die beiden ab, gibt es
+ * keine Fehlermeldung; der Server lehnt dann ehrliche Partien ab oder traegt
+ * falsche Punktestaende ein.
  *
- * Genau das prueft dieses Skript: Es wuerfelt Eingabeprotokolle, schickt
- * JEDES davon durch beide Fassungen und vergleicht die Ergebnisse Feld fuer
+ * Dieses Skript prueft die Annahme: Es wuerfelt Eingabeprotokolle, schickt
+ * jedes davon durch beide Fassungen und vergleicht die Ergebnisse Feld fuer
  * Feld.
  *
  * Die Protokolle entstehen nur EINMAL, hier in JS, und werden unveraendert
@@ -37,8 +37,8 @@ const HIER = __dirname;
 
 /**
  * Je Spiel: wie die Eingaben heissen und welche erlaubt sind.
- * Die Werte stammen aus den ACTIONS-Konstanten der Engines — weichen sie
- * dort ab, faellt es hier als Fehlschlag auf.
+ * Die Werte stammen aus den ACTIONS-Konstanten der Engines. Weichen sie dort
+ * ab, faellt das hier als Fehlschlag auf.
  *
  * maxLuecke  groesster Tick-Abstand zwischen zwei Eingaben
  */
@@ -48,13 +48,13 @@ const SPIELE = {
   g2048:    { schluessel: "dir",    aktionen: ["U", "D", "L", "R"],              maxLuecke: 12 },
   gd:       { schluessel: "dir",    aktionen: ["D", "U"],                        maxLuecke: 12 },
 
-  // Snake erzeugt seine Protokolle anders — siehe snakeProtokoll() weiter unten.
+  // Snake erzeugt seine Protokolle anders, siehe snakeProtokoll() weiter unten.
   snake:    { schluessel: "dir",    aktionen: ["U", "D", "L", "R"],              maxLuecke: 5 },
 };
 
 const FAELLE_JE_SPIEL = 30;
 
-/** mulberry32 — kleiner, geseedeter PRNG. Nur fuer die Testdaten. */
+/** mulberry32: kleiner, geseedeter PRNG. Nur fuer die Testdaten. */
 function rng(seed) {
   let a = seed >>> 0;
   return function () {
@@ -69,7 +69,7 @@ function rng(seed) {
 /**
  * Ein Eingabeprotokoll wuerfeln.
  *
- * Die Ticks steigen monoton mit zufaelligen Luecken — so entstehen sowohl
+ * Die Ticks steigen monoton mit zufaelligen Luecken. So entstehen sowohl
  * Haeufungen (mehrere Aktionen im selben Tick) als auch Pausen, in denen nur
  * die Schwerkraft laeuft. Beides sind Stellen, an denen zwei Fassungen
  * typischerweise auseinanderlaufen.
@@ -87,20 +87,18 @@ function protokollWuerfeln(zufall, cfg, anzahl) {
 }
 
 /**
- * Snake: ein Protokoll erzeugen, in dem die Schlange wirklich frisst.
+ * Snake: ein Protokoll erzeugen, in dem die Schlange frisst.
  *
- * Zufaellige Richtungen reichen hier nicht. Auf 20x20 findet eine planlos
- * herumirrende Schlange fast nie Futter — der Test verglich dadurch nur
- * Partien mit Punktestand 0 und liess ausgerechnet Fressen und Wachsen
- * ungeprueft, also die Stellen, an denen zwei Fassungen am ehesten
- * auseinanderlaufen.
+ * Mit zufaelligen Richtungen findet die Schlange auf 20x20 fast nie Futter.
+ * Verglichen wuerden dann nur Partien mit Punktestand 0, und Fressen und
+ * Wachsen blieben ungeprueft, obwohl die beiden Fassungen gerade dort am
+ * ehesten auseinanderlaufen.
  *
  * Deshalb steuert hier ein einfacher Spieler: Er laeuft aufs Futter zu und
- * meidet Wand und eigenen Koerper. Er benutzt dafuer die JS-Engine selbst
- * als Auskunft (Kopfposition, Futter, Richtung) — es wird keine Spiellogik
- * nachgebaut, sondern nur eine realistische Partie aufgezeichnet. Geprueft
- * wird danach wie bei allen anderen: Python muss dasselbe Protokoll zum
- * selben Ergebnis nachrechnen.
+ * meidet Wand und eigenen Koerper. Kopfposition, Futter und Richtung liest er
+ * aus der JS-Engine; Spiellogik wird nicht nachgebaut, es wird nur eine
+ * realistische Partie aufgezeichnet. Geprueft wird danach wie bei den anderen
+ * Spielen: Python muss dasselbe Protokoll zum selben Ergebnis nachrechnen.
  *
  * In 15 % der Ticks greift er absichtlich daneben, damit nicht nur der
  * Ideallauf abgedeckt ist.
@@ -148,20 +146,19 @@ function snakeProtokoll(zufall, seed, maxTicks) {
 }
 
 /**
- * Tetris: ein Protokoll erzeugen, in dem tatsaechlich Reihen geraeumt werden.
+ * Tetris: ein Protokoll erzeugen, in dem Reihen geraeumt werden.
  *
- * Auch hier reicht Zufall nicht. Zufaellig fallende Steine tuermen sich, das
- * Spiel endet, und geraeumt wird nie eine einzige Reihe — nachgemessen: 0 in
- * 30 Faellen. Der gesamte Punktestand kam aus Drop-Punkten. Damit blieb
- * ausgerechnet LINE_SCORES ungeprueft, also die Punktetabelle selbst, und mit
- * ihr Levelaufstieg und levelabhaengige Fallgeschwindigkeit.
+ * Mit zufaelligen Eingaben tuermen sich die Steine, das Spiel endet, und es
+ * wird praktisch nie eine Reihe geraeumt. Der Punktestand kaeme dann nur aus
+ * Drop-Punkten, und die Punktetabelle LINE_SCORES bliebe ungeprueft, mit ihr
+ * Levelaufstieg und levelabhaengige Fallgeschwindigkeit.
  *
  * Deshalb waehlt hier eine einfache Bewertung die Ablage: volle Reihen zaehlen
  * viel, Loecher und Hoehe kosten. Kollision und Landepunkt kommen aus der
  * Engine selbst (_collides), nur das Drehen der Matrix ist nachgebildet.
  *
- * Diese Auswahl muss weder optimal noch ueberhaupt richtig sein — sie erzeugt
- * nur Eingaben. Gespielt und gewertet wird danach ausschliesslich von den
+ * Diese Auswahl muss weder optimal noch fehlerfrei sein, sie erzeugt nur
+ * Eingaben. Gespielt und gewertet wird danach ausschliesslich von den
  * echten Engines. Ein Fehler hier fuehrt zu schlechteren Ablagen, nicht zu
  * einem falschen Testergebnis.
  */
@@ -245,7 +242,7 @@ function faelleBauen(spiel) {
     // Snake und Tetris bekommen gesteuerte Partien, sonst wuerden ihre
     // wichtigsten Regeln nie ausgeloest (siehe die Kommentare oben).
     // Bei Tetris bleibt jeder dritte Fall zufaellig: Planloses Spiel endet
-    // frueh und trifft dadurch andere Stellen — Spielende, Ueberlauf beim
+    // frueh und trifft dadurch andere Stellen: Spielende, Ueberlauf beim
     // Spawn, reine Drop-Punkte ohne Reihe.
     let eingaben;
     if (anzahl === 0) {
@@ -280,10 +277,9 @@ function jsLauf(fall) {
  * letzte Lauf passiert, wird dabei nicht bemerkt: Python nimmt den alten
  * Bytecode.
  *
- * Fuer diesen Pruefstand waere das der schlimmste denkbare Fehler — er
- * meldete gruen, waehrend er die vorige Fassung der Engine testet. Deshalb
- * werden die zwischengespeicherten Engines vor jedem Lauf entfernt, und die
- * Python-Seite legt keine neuen an.
+ * Der Test wuerde dann die vorige Fassung der Engine pruefen und trotzdem
+ * Erfolg melden. Deshalb werden die zwischengespeicherten Engines vor jedem
+ * Lauf entfernt, und die Python-Seite legt keine neuen an.
  */
 function bytecodeVerwerfen() {
   const cache = path.join(HIER, "__pycache__");
@@ -340,8 +336,8 @@ function vergleichen(ausJs, ausPy) {
   for (const k of [...schluessel].sort()) {
     const a = ausJs ? ausJs[k] : undefined;
     const b = ausPy ? ausPy[k] : undefined;
-    // JSON macht aus Pythons True ein true — normalisieren, damit nicht
-    // Datentypen als Unterschied gemeldet werden, wo keiner ist.
+    // JSON macht aus Pythons True ein true. Normalisieren, damit ein anderer
+    // Datentyp nicht als Unterschied gemeldet wird.
     const na = typeof a === "boolean" ? Number(a) : a;
     const nb = typeof b === "boolean" ? Number(b) : b;
     if (na !== nb) abweichungen.push({ feld: k, js: a, py: b });
@@ -365,9 +361,9 @@ function main() {
 
   const alleFaelle = spiele.flatMap(faelleBauen);
 
-  // Erst JS, dann Python — die Python-Seite laeuft als ein einziger
-  // Prozessstart fuer alle Faelle, sonst kostet der Interpreterstart mehr
-  // Zeit als die Rechnung.
+  // Erst JS, dann Python. Die Python-Seite laeuft als ein einziger Prozess
+  // fuer alle Faelle, sonst kostete der Interpreterstart mehr Zeit als die
+  // Rechnung.
   const jsErgebnisse = alleFaelle.map((f) => {
     try {
       return { ok: true, wert: jsLauf(f) };
@@ -378,9 +374,9 @@ function main() {
   const pyErgebnisse = pythonLauf(alleFaelle);
 
   let fehlgeschlagen = 0;
-  // Neben Treffer/Fehler wird mitgezaehlt, was die Faelle ueberhaupt
-  // ausloesen. Ein Test, bei dem jede Partie sofort mit 0 Punkten endet,
-  // wuerde zwar gruen leuchten, aber nichts pruefen — das soll man sehen.
+  // Neben Treffer/Fehler wird mitgezaehlt, was die Faelle ausloesen. Ein
+  // Test, bei dem jede Partie sofort mit 0 Punkten endet, meldet Erfolg, ohne
+  // etwas zu pruefen. Die Ausgabe soll das sichtbar machen.
   const proSpiel = new Map(
     spiele.map((s) => [s, { geprueft: 0, fehler: 0, maxScore: 0, mitPunkten: 0, maxDauer: 0 }])
   );
@@ -414,8 +410,9 @@ function main() {
     if (abw.length) {
       zaehler.fehler++;
       fehlgeschlagen++;
-      // Nur die ersten beiden je Spiel ausfuehrlich — bei echtem Drift
-      // sind sonst alle 30 gleich, und die Ausgabe wird unlesbar.
+      // Nur die ersten beiden je Spiel ausfuehrlich. Laufen die Fassungen
+      // auseinander, weichen meist alle Faelle gleich ab, und die Ausgabe
+      // wuerde unlesbar.
       if (zaehler.fehler <= 2) {
         console.log(`ABWEICHUNG  ${fall.spiel}  seed=${fall.seed}  ${fall.eingaben.length} Eingaben`);
         for (const a of abw) {
@@ -444,8 +441,8 @@ function main() {
 
   if (fehlgeschlagen) {
     console.log(`\n${fehlgeschlagen} von ${alleFaelle.length} Faellen weichen ab.`);
-    console.log("Die Python- und die JS-Fassung rechnen nicht mehr gleich —");
-    console.log("Bestenlisten sind damit unzuverlaessig, bis das behoben ist.");
+    console.log("Die Python- und die JS-Fassung rechnen nicht mehr gleich.");
+    console.log("Bis das behoben ist, sind die Bestenlisten unzuverlaessig.");
     process.exit(1);
   }
 

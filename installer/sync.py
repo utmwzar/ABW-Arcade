@@ -3,10 +3,9 @@
 
     python installer/sync.py QUELLE ZIEL [--dry-run]
 
-Macht, was frueher `rsync -a --delete` mit einer Liste von Ausschluessen
-erledigt hat, aber auf Linux, macOS und Windows gleich und ohne rsync. Alle
-drei Installer rufen dieses Skript auf; die Listen unten gelten damit
-ueberall.
+Arbeitet wie `rsync -a --delete` mit einer Liste von Ausschluessen, aber auf
+Linux, macOS und Windows gleich und ohne rsync. Alle drei Installer rufen
+dieses Skript auf; die Listen unten gelten damit ueberall.
 
 - Neue und geaenderte Dateien (andere Groesse oder anderer Zeitstempel)
   werden nach ZIEL kopiert, erst in eine temporaere Datei und dann per

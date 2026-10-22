@@ -6,8 +6,8 @@ Wird von pruefe-engines.js aufgerufen, nicht von Hand. Liest die Faelle als
 JSON von stdin, schickt jeden durch die passende Python-Engine und schreibt
 die Ergebnisse als JSON nach stdout.
 
-Bewusst ein einziger Prozessstart fuer alle Faelle: Ein Interpreterstart je
-Fall kostet mehr Zeit als das Nachrechnen selbst.
+Ein einziger Prozess fuer alle Faelle: Ein Interpreterstart je Fall kostete
+mehr Zeit als das Nachrechnen selbst.
 
 Eingabe:  [{"spiel": "snake", "seed": 123, "eingaben": [{"tick": 0, "dir": "U"}, ...]}, ...]
 Ausgabe:  [{"ok": true, "wert": {...}} | {"ok": false, "fehler": "..."}, ...]
@@ -48,8 +48,8 @@ def main() -> int:
             continue
         try:
             wert = modul.simulate(fall["seed"], fall["eingaben"])
-            # Ein Abbruch waere hier ein Fehler der Engine, kein Testfehler —
-            # deshalb wird er als solcher gemeldet statt das Skript zu killen.
+            # Ein Abbruch waere hier ein Fehler der Engine, kein Testfehler.
+            # Deshalb wird er als Ergebnis gemeldet, statt das Skript zu beenden.
             ergebnisse.append({"ok": True, "wert": wert})
         except Exception:
             ergebnisse.append({

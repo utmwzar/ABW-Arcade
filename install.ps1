@@ -699,7 +699,7 @@ function Invoke-Install {
     if ($addresses.Count -eq 0) { $addresses = @('<dieser-rechner>') }
     foreach ($ip in $addresses) { Write-Step ('Fertig! ABW Arcade:  http://{0}:{1}' -f $ip, $effPort) }
     Write-Step 'Ersten Admin ernennen (nach der Registrierung im Browser), in einer PowerShell als Administrator:'
-    Write-Host ('     & "{0}" "{1}" make-admin NUTZERNAME' -f $venvPython, (Join-Path $Root 'run.py'))
+    Write-Host ('     & "{0}" "{1}" make-admin BENUTZERNAME' -f $venvPython, (Join-Path $Root 'run.py'))
 }
 
 # ---------------------------------------------------------------------------

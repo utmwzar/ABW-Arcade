@@ -8,7 +8,7 @@ und die gespeicherten Einstellungen in `static/js/prefs.js`.
 ## Grundsätze
 
 - Die Oberfläche ist dunkel und zurückhaltend. Kräftige Farben kommen nur aus den Spielen,
-  also aus den Kapselgrafiken im Hub und den Spielfeldern.
+  also aus den Kapselgrafiken der Spieleübersicht und den Spielfeldern.
 - Es gibt einen Akzent, Cyan. Er kennzeichnet alles, was man anklicken, auswählen oder
   fokussieren kann.
 - Zustandsfarben haben eine feste Bedeutung: Grün für gespeichert und gewonnen, Gold für
@@ -90,11 +90,11 @@ Hinweise Gesten statt Tasten; das lässt sich in den Einstellungen unter „Touc
   ab: In der Schach-Lobby ist es „Zum Brett“ bei der ersten Partie, in der der Spieler am Zug
   ist, sonst „Bot-Partie starten“. Kurzmeldungen zeigen ihre Aktion gefüllt, weil sie nur kurz
   über der Ansicht liegen.
-- **Kapseln im Hub:** oben eine Grafik im Format 16 : 9 auf `--playfield`, darunter eine 3 px
-  hohe Kante in der Spielfarbe, dann Titel, Ziel, Highscore mit Platz und die Zahlentaste. Die
-  ganze Kapsel ist ein Link. Über den anderen steht eine doppelt breite Kapsel, unter
-  „Weiterspielen“ mit dem zuletzt gespielten Spiel oder, wenn noch keine Partie gespeichert
-  ist, unter „Zum Einstieg“.
+- **Kapseln in der Spieleübersicht:** oben eine Grafik im Format 16 : 9 auf `--playfield`,
+  darunter eine 3 px hohe Kante in der Spielfarbe, dann Titel, Ziel, Highscore mit Platz und
+  die Zahlentaste. Die ganze Kapsel ist ein Link. Über den anderen steht eine doppelt breite
+  Kapsel, unter „Weiterspielen“ mit dem zuletzt gespielten Spiel oder, wenn noch keine Partie
+  gespeichert ist, unter „Zum Einstieg“.
 - **Overlay und Ergebniskarte:** Über dem Spielfeld liegt ein dunkler Schleier, darauf eine
   Karte von höchstens 360 px Breite. Am Spielende zählt der Score hoch, und darunter steht, was
   der Server meldet, etwa „Gespeichert · Platz 3 von 9“. Bestätigt der Server einen neuen
