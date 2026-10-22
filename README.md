@@ -2,9 +2,9 @@
 
 <img src="docs/bilder/banner.png" width="880" alt="ABW Arcade">
 
-Browser-Spiele zum Selbsthosten: sieben Spiele, ein Account für alle und
-Leaderboards, die der Server nachrechnet. ABW Arcade läuft als Dienst im
-eigenen Netz, ohne Werbung, Tracking oder externe Dienste.
+ABW Arcade ist eine Sammlung von Browser-Spielen zum Selbsthosten. Jeder Score
+wird vom Server nachgerechnet, bevor er ins Leaderboard kommt. Die Anwendung
+läuft als Dienst im eigenen Netz, ohne Werbung, Tracking oder externe Dienste.
 
 [![CI](https://github.com/utmwzar/ABW-Arcade/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/utmwzar/ABW-Arcade/actions/workflows/ci.yml)
 
