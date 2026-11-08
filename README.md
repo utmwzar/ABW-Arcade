@@ -4,7 +4,7 @@
 
 ABW Arcade ist eine Sammlung von Browser-Spielen zum Selbsthosten. Jeder Score
 wird vom Server nachgerechnet, bevor er ins Leaderboard kommt. Die Anwendung
-läuft als Dienst im eigenen Netz, ohne Werbung, Tracking oder externe Dienste.
+läuft als Dienst im eigenen Netz, ohne Werbung und ohne Tracking.
 
 [![CI](https://github.com/utmwzar/ABW-Arcade/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/utmwzar/ABW-Arcade/actions/workflows/ci.yml)
 
@@ -411,7 +411,7 @@ jedes Spiel mit und ohne sie und verlangt dasselbe Ergebnis.
 ### Schach
 
 Partien zwischen zwei Spielern laufen über die Lobby unter `/games/chess`:
-Ein Account erstellt eine Partie, ein zweiter tritt bei. Nachgespielt wird
+Ein Spieler erstellt eine Partie, ein zweiter tritt bei. Nachgespielt wird
 hier nichts, stattdessen prüft der Server jeden einzelnen Zug.
 `chess_engine.py` kennt die vollständigen Regeln mit Rochade, en passant,
 Umwandlung, Matt, Patt, 50-Züge-Regel, Stellungswiederholung und

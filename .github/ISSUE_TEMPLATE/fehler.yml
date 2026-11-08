@@ -12,7 +12,7 @@ body:
     attributes:
       label: Wo ist es passiert?
       options:
-        - Hub (Spieleübersicht)
+        - Übersicht
         - Tetris
         - Snake
         - Breakout
