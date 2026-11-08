@@ -463,7 +463,7 @@ oder `ARCADE_PORT` usw.): `.venv/bin/python run.py`.
 ### Testversion als einzelne HTML-Datei
 
 Zum Ausprobieren ganz ohne Server baut `werkzeuge/testversion/bauen.py` die
-fünf Arcade-Spiele in eine einzige HTML-Datei, die per Doppelklick im Browser
+Arcade-Spiele in eine einzige HTML-Datei, die per Doppelklick im Browser
 läuft:
 
 ```bash
@@ -575,7 +575,7 @@ Die Pakete lassen sich auch lokal bauen:
 
 ```bash
 ./paket-bauen.sh              # aus HEAD
-./paket-bauen.sh v1.1         # aus einem Tag oder Commit
+./paket-bauen.sh v1.1.1       # aus einem Tag oder Commit
 ```
 
 Das Skript baut `abw-arcade.tar.gz` (Linux, macOS) und `abw-arcade.zip`

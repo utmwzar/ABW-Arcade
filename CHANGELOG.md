@@ -4,7 +4,59 @@ Was sich zwischen den Versionen von ABW Arcade geändert hat, die neueste oben.
 Installation und Update stehen in der
 [README](https://github.com/utmwzar/ABW-Arcade#readme).
 
-## [1.1] – 21.10.2026
+## [1.1.1] – 08.11.2026
+
+Version 1.1.1 ersetzt die Version 1.1 und enthält alle ihre Neuerungen. Was
+mit 1.1 dazugekommen ist, steht im
+[Changelog](https://github.com/utmwzar/ABW-Arcade/blob/main/CHANGELOG.md) im
+Abschnitt zu 1.1. Neu gegenüber 1.1 sind eine Testversion ohne Server und
+überarbeitete Texte. Spiele und Datenbank bleiben unverändert.
+
+### Neu
+
+- **Testversion als einzelne HTML-Datei.** `werkzeuge/testversion/bauen.py`
+  baut die Arcade-Spiele in eine HTML-Datei, die ohne Server per Doppelklick
+  im Browser läuft. Jede Partie wird dort mit derselben Engine nachgerechnet
+  wie auf dem Server, die Scores bleiben aber im Browser. Schach und DOOM
+  fehlen, weil sie den Server brauchen. Die CI baut die Testversion bei jedem
+  Lauf mit. Jeder Aufruf von `npx` hat ein Zeitlimit, und der Schritt in der
+  CI bricht nach 10 Minuten ab.
+- **Gestaltung und Texte** sind in `docs/gestaltung.md` beschrieben: Farben,
+  Schrift, Bausteine, Bewegung, gespeicherte Einstellungen und die Begriffe
+  der Oberfläche. Die Datei ersetzt `PRODUCT.md` und `DESIGN.md`.
+
+### Geändert
+
+- Übersicht und Anmeldeseite nennen keine Zahl der Spiele mehr. Unter dem
+  Titel der Übersicht steht „Jeder Score wird vom Server nachgerechnet.“
+  Banner und Social-Preview tragen dieselbe Zeile, die Bilder in der README
+  zeigen den neuen Stand.
+- Übersicht und Schach-Lobby beschreiben Schach als Partie gegen Mitspieler
+  oder gegen den Bot.
+- Am Ende der Installation nennen die Skripte den Befehl
+  `run.py make-admin BENUTZERNAME` in derselben Form wie die README.
+- Die README ist sachlicher formuliert und verwendet die Begriffe aus
+  `docs/gestaltung.md`. Der Abschnitt zum Umstieg von einer älteren
+  `tetris`-Installation entfällt; `install.sh` weist weiterhin auf eine
+  solche Installation hin.
+- Bei einer Installation aus einem git-Klon kopiert `installer/sync.py` die
+  Editor-Ordner `.vscode` und `.idea` nicht mehr in den Programmordner.
+- CI und Release-Workflow halten dieselben Entwicklungsordner aus den
+  Paketen heraus, darunter jetzt auch `werkzeuge/`.
+- Die Beispiele für eine Version in README, Bauskript und Issue-Vorlage
+  nennen v1.1.1.
+
+### Betrieb und Umstieg von 1.1
+
+- Das Update geht wie bisher: neues Paket entpacken und `sudo ./install.sh`
+  oder `install.cmd` starten. Accounts und Scores bleiben erhalten, ebenso
+  der Port und eigene WADs.
+- Ein Update direkt von 1.0 auf 1.1.1 geht ebenfalls. Was dabei zu beachten
+  ist, steht im Abschnitt zu 1.1 unter „Betrieb und Umstieg von v1.0“.
+- Nach dem Update steht in `PAKET-INFO` im Programmordner die Zeile
+  `Quelle: v1.1.1`.
+
+## [1.1] – 21.10.2026 (zurückgezogen, ersetzt durch 1.1.1)
 
 Neue Oberfläche, neues Schach, Touch-Steuerung, und ABW Arcade läuft jetzt als
 Dienst unter Linux, macOS und Windows. Accounts, Scores und der Port bleiben
@@ -84,5 +136,6 @@ Erste Veröffentlichung: Tetris, Snake, Breakout, 2048, Geometry Dash, Schach mi
 Elo und Bot sowie DOOM. Die Leaderboards sind durch Server-Replay
 fälschungssicher. Installation als systemd-Dienst unter Debian und Ubuntu.
 
-[1.1]: https://github.com/utmwzar/ABW-Arcade/compare/v1.0...v1.1
+[1.1.1]: https://github.com/utmwzar/ABW-Arcade/compare/cc210ab16c9e547dec70e5e06aba3034cdbb8b1e...v1.1.1
+[1.1]: https://github.com/utmwzar/ABW-Arcade/compare/v1.0...cc210ab16c9e547dec70e5e06aba3034cdbb8b1e
 [1.0]: https://github.com/utmwzar/ABW-Arcade/releases/tag/v1.0

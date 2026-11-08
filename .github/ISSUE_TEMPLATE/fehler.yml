@@ -52,7 +52,7 @@ body:
     attributes:
       label: Version
       description: Steht in der Datei PAKET-INFO im Programmordner (Zeile „Quelle“) und am Ende der Installation.
-      placeholder: z. B. v1.1
+      placeholder: z. B. v1.1.1
   - type: textarea
     id: log
     attributes:
