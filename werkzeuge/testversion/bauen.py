@@ -1,11 +1,11 @@
-"""Baut die lokale Testversion: die fuenf Arcade-Spiele in einer HTML-Datei, die
+"""Baut die lokale Testversion: die Arcade-Spiele in einer HTML-Datei, die
 ohne Server im Browser laeuft (Doppelklick genuegt). Schach und DOOM fehlen, weil
 sie den Server brauchen. Die Scores bleiben im localStorage des Browsers.
 
 Aufruf aus dem Repo, mit den Python-Paketen aus requirements.txt:
 
     python werkzeuge/testversion/bauen.py                       # Stand HEAD
-    python werkzeuge/testversion/bauen.py --ref v1.1 --out ~/arcade.html
+    python werkzeuge/testversion/bauen.py --ref v1.1.1 --out ~/arcade.html
 
 Gebaut wird ein eingecheckter Stand (git archive), nicht das Arbeitsverzeichnis.
 Gebraucht werden git, Python mit Flask und Node mit npx (laedt esbuild).
@@ -129,7 +129,7 @@ def vorlagen_anpassen(b):
 
 
 def seiten_rendern(b, daten):
-    """Hub (ohne Stand und je Spiel als „Weiterspielen“) und die fuenf Spielseiten."""
+    """Hub (ohne Stand und je Spiel als „Weiterspielen“) und die Spielseiten der Arcade-Spiele."""
     os.environ["ARCADE_DATA_DIR"] = daten
     sys.path.insert(0, b.src)
     import app as arcade  # noqa: E402  (liest ARCADE_DATA_DIR beim Import)
